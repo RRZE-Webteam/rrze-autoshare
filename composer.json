@@ -1,0 +1,19 @@
+{
+    "name": "rrze/rrze-autoshare",
+    "description": "RRZE WordPress Plugin",
+    "version": "1.0.0",
+    "type": "wordpress-plugin",
+    "license": "GPL",
+    "require": {
+        "php": "^8.1.0"
+    },
+    "suggest": {
+        "ext-mbstring": "*",
+        "ext-intl": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "RRZE\\Autoshare\\": "includes/"
+        }
+    }
+}
