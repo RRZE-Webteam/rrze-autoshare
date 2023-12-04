@@ -17,7 +17,7 @@ class Main
 
         settings();
 
-        Cron::init();
+        // Cron::init();
     }
 
     /**
