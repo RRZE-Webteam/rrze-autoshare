@@ -115,11 +115,11 @@ class Bluesky
                             'createdAt' => gmdate('c', strtotime($post->post_date_gmt)),
                             'embed'     => [
                                 '$type'    => 'app.bsky.embed.external',
-                                'external' => array(
+                                'external' => [
                                     'uri'         => wp_get_shortlink($post->ID),
                                     'title'       => esc_html($post->post_title),
                                     'description' => esc_html(wp_trim_words(get_the_excerpt($post), 55, ' ...')),
-                                ),
+                                ],
                             ],
                         ],
                     ]
