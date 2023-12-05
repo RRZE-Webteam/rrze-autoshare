@@ -7,4 +7,6 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'RRZE\\Autoshare\\' => array($baseDir . '/includes'),
+    'Composer\\CaBundle\\' => array($vendorDir . '/composer/ca-bundle/src'),
+    'Abraham\\TwitterOAuth\\' => array($vendorDir . '/abraham/twitteroauth/src'),
 );

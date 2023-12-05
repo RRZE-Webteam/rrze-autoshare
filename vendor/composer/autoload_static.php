@@ -4,12 +4,20 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit8b7292c42cd553071a1bb74aff53be4a
+class ComposerStaticInit56b574ea1c3d61f938fbd326936a01b9
 {
     public static $prefixLengthsPsr4 = array (
         'R' => 
         array (
             'RRZE\\Autoshare\\' => 15,
+        ),
+        'C' => 
+        array (
+            'Composer\\CaBundle\\' => 18,
+        ),
+        'A' => 
+        array (
+            'Abraham\\TwitterOAuth\\' => 21,
         ),
     );
 
@@ -17,6 +25,14 @@ class ComposerStaticInit8b7292c42cd553071a1bb74aff53be4a
         'RRZE\\Autoshare\\' => 
         array (
             0 => __DIR__ . '/../..' . '/includes',
+        ),
+        'Composer\\CaBundle\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/composer/ca-bundle/src',
+        ),
+        'Abraham\\TwitterOAuth\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/abraham/twitteroauth/src',
         ),
     );
 
@@ -27,9 +43,9 @@ class ComposerStaticInit8b7292c42cd553071a1bb74aff53be4a
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit8b7292c42cd553071a1bb74aff53be4a::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit8b7292c42cd553071a1bb74aff53be4a::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit8b7292c42cd553071a1bb74aff53be4a::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit56b574ea1c3d61f938fbd326936a01b9::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit56b574ea1c3d61f938fbd326936a01b9::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit56b574ea1c3d61f938fbd326936a01b9::$classMap;
 
         }, null, ClassLoader::class);
     }

@@ -10,6 +10,24 @@
         'dev' => true,
     ),
     'versions' => array(
+        'abraham/twitteroauth' => array(
+            'pretty_version' => '6.2.0',
+            'version' => '6.2.0.0',
+            'reference' => 'e6fc2e0c30371ce68427d547bdeb19725868db30',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../abraham/twitteroauth',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'composer/ca-bundle' => array(
+            'pretty_version' => '1.3.7',
+            'version' => '1.3.7.0',
+            'reference' => '76e46335014860eec1aa5a724799a00a2e47cc85',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/./ca-bundle',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'rrze/rrze-autoshare' => array(
             'pretty_version' => '1.0.0',
             'version' => '1.0.0.0',
