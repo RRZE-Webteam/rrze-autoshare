@@ -68,11 +68,16 @@ abstract class Field
         return $this->getArg('name');
     }
 
+    public function getPlaceholderAttribute()
+    {
+        $placeholder = $this->getArg('placeholder') ?? false;
+        return $placeholder ?: null;
+    }
+
     public function getCss()
     {
         return $this->getArg('css', []);
     }
-
 
     public function getInputClassAttribute()
     {
