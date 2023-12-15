@@ -4,8 +4,6 @@ namespace RRZE\Autoshare\Options;
 
 defined('ABSPATH') || exit;
 
-use RRZE\Autoshare\Services\Bluesky;
-
 class Settings
 {
     public $title;
@@ -321,7 +319,7 @@ class Settings
 
         update_option($this->optionName, $newOptions);
 
-        Bluesky::connect();
+        do_action('rrze_autoshare_post_update_option', $newOptions);
 
         $this->flash->set('success', __('Settings saved.', 'rrze-autoshare'));
     }
