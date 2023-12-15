@@ -53,14 +53,14 @@ function systemRequirements(): string
     $error = '';
     if (!is_php_version_compatible(RRZE_PHP_VERSION)) {
         $error = sprintf(
-            /* translators: 1: Server PHP version number, 2: Required PHP version number. */
+            /* translators: %1$s: Server PHP version number, %2$s: Required PHP version number. */
             __('The server is running PHP version %1$s. The Plugin requires at least PHP version %2$s.', 'rrze-autoshare'),
             $phpVersion,
             RRZE_PHP_VERSION
         );
     } elseif (!is_wp_version_compatible(RRZE_WP_VERSION)) {
         $error = sprintf(
-            /* translators: 1: Server WordPress version number, 2: Required WordPress version number. */
+            /* translators: %1$s: Server WordPress version number, %2$s: Required WordPress version number. */
             __('The server is running WordPress version %1$s. The Plugin requires at least WordPress version %2$s.', 'rrze-autoshare'),
             $wpVersion,
             RRZE_WP_VERSION
@@ -79,7 +79,7 @@ function activation()
         deactivate_plugins(plugin_basename(__FILE__));
         wp_die(
             sprintf(
-                /* translators: 1: The plugin name, 2: The error string. */
+                /* translators: %1$s: The plugin name, %2$s: The error string. */
                 __('Plugins: %1$s: %2$s', 'rrze-autoshare'),
                 plugin_basename(__FILE__),
                 $error
@@ -139,7 +139,7 @@ function loaded()
                 add_action($tag, function () use ($pluginName, $error) {
                     printf(
                         '<div class="notice notice-error"><p>' .
-                            /* translators: 1: The plugin name, 2: The error string. */
+                            /* translators: %1$s: The plugin name, %2$s: The error string. */
                             __('Plugins: %1$s: %2$s', 'rrze-autoshare') .
                             '</p></div>',
                         esc_html($pluginName),
