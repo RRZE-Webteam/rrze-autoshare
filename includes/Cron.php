@@ -4,7 +4,7 @@ namespace RRZE\Autoshare;
 
 defined('ABSPATH') || exit;
 
-use RRZE\Autoshare\Services\Bluesky;
+use RRZE\Autoshare\Services\Bluesky\Main as Bluesky;
 
 /**
  * Class Cron
