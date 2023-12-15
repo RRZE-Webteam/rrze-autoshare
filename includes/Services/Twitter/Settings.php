@@ -61,27 +61,27 @@ class Settings
             <li><?php _e("Fill out the <code>Describe all of your use cases of Twitter's data and API</code> field.", 'rrze-autoshare'); ?></li>
             <li><?php _e('Click on "Submit" button, it will redirect you to Developer portal.', 'rrze-autoshare'); ?></li>
         </ul>
-        <h4><?php _e('2. Configure access to your Twitter app access tokens', 'autoshare-for-twitter'); ?></h4>
+        <h4><?php _e('2. Configure access to your Twitter app access tokens', 'rrze-autoshare'); ?></h4>
         <ul>
             <li>
                 <?php
                 printf(
                     /* translators: %1$s: opening HTML <a> link tag, %2$s: closing HTML </a> link tag. */
-                    __('Go to the %1$sTwitter developer portal%2$s', 'autoshare-for-twitter'),
+                    __('Go to the %1$sTwitter developer portal%2$s', 'rrze-autoshare'),
                     '<a href="https://developer.twitter.com/en/portal/dashboard" target="_blank">',
                     '</a>'
                 );
                 ?>
             </li>
-            <li><?php _e('Click on Projects & Apps on the left navigation menu.', 'autoshare-for-twitter'); ?></li>
-            <li><?php _e('Find the App and click it to show the Settings page for the App.', 'autoshare-for-twitter'); ?></li>
-            <li><?php _e('Click "Setup" under User authentication settings to setup Authentication.', 'autoshare-for-twitter'); ?></li>
-            <li><?php _e('Enable <code>OAuth 1.0a</code> and Set App permissions to <strong>Read and write</strong>.', 'autoshare-for-twitter'); ?></li>
+            <li><?php _e('Click on Projects & Apps on the left navigation menu.', 'rrze-autoshare'); ?></li>
+            <li><?php _e('Find the App and click it to show the Settings page for the App.', 'rrze-autoshare'); ?></li>
+            <li><?php _e('Click "Setup" under User authentication settings to setup Authentication.', 'rrze-autoshare'); ?></li>
+            <li><?php _e('Enable <code>OAuth 1.0a</code> and Set App permissions to <strong>Read and write</strong>.', 'rrze-autoshare'); ?></li>
             <li>
                 <?php
                 printf(
                     /* translators: %s: Site URL. */
-                    __('Set the <code>Website URL</code> to <code>%s</code>.', 'autoshare-for-twitter'),
+                    __('Set the <code>Website URL</code> to <code>%s</code>.', 'rrze-autoshare'),
                     esc_url(get_site_url())
                 );
                 ?>
@@ -90,25 +90,25 @@ class Settings
                 <?php
                 printf(
                     /* translators: %s: Callback URL for Twitter Auth */
-                    __('Set the <code>Callback URLs</code> fields to <code>%s</code> and click <code>Save</code>.', 'autoshare-for-twitter'),
+                    __('Set the <code>Callback URLs</code> fields to <code>%s</code> and click <code>Save</code>.', 'rrze-autoshare'),
                     esc_url(admin_url('admin-post.php?action=authoshare_authorize_callback'))
                 );
                 ?>
             </li>
-            <li><?php _e('Switch from the "Settings" tab to the "Keys and tokens" tab.', 'autoshare-for-twitter'); ?></li>
-            <li><?php _e('Click on the <code>Generate</code>/<code>Regenerate</code> button in the <code>Consumer Keys</code> section.', 'autoshare-for-twitter'); ?></li>
-            <li><?php _e('Copy the <code>API Key</code> and <code>API Key Secret</code> values and paste them below.', 'autoshare-for-twitter'); ?></li>
+            <li><?php _e('Switch from the "Settings" tab to the "Keys and tokens" tab.', 'rrze-autoshare'); ?></li>
+            <li><?php _e('Click on the <code>Generate</code>/<code>Regenerate</code> button in the <code>Consumer Keys</code> section.', 'rrze-autoshare'); ?></li>
+            <li><?php _e('Copy the <code>API Key</code> and <code>API Key Secret</code> values and paste them below.', 'rrze-autoshare'); ?></li>
         </ul>
 
-        <h4><?php _e('3. Save settings', 'autoshare-for-twitter'); ?></h4>
+        <h4><?php _e('3. Save settings', 'rrze-autoshare'); ?></h4>
         <ul>
-            <li><?php _e('Click the <code>Save Changes</code> button below to save settings.', 'autoshare-for-twitter'); ?></li>
+            <li><?php _e('Click the <code>Save Changes</code> button below to save settings.', 'rrze-autoshare'); ?></li>
         </ul>
 
-        <h4><?php _e('4. Connect your Twitter account', 'autoshare-for-twitter'); ?></h4>
+        <h4><?php _e('4. Connect your Twitter account', 'rrze-autoshare'); ?></h4>
         <ul>
-            <li><?php _e('After saving settings, you will see the option to connect your Twitter account.', 'autoshare-for-twitter'); ?></li>
-            <li><?php _e('Click the <code>Connect Twitter account</code> button and follow the instructions provided there to connect your Twitter account with this site.', 'autoshare-for-twitter'); ?></li>
+            <li><?php _e('After saving settings, you will see the option to connect your Twitter account.', 'rrze-autoshare'); ?></li>
+            <li><?php _e('Click the <code>Connect Twitter account</code> button and follow the instructions provided there to connect your Twitter account with this site.', 'rrze-autoshare'); ?></li>
         </ul>
 <?php
         $content = ob_get_contents();
