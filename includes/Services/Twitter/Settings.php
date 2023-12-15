@@ -32,6 +32,7 @@ class Settings
             'placeholder' => __('paste your API Key Secret here', 'rrze-autoshare')
         ]);
 
+        // API keys available?
         if (!$this->settings->getOption('twitter_api_key') || !$this->settings->getOption('twitter_api_secret')) {
             return;
         }
