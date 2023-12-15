@@ -12,7 +12,6 @@ class Settings
     {
         $this->settings = $settings;
 
-        // Bluesky settings
         $tab = $this->settings->addTab(__('Bluesky', 'rrze-autoshare'));
 
         $sectionMain = $tab->addSection(
@@ -34,7 +33,7 @@ class Settings
             'validate' => [
                 [
                     'feedback' => __('The URL entered is not valid.', 'rrze-autoshare'),
-                    'callback' => [__NAMESPACE__ . '/Utils', 'validateUrl']
+                    'callback' => [__NAMESPACE__ . '\Utils', 'validateUrl']
                 ]
             ]
         ]);
