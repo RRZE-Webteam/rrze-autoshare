@@ -8,67 +8,104 @@ class Settings
 {
     protected $settings;
 
+    protected $tab;
+
     public function __construct(\RRZE\Autoshare\Options\Settings $settings)
     {
         $this->settings = $settings;
 
-        $tab = $this->settings->addTab(__('Twitter', 'rrze-autoshare'));
+        $this->tab = $this->settings->addTab(__('Twitter', 'rrze-autoshare'));
 
-        $sectionMain = $tab->addSection(
-            __('Twitter Settings', 'rrze-autoshare'),
+        // Are API keys available?
+        // if ($this->settings->getOption('twitter_api_key') && $this->settings->getOption('twitter_api_key_secret')) {
+        $this->sectionMain();
+        // }
+
+        $this->sectionKeys();
+    }
+
+    private function sectionMain()
+    {
+        $sectionMain = $this->tab->addSection(
+            __('Main', 'rrze-autoshare'),
             [
                 'description' => $this->sectionMainDescription()
             ]
         );
 
-        $sectionMain->addOption('text', [
-            'name' => 'twitter_api_key',
-            'label' => __('API Key', 'rrze-autoshare'),
-            'placeholder' => __('paste your API Key here', 'rrze-autoshare')
-        ]);
-        $sectionMain->addOption('text', [
-            'name' => 'twitter_api_secret',
-            'label' => __('API Key Secret', 'rrze-autoshare'),
-            'placeholder' => __('paste your API Key Secret here', 'rrze-autoshare')
-        ]);
-
-        // Are API keys available?
-        if (!$this->settings->getOption('twitter_api_key') || !$this->settings->getOption('twitter_api_secret')) {
-            return;
-        }
-
         $sectionMain->addOption('checkbox-multiple', [
             'name' => 'twitter_post_types',
             'label' => __('Content Types', 'rrze-autoshare'),
-            'description' => __('Select the type of content that Autoshare could use.', 'rrze-autoshare'),
+            'description' => __('Select the type of content that Autoshare could use to write a tweet.', 'rrze-autoshare'),
             'options' => [
                 'post' => __('Posts', 'rrze-autoshare'),
                 'page' => __('Pages', 'rrze-autoshare')
             ],
             'default' => ['post']
         ]);
+
+        $sectionMain->addOption('checkbox', [
+            'name' => 'twitter_enable_default',
+            'label' => __('Enable by default', 'rrze-autoshare'),
+            'description' => __('Enable Autoshare by default when publishing content', 'rrze-autoshare'),
+            'default' => true
+        ]);
+
+        $sectionMain->addOption('checkbox', [
+            'name' => 'twitter_enable_upload',
+            'label' => __('Image setting', 'rrze-autoshare'),
+            'description' => __('Always add the featured image to tweets', 'rrze-autoshare'),
+            'default' => true
+        ]);
+    }
+
+    private function sectionKeys()
+    {
+        $sectionKeys = $this->tab->addSection(
+            __('Twitter Consumer Keys', 'rrze-autoshare'),
+            [
+                'description' => $this->sectionKeysDescription()
+            ]
+        );
+
+        $sectionKeys->addOption('text', [
+            'name' => 'twitter_api_key',
+            'label' => __('API Key', 'rrze-autoshare'),
+            'placeholder' => __('paste your API Key here', 'rrze-autoshare')
+        ]);
+        $sectionKeys->addOption('text', [
+            'name' => 'twitter_api_key_secret',
+            'label' => __('API Key Secret', 'rrze-autoshare'),
+            'placeholder' => __('paste your API Key Secret here', 'rrze-autoshare')
+        ]);
     }
 
     private function sectionMainDescription()
     {
         ob_start(); ?>
-        <h4>
-            <a href="https://developer.twitter.com/en/portal/petition/essential/basic-info" target="_blank">
-                <?php _e('1. Sign up for a Twitter developer account', 'rrze-autoshare'); ?>
+        <p><?php _e('Think of these as the user name and password that represents your App when making API requests.', 'rrze-autoshare'); ?>
+        <?php
+        $content = ob_get_contents();
+        ob_end_clean();
+        return $content;
+    }
+
+    private function sectionKeysDescription()
+    {
+        ob_start(); ?>
+        <p><?php _e('Think of these as the user name and password that represents your App when making API requests.', 'rrze-autoshare'); ?>
+        <h4>1.
+            <a href="https://developer.twitter.com" target="_blank">
+                <?php _e('Sign up for a X (Twitter) developer account', 'rrze-autoshare'); ?>
             </a>
         </h4>
-        <ul>
-            <li><?php _e('Click on "Sign up for Free Account" button to proceed with free access.', 'rrze-autoshare'); ?></li>
-            <li><?php _e("Fill out the <code>Describe all of your use cases of Twitter's data and API</code> field.", 'rrze-autoshare'); ?></li>
-            <li><?php _e('Click on "Submit" button, it will redirect you to Developer portal.', 'rrze-autoshare'); ?></li>
-        </ul>
-        <h4><?php _e('2. Configure access to your Twitter app access tokens', 'rrze-autoshare'); ?></h4>
+        <h4><?php _e('2. Configure the Twitter Consumer Keys', 'rrze-autoshare'); ?></h4>
         <ul>
             <li>
                 <?php
                 printf(
                     /* translators: %1$s: opening HTML <a> link tag, %2$s: closing HTML </a> link tag. */
-                    __('Go to the %1$sTwitter developer portal%2$s', 'rrze-autoshare'),
+                    __('Go to the %1$sX (Twitter) developer portal%2$s', 'rrze-autoshare'),
                     '<a href="https://developer.twitter.com/en/portal/dashboard" target="_blank">',
                     '</a>'
                 );
@@ -92,7 +129,7 @@ class Settings
                 printf(
                     /* translators: %s: Callback URL for Twitter Auth */
                     __('Set the <code>Callback URLs</code> fields to <code>%s</code> and click <code>Save</code>.', 'rrze-autoshare'),
-                    esc_url(admin_url('admin-post.php?action=authoshare_authorize_callback'))
+                    esc_url(admin_url('admin-post.php?action=rrze_authoshare_authorize_callback'))
                 );
                 ?>
             </li>
