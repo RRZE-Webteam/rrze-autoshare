@@ -251,36 +251,6 @@ class Settings
         Template::include('settings-page', ['settings' => $this]);
     }
 
-    public function defaultOptions()
-    {
-        $options = [];
-        foreach ($this->tabs as $tab) {
-            foreach ($tab->sections as $section) {
-                foreach ($section->options as $option) {
-                    $options[$option->args['name']] = $option->args['default'] ?? null;
-                }
-            }
-        }
-
-        return $options;
-    }
-
-    public function getOptions()
-    {
-        $defaults = $this->defaultOptions();
-        $options = get_option($this->optionName, []);
-        $options = wp_parse_args($options, $defaults);
-        $options = array_intersect_key($options, $defaults);
-
-        return $options;
-    }
-
-    public function getOption($option)
-    {
-        $options = $this->getOptions();
-        return $options[$option] ?? null;
-    }
-
     public function save()
     {
         if (
@@ -317,10 +287,44 @@ class Settings
             }
         }
 
-        update_option($this->optionName, $newOptions);
-
-        do_action('rrze_autoshare_post_update_option', $newOptions);
+        $this->updateOptions($newOptions);
 
         $this->flash->set('success', __('Settings saved.', 'rrze-autoshare'));
+    }
+
+    public function defaultOptions()
+    {
+        $options = [];
+        foreach ($this->tabs as $tab) {
+            foreach ($tab->sections as $section) {
+                foreach ($section->options as $option) {
+                    $options[$option->args['name']] = $option->args['default'] ?? null;
+                }
+            }
+        }
+
+        return $options;
+    }
+
+    public function getOptions()
+    {
+        $defaults = $this->defaultOptions();
+        $options = get_option($this->optionName, []);
+        $options = wp_parse_args($options, $defaults);
+        $options = array_intersect_key($options, $defaults);
+
+        return $options;
+    }
+
+    public function getOption($option)
+    {
+        $options = $this->getOptions();
+        return $options[$option] ?? null;
+    }
+
+    public function updateOptions($options)
+    {
+        update_option($this->optionName, $options);
+        do_action('rrze_autoshare_post_update_option', $options);
     }
 }
