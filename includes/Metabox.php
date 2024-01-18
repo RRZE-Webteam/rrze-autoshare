@@ -6,7 +6,7 @@ defined('ABSPATH') || exit;
 
 use RRZE\Autoshare\Services\Bluesky\Main as Bluesky;
 use RRZE\Autoshare\Services\Mastodon\Main as Mastodon;
-use RRZE\Autoshare\Services\Mastodon\Main as Twitter;
+use RRZE\Autoshare\Services\Twitter\Main as Twitter;
 
 class Metabox
 {
