@@ -2,10 +2,9 @@
 
 namespace RRZE\Autoshare\Services\Bluesky;
 
-use RRZE\Autoshare\Options\Encryption;
-
 defined('ABSPATH') || exit;
 
+use RRZE\Autoshare\Options\Encryption;
 use function RRZE\Autoshare\settings;
 
 class Main
@@ -18,7 +17,16 @@ class Main
 
     public static function init()
     {
-        add_action('publish_post', [__CLASS__, 'publishPost']);
+        add_action('save_post', [__CLASS__, 'saveMeta'], 11, 3);
+
+        $supportedPostTypes = settings()->getOption('bluesky_post_types');
+        foreach ($supportedPostTypes as $postType) {
+            add_action("save_post_{$postType}", [__CLASS__, 'publishPost'], 11, 3);
+        }
+
+        add_action('rrze_autoshare_bluesky_publish_post', [__CLASS__, 'sendPost']);
+
+        add_action('init', [__CLASS__, 'registerPostMeta']);
     }
 
     public static function connect()
@@ -78,9 +86,51 @@ class Main
         }
     }
 
-    public static function publishPost($postId)
+    public static function saveMeta($postId, $post, $update)
     {
-        wp_schedule_single_event(time(), 'rrze_autoshare_bluesky_send_post', [$postId]);
+        if (wp_is_post_revision($post) || wp_is_post_autosave($post)) {
+            return;
+        }
+
+        $supportedPostTypes = settings()->getOption('bluesky_post_types');
+        if (!in_array($post->post_type, $supportedPostTypes)) {
+            return;
+        }
+
+        if (!isset($_POST['rrze_autoshare_bluesky_enabled'])) {
+            return;
+        }
+
+        $metaValue = (bool) $_POST['rrze_autoshare_bluesky_enabled'];
+        // if ($update) {
+        //     $metaValue = false;
+        // }
+        update_metadata('post', $postId, 'rrze_autoshare_bluesky_enabled', $metaValue);
+    }
+
+    public static function publishPost($postId, $post, $update)
+    {
+        if (wp_is_post_revision($post) || wp_is_post_autosave($post)) {
+            return;
+        }
+
+        if (post_password_required($post)) {
+            return false;
+        }
+
+        $supportedPostTypes = settings()->getOption('bluesky_post_types');
+        if (!in_array($post->post_type, $supportedPostTypes)) {
+            return;
+        }
+
+        if (!self::isConnected()) {
+            return;
+        }
+
+        $autoshare = (bool) get_metadata($post->post_type, $postId, 'rrze_autoshare_bluesky_enabled', true);
+        if ($autoshare) {
+            wp_schedule_single_event(time(), 'rrze_autoshare_bluesky_publish_post', [$postId]);
+        }
     }
 
     public static function sendPost($postId)
@@ -128,9 +178,38 @@ class Main
         );
 
         if (is_wp_error($response)) {
-            return $response;
+            update_metadata($post->post_type, $postId, 'rrze_autoshare_bluesky_error', $response->get_error_message());
         } else {
-            return null;
+            $code = wp_remote_retrieve_response_code($response);
+            if ($code >= 300) {
+                update_metadata($post->post_type, $postId, 'rrze_autoshare_bluesky_error', $code);
+            } else {
+                delete_metadata($post->post_type, $postId, 'rrze_autoshare_bluesky_error');
+                update_metadata($post->post_type, $postId, 'rrze_autoshare_bluesky_syndicated', true);
+            }
+        }
+    }
+
+    static public function isConnected()
+    {
+        return (bool) get_option(self::ACCESS_JWT);
+    }
+
+    static public function isSyndicated($postType, $postId)
+    {
+        return (bool) get_metadata($postType, $postId, 'rrze_autoshare_bluesky_syndicated');
+    }
+
+    static public function registerPostMeta()
+    {
+        $supportedPostTypes = settings()->getOption('bluesky_post_types');
+        foreach ($supportedPostTypes as $postType) {
+            register_meta($postType, 'rrze_autoshare_bluesky_enabled', [
+                'show_in_rest' => true,
+                'single' => true,
+                'type' => 'boolean',
+                'default' => 'true',
+            ]);
         }
     }
 }
