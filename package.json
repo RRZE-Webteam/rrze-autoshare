@@ -16,6 +16,9 @@
         "npm": ">=10.2.3"
     },
     "devDependencies": {
+        "@wordpress/components": "latest",
+        "@wordpress/plugins": "latest",
+        "@wordpress/data": "latest",
         "@wordpress/env": "latest",
         "@wordpress/icons": "latest",
         "@wordpress/scripts": "latest",
