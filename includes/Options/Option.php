@@ -12,7 +12,9 @@ use RRZE\Autoshare\Options\Fields\{
     Select,
     SelectMultiple,
     Text,
-    Textarea
+    Textarea,
+    TextSecure,
+    TwitterAccount
 };
 
 class Option
@@ -39,7 +41,9 @@ class Option
             'textarea' => Textarea::class,
             'password' => Password::class,
             'select' => Select::class,
-            'select-multiple' => SelectMultiple::class
+            'select-multiple' => SelectMultiple::class,
+            'text-secure' => TextSecure::class,
+            'twitter-account' => TwitterAccount::class
         ];
 
         $this->implementation = new $typeMap[$this->type]($section, $args);
