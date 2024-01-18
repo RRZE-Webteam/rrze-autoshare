@@ -4,6 +4,10 @@ namespace RRZE\Autoshare;
 
 defined('ABSPATH') || exit;
 
+use RRZE\Autoshare\Services\Bluesky\Main as Bluesky;
+use RRZE\Autoshare\Services\Mastodon\Main as Mastodon;
+use RRZE\Autoshare\Services\Mastodon\Main as Twitter;
+
 class Main
 {
     /**
@@ -13,11 +17,20 @@ class Main
     {
         add_filter('plugin_action_links_' . plugin()->getBaseName(), [$this, 'settingsLink']);
 
+        /* Enqueue Admin Assets */
         add_action('admin_enqueue_scripts', [$this, 'adminEnqueueScripts']);
+
+        /* Enqueue Block Editor Assets */
+        add_action('enqueue_block_editor_assets', [__CLASS__, 'enqueueBlockEditorAssets'], 10, 0);
 
         settings();
 
-        // Cron::init();
+        Bluesky::init();
+        Mastodon::init();
+
+        Metabox::init();
+
+        Cron::init();
     }
 
     /**
@@ -37,11 +50,62 @@ class Main
         return $links;
     }
 
-    public function adminEnqueueScripts()
+    public function adminEnqueueScripts($hook)
     {
-        $screen = get_current_screen();
-        if (is_null($screen)) {
+        if ($hook != 'post.php' && $hook != 'post-new.php') {
             return;
         }
+
+        if (
+            !in_array(get_post_type(), settings()->getOption('bluesky_post_types'))
+            && !in_array(get_post_type(), settings()->getOption('mastodon_post_types'))
+            && !in_array(get_post_type(), settings()->getOption('twitter_post_types'))
+        ) {
+            return;
+        }
+
+        wp_enqueue_style(
+            'rrze-autoshare-admin',
+            plugins_url('build/admin.style.css', plugin()->getBasename()),
+            [],
+            plugin()->getVersion()
+        );
+    }
+
+    static public function enqueueBlockEditorAssets()
+    {
+        wp_enqueue_style(
+            'rrze-autoshare-blockeditor',
+            plugins_url('build/blockeditor.style.css', plugin()->getBasename()),
+            [],
+            plugin()->getVersion()
+        );
+
+        $assetFile = include(plugin()->getPath('build') . 'blockeditor.asset.php');
+
+        wp_enqueue_script(
+            'rrze-autoshare-blockeditor',
+            plugins_url('build/blockeditor.js', plugin()->getBasename()),
+            $assetFile['dependencies'],
+            plugin()->getVersion()
+        );
+
+        $localization = [
+            'blueskyEnabled' => Bluesky::isConnected(),
+            'mastodonEnabled' => Mastodon::isConnected(),
+            'twitterEnabled' => Twitter::isConnected(),
+        ];
+
+        wp_localize_script(
+            'rrze-autoshare-blockeditor',
+            'autoshareObject',
+            $localization
+        );
+
+        wp_set_script_translations(
+            'rrze-autoshare-blockeditor',
+            'rrze-autoshare',
+            plugin()->getPath('languages')
+        );
     }
 }
