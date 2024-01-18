@@ -7,6 +7,7 @@ defined('ABSPATH') || exit;
 use RRZE\Autoshare\Options\Settings as OptionsSettings;
 use RRZE\Autoshare\Services\Bluesky\Main as Bluesky;
 use RRZE\Autoshare\Services\Bluesky\Settings as BlueskySettings;
+use RRZE\Autoshare\Services\Mastodon\Settings as MastodonSettings;
 use RRZE\Autoshare\Services\Twitter\Settings as TwitterSettings;
 
 class Settings
@@ -29,9 +30,12 @@ class Settings
 
         // Bluesky settings
         new BlueskySettings(@$this->settings);
+        
+        // Mastodon settings
+        new MastodonSettings(@$this->settings);        
 
         // Twitter settings
-        new TwitterSettings(@$this->settings);
+        // new TwitterSettings(@$this->settings);
 
         $this->settings->build();
     }
