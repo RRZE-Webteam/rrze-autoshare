@@ -57,6 +57,11 @@ class Settings
             'description' => __('Always add the featured image to tweets', 'rrze-autoshare'),
             'default' => true
         ]);
+
+        $sectionMain->addOption('twitter-account', [
+            'name' => 'twitter_account',
+            'label' => __('Twitter account', 'rrze-autoshare')
+        ]);        
     }
 
     private function sectionKeys()
@@ -68,12 +73,13 @@ class Settings
             ]
         );
 
-        $sectionKeys->addOption('text', [
+        $sectionKeys->addOption('text-secure', [
             'name' => 'twitter_api_key',
             'label' => __('API Key', 'rrze-autoshare'),
             'placeholder' => __('paste your API Key here', 'rrze-autoshare')
         ]);
-        $sectionKeys->addOption('text', [
+
+        $sectionKeys->addOption('text-secure', [
             'name' => 'twitter_api_key_secret',
             'label' => __('API Key Secret', 'rrze-autoshare'),
             'placeholder' => __('paste your API Key Secret here', 'rrze-autoshare')
@@ -105,14 +111,18 @@ class Settings
                 <?php
                 printf(
                     /* translators: %1$s: opening HTML <a> link tag, %2$s: closing HTML </a> link tag. */
-                    __('Go to the %1$sX (Twitter) developer portal%2$s', 'rrze-autoshare'),
+                    __('Go to the %1$sX (Twitter) developer portal%2$s and Sign up for Free Account.', 'rrze-autoshare'),
                     '<a href="https://developer.twitter.com/en/portal/dashboard" target="_blank">',
                     '</a>'
                 );
                 ?>
             </li>
+            <li><?php _e('Complete the "Developer agreement & policy" and click on the <code>Submit</code> button.', 'rrze-autoshare'); ?></li>
             <li><?php _e('Click on Projects & Apps on the left navigation menu.', 'rrze-autoshare'); ?></li>
-            <li><?php _e('Find the App and click it to show the Settings page for the App.', 'rrze-autoshare'); ?></li>
+            <li><?php _e('Note: The free plan only supports one App. If the App quota has been exceeded, an App must be deleted to create a new one.', 'rrze-autoshare'); ?></li>
+            <li><?php _e('In the section Standalone Apps click on the <code>Create App</code> button.', 'rrze-autoshare'); ?></li>
+            <li><?php _e('Name the App and click on the <code>Next</code> button.', 'rrze-autoshare'); ?></li>
+            <li><?php _e('Copy the API Key and API Key Secret. These values will be required in the plugin settings. Click on the <code>App settings</code> button.', 'rrze-autoshare'); ?></li>
             <li><?php _e('Click "Setup" under User authentication settings to setup Authentication.', 'rrze-autoshare'); ?></li>
             <li><?php _e('Enable <code>OAuth 1.0a</code> and Set App permissions to <strong>Read and write</strong>.', 'rrze-autoshare'); ?></li>
             <li>
