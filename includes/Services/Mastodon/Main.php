@@ -15,7 +15,7 @@ class Main
 
     public static function isConnected()
     {
-        return (bool) get_option('rrze_autoshare_mastodon_connected');
+        return API::isConnected();
     }
 
     public static function isSyndicated($postType, $postId)
