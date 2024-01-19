@@ -8,7 +8,7 @@ class Utils
 {
     public static function getConnectionStatus()
     {
-        if (get_option(Main::ACCESS_JWT)) {
+        if (get_option(API::ACCESS_JWT)) {
             return __('connected', 'rrze-autoshare');
         }
         return __('not connected', 'rrze-autoshare');
