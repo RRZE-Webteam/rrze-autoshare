@@ -13,17 +13,17 @@ class Main
         add_action('init', [__CLASS__, 'registerPostMeta']);
     }
 
-    static public function isConnected()
+    public static function isConnected()
     {
         return (bool) get_option('rrze_autoshare_twitter_connected');
     }
 
-    static public function isSyndicated($postType, $postId)
+    public static function isSyndicated($postType, $postId)
     {
         return (bool) get_metadata($postType, $postId, 'rrze_autoshare_twitter_syndicated');
     }
 
-    static public function registerPostMeta()
+    public static function registerPostMeta()
     {
         $supportedPostTypes = settings()->getOption('twitter_post_types');
         foreach ($supportedPostTypes as $postType) {
