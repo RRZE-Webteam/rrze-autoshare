@@ -5,7 +5,7 @@ namespace RRZE\Autoshare;
 defined('ABSPATH') || exit;
 
 use RRZE\Autoshare\Options\Settings as OptionsSettings;
-use RRZE\Autoshare\Services\Bluesky\Main as Bluesky;
+use RRZE\Autoshare\Services\Bluesky\API as BlueskyAPI;
 use RRZE\Autoshare\Services\Bluesky\Settings as BlueskySettings;
 use RRZE\Autoshare\Services\Mastodon\Settings as MastodonSettings;
 use RRZE\Autoshare\Services\Twitter\Settings as TwitterSettings;
@@ -52,6 +52,6 @@ class Settings
 
     public function postUpdateOption()
     {
-        Bluesky::connect();
+        BlueskyAPI::connect();
     }
 }
