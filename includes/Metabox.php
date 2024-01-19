@@ -44,7 +44,7 @@ class Metabox
         $inputName = 'rrze_autoshare_bluesky_enabled';
         $isEnabled = Bluesky::isConnected();
         $isSyndicated = Bluesky::isSyndicated($post->post_type, $post->ID);
-        $disabled = !$isEnabled || !$isSyndicated ? '' : ' disabled';
+        $disabled = !$isEnabled || $isSyndicated ? ' disabled' : '';
         $disabledClass = $disabled ? 'class = "rrze-autoshare-disabled_input__label" ' : '';
         $checked = !$disabled ? (bool) get_metadata($post->post_type, $post->ID, $inputName, true) : false;
         $label = !$disabled ? __('Share on Bluesky', 'rrze-autoshare') : __('Share on Bluesky is disabled', 'rrze-autoshare');
@@ -66,7 +66,7 @@ class Metabox
         $inputName = 'rrze_autoshare_mastodon_enabled';
         $isEnabled = Mastodon::isConnected();
         $isSyndicated = Mastodon::isSyndicated($post->post_type, $post->ID);
-        $disabled = !$isEnabled || !$isSyndicated ? '' : ' disabled';
+        $disabled = !$isEnabled || $isSyndicated ? ' disabled' : '';
         $disabledClass = $disabled ? 'class = "rrze-autoshare-disabled_input__label" ' : '';
         $checked = !$disabled ? (bool) get_metadata($post->post_type, $post->ID, $inputName, true) : false;
         $label = !$disabled ? __('Share on Mastodon', 'rrze-autoshare') : __('Share on Mastodon is disabled', 'rrze-autoshare');
@@ -88,7 +88,7 @@ class Metabox
         $inputName = 'rrze_autoshare_twitter_enabled';
         $isEnabled = Twitter::isConnected();
         $isSyndicated = Twitter::isSyndicated($post->post_type, $post->ID);
-        $disabled = !$isEnabled || !$isSyndicated ? '' : ' disabled';
+        $disabled = !$isEnabled || $isSyndicated ? ' disabled' : '';
         $disabledClass = $disabled ? 'class = "rrze-autoshare-disabled_input__label" ' : '';
         $checked = !$disabled ? (bool) get_metadata($post->post_type, $post->ID, $inputName, true) : false;
         $label = !$disabled ? __('Share on Twitter', 'rrze-autoshare') : __('Share on Twitter is disabled', 'rrze-autoshare');
