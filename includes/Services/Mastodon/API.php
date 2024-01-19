@@ -193,7 +193,7 @@ class API
                 isset($_GET['action']) &&
                 'revoke' === $_GET['action'] &&
                 isset($_GET['_wpnonce']) &&
-                wp_verify_nonce(sanitize_key($_GET['_wpnonce']), 'rrze_autoshare-mastodon-revoke')
+                wp_verify_nonce(sanitize_key($_GET['_wpnonce']), 'rrze-autoshare-mastodon-revoke')
             ) {
                 self::revokeAccess();
             }
@@ -260,7 +260,7 @@ class API
                 ],
                 admin_url('options-general.php')
             ),
-            'rrze_autoshare-mastodon-revoke',
+            'rrze-autoshare-mastodon-revoke',
             '_wpnonce'
         );
     }
