@@ -4,7 +4,7 @@ namespace RRZE\Autoshare;
 
 defined('ABSPATH') || exit;
 
-use RRZE\Autoshare\Services\Bluesky\Main as Bluesky;
+use RRZE\Autoshare\Services\Bluesky\API as Bluesky;
 
 /**
  * Class Cron
@@ -30,8 +30,8 @@ class Cron
     {
         // Check if the scheduled event is not already in the queue.
         if (!wp_next_scheduled(self::BLUESKY_REFRESH_TOKEN)) {
-            // Schedule the event to run weekly starting from the current time.
-            wp_schedule_event(time(), 'weekly', self::BLUESKY_REFRESH_TOKEN);
+            // Schedule the event to run daily starting from the current time.
+            wp_schedule_event(time(), 'daily', self::BLUESKY_REFRESH_TOKEN);
         }
     }
 
