@@ -89,7 +89,6 @@ class API
         }
 
         $data = json_decode($response['body']);
-        error_log(print_r($data, true));
 
         if (isset($data->access_token)) {
             update_option(self::ACCESS_TOKEN, $data->access_token);
