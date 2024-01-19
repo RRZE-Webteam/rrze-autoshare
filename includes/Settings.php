@@ -7,6 +7,7 @@ defined('ABSPATH') || exit;
 use RRZE\Autoshare\Options\Settings as OptionsSettings;
 use RRZE\Autoshare\Services\Bluesky\API as BlueskyAPI;
 use RRZE\Autoshare\Services\Bluesky\Settings as BlueskySettings;
+use RRZE\Autoshare\Services\Mastodon\API as MastodonAPI;
 use RRZE\Autoshare\Services\Mastodon\Settings as MastodonSettings;
 use RRZE\Autoshare\Services\Twitter\Settings as TwitterSettings;
 
@@ -18,8 +19,6 @@ class Settings
 
     public function __construct()
     {
-        add_action('rrze_autoshare_post_update_option', [$this, 'postUpdateOption']);
-
         $this->settings = new OptionsSettings(__('Autoshare Settings', 'rrze-autoshare'), 'rrze_autoshare');
 
         $this->settings->setCapability('manage_options')
@@ -30,14 +29,16 @@ class Settings
 
         // Bluesky settings
         new BlueskySettings(@$this->settings);
-        
+
         // Mastodon settings
-        new MastodonSettings(@$this->settings);        
+        new MastodonSettings(@$this->settings);
 
         // Twitter settings
         // new TwitterSettings(@$this->settings);
 
         $this->settings->build();
+
+        add_action('admin_init', [$this, 'connectAPI']);
     }
 
     public function getOption($option)
@@ -50,8 +51,22 @@ class Settings
         return $this->settings->getOptions();
     }
 
-    public function postUpdateOption()
+    public function connectAPI()
     {
-        BlueskyAPI::connect();
+        $page = filter_input(INPUT_GET, 'page', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        $tab = filter_input(INPUT_GET, 'tab', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        if ($page !== 'rrze_autoshare') {
+            return;
+        }
+        switch ($tab) {
+            case 'bluesky':
+                BlueskyAPI::connect();
+                break;
+            case 'mastodon':
+                MastodonAPI::connect();
+                break;
+            case 'twitter':
+                break;
+        }
     }
 }
