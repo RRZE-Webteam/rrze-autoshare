@@ -200,6 +200,11 @@ class API
         }
     }
 
+    public static function isConnected()
+    {
+        return (bool) get_option(self::ACCESS_TOKEN);
+    }
+
     public static function authorizeAccessText()
     {
         return get_option(self::ACCESS_TOKEN) ? __('Revoke Access', 'rrze-autoshare') : __('Authorize Access', 'rrze-autoshare');
