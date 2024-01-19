@@ -12,10 +12,10 @@ class Main
     {
         add_action('init', [__CLASS__, 'registerPostMeta']);
 
-        API::init();
+        Post::init();
     }
 
-    static public function registerPostMeta()
+    public static function registerPostMeta()
     {
         $supportedPostTypes = settings()->getOption('bluesky_post_types');
         foreach ($supportedPostTypes as $postType) {
@@ -28,12 +28,12 @@ class Main
         }
     }
 
-    static public function isConnected()
+    public static function isConnected()
     {
         return API::isConnected();
     }
 
-    static public function isSyndicated($postType, $postId)
+    public static function isSyndicated($postType, $postId)
     {
         return (bool) get_metadata($postType, $postId, 'rrze_autoshare_bluesky_syndicated');
     }
