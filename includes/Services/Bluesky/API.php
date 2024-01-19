@@ -5,8 +5,8 @@ namespace RRZE\Autoshare\Services\Bluesky;
 defined('ABSPATH') || exit;
 
 use RRZE\Autoshare\Options\Encryption;
+use function RRZE\Autoshare\plugin;
 use function RRZE\Autoshare\settings;
-
 
 class API
 {
@@ -146,12 +146,13 @@ class API
         $blueskyDomain = trailingslashit($blueskyDomain);
 
         $wpVersion = get_bloginfo('version');
+        $pluginVersion = plugin()->getVersion();
         $userAgent = 'WordPress/' . $wpVersion . '; ' . get_bloginfo('url');
 
         $response = wp_safe_remote_post(
             $blueskyDomain . 'xrpc/com.atproto.repo.createRecord',
             [
-                'user-agent' => "$userAgent; Share on Bluesky",
+                'user-agent' => "$userAgent; RRZE-Autoshare/$pluginVersion",
                 'headers' => [
                     'Content-Type'  => 'application/json',
                     'Authorization' => 'Bearer ' . $accessToken,
