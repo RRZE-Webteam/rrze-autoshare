@@ -20,7 +20,7 @@ class Settings
                 'description' => sprintf(
                     '%1$s %2$s',
                     __('Status:', 'rrze-autoshare'),
-                    Utils::getConnectionStatus()
+                    API::getConnectionStatus()
                 )
             ]
         );
