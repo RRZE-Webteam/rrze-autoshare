@@ -72,7 +72,7 @@ class Main
         );
     }
 
-    static public function enqueueBlockEditorAssets()
+    public static function enqueueBlockEditorAssets()
     {
         wp_enqueue_style(
             'rrze-autoshare-blockeditor',
