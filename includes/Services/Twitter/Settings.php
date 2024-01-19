@@ -57,11 +57,6 @@ class Settings
             'description' => __('Always add the featured image to tweets', 'rrze-autoshare'),
             'default' => true
         ]);
-
-        $sectionMain->addOption('twitter-account', [
-            'name' => 'twitter_account',
-            'label' => __('Twitter account', 'rrze-autoshare')
-        ]);        
     }
 
     private function sectionKeys()
@@ -158,7 +153,7 @@ class Settings
             <li><?php _e('After saving settings, you will see the option to connect your Twitter account.', 'rrze-autoshare'); ?></li>
             <li><?php _e('Click the <code>Connect Twitter account</code> button and follow the instructions provided there to connect your Twitter account with this site.', 'rrze-autoshare'); ?></li>
         </ul>
-<?php
+        <?php
         $content = ob_get_contents();
         ob_end_clean();
         return $content;
