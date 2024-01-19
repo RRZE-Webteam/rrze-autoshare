@@ -92,12 +92,12 @@ class API
 
         if (isset($data->access_token)) {
             update_option(self::ACCESS_TOKEN, $data->access_token);
-            if (self::verifyAccessToken()) {
-                return true;
+            if (!self::verifyAccessToken()) {
+                return false;
             }
         }
 
-        return false;
+        return true;
     }
 
     public static function revokeAccess()
