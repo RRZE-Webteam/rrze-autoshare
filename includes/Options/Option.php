@@ -5,6 +5,7 @@ namespace RRZE\Autoshare\Options;
 defined('ABSPATH') || exit;
 
 use RRZE\Autoshare\Options\Fields\{
+    ButtonLink,
     Checkbox,
     CheckboxMultiple,
     Choices,
@@ -13,8 +14,7 @@ use RRZE\Autoshare\Options\Fields\{
     SelectMultiple,
     Text,
     Textarea,
-    TextSecure,
-    TwitterAccount
+    TextSecure
 };
 
 class Option
@@ -43,7 +43,7 @@ class Option
             'select' => Select::class,
             'select-multiple' => SelectMultiple::class,
             'text-secure' => TextSecure::class,
-            'twitter-account' => TwitterAccount::class
+            'button-link' => ButtonLink::class
         ];
 
         $this->implementation = new $typeMap[$this->type]($section, $args);
