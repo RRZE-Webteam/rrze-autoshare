@@ -139,8 +139,8 @@ class API
     public static function getConnectionStatus()
     {
         if (get_option(self::ACCESS_JWT)) {
-            return __('connected', 'rrze-autoshare');
+            return __('Connected', 'rrze-autoshare');
         }
-        return __('not connected', 'rrze-autoshare');
+        return __('Not connected', 'rrze-autoshare');
     }
 }
