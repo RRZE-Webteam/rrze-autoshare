@@ -1,9 +1,10 @@
 <?php
 
-namespace RRZE\Autoshare\Services\Mastodon;
+namespace RRZE\Autoshare\Services\Bluesky;
 
 defined('ABSPATH') || exit;
 
+use function RRZE\Autoshare\plugin;
 use function RRZE\Autoshare\settings;
 
 class Media
@@ -11,7 +12,7 @@ class Media
     public static function getImages($post)
     {
         $enableFeaturedImage = has_post_thumbnail($post->ID) &&
-            settings()->getOption('mastodon_featured_image');
+            settings()->getOption('bluesky_featured_image');
         if (!$enableFeaturedImage) {
             return [];
         }
@@ -48,47 +49,45 @@ class Media
             return;
         }
 
-        $boundary = md5(time());
-        $eol      = "\r\n";
+        $body = file_get_contents($filePath);
 
-        $body = '--' . $boundary . $eol;
+        $mimeType = mime_content_type($filePath);
 
-        if ('' !== $alt) {
-            $body .= 'Content-Disposition: form-data; name="description";' . $eol . $eol;
-            $body .= $alt . $eol;
-            $body .= '--' . $boundary . $eol;
-        }
+        $accessToken = get_option(API::ACCESS_JWT);
+        $host = settings()->getOption('bluesky_domain');
 
-        $body .= 'Content-Disposition: form-data; name="file"; filename="' . basename($filePath) . '"' . $eol;
-        $body .= 'Content-Type: ' . mime_content_type($filePath) . $eol . $eol;
-        $body .= file_get_contents($filePath) . $eol;
-        $body .= '--' . $boundary . '--';
+        $host = trailingslashit($host);
 
-        $host = settings()->getOption('mastodon_domain');
-        $accessToken = get_option(API::ACCESS_TOKEN);
+        $wpVersion = get_bloginfo('version');
+        $pluginVersion = plugin()->getVersion();
+        $userAgent = 'WordPress/' . $wpVersion . '; ' . get_bloginfo('url');
 
-        $response = wp_remote_post(
-            esc_url_raw($host . '/api/v1/media'),
-            array(
-                'headers'     => array(
+        $response = wp_safe_remote_post(
+            esc_url_raw($host . 'xrpc/com.atproto.repo.uploadBlob'),
+            [
+                'user-agent' => "$userAgent; RRZE-Autoshare/$pluginVersion",
+                'headers'    => [
+                    'Content-Type' => $mimeType,
                     'Authorization' => 'Bearer ' . $accessToken,
-                    'Content-Type'  => 'multipart/form-data; boundary=' . $boundary,
-                ),
-                'data_format' => 'body',
+                ],
                 'body'        => $body,
                 'timeout'     => 15,
-            )
+            ]
         );
 
-        if (is_wp_error($response)) {
-            return;
+        if (
+            is_wp_error($response) ||
+            wp_remote_retrieve_response_code($response) >= 300
+        ) {
+            return false;
         }
 
-        $media = json_decode($response['body']);
-
-        if (!empty($media->id)) {
-            return $media->id;
+        $data = json_decode(wp_remote_retrieve_body($response), true);
+        if (empty($data['blob'])) {
+            return false;
         }
+
+        return $data['blob'];
     }
 
     private static function addAltText($postType, $imageIds)

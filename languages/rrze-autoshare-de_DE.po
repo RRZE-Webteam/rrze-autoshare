@@ -4,8 +4,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: RRZE Autoshare\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/rrze-autoshare\n"
-"POT-Creation-Date: 2024-01-22T08:14:19+00:00\n"
-"PO-Revision-Date: 2024-01-22 09:19+0100\n"
+"POT-Creation-Date: 2024-01-22T15:15:10+00:00\n"
+"PO-Revision-Date: 2024-01-22 16:16+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: de\n"
@@ -88,27 +88,25 @@ msgstr "Die Einstellungen wurden gespeichert."
 msgid "Settings issues detected."
 msgstr "Einstellungsprobleme erkannt."
 
-#: includes/Services/Bluesky/API.php:176 includes/Services/Mastodon/API.php:301
+#: includes/Services/Bluesky/API.php:194 includes/Services/Mastodon/API.php:302
 msgid "Revoke Access"
 msgstr "Zugriff widerrufen"
 
-#: includes/Services/Bluesky/API.php:176 includes/Services/Mastodon/API.php:301
+#: includes/Services/Bluesky/API.php:195 includes/Services/Mastodon/API.php:303
 msgid "Authorize Access"
 msgstr "Zugriff autorisieren"
 
-#: includes/Services/Bluesky/API.php:181
+#: includes/Services/Bluesky/API.php:201
 msgid "You’ve authorized Autoshare to read and write to the Bluesky timeline."
 msgstr ""
 "Sie haben Autoshare autorisiert, die Bluesky-Timeline zu lesen und zu "
 "schreiben."
 
-#: includes/Services/Bluesky/API.php:181
-msgid ""
-"Authorize Autoshare to read and write to the Bluesky timeline in order to "
-"publish."
+#: includes/Services/Bluesky/API.php:202
+msgid "Authorize Autoshare to read and write to the Bluesky."
 msgstr ""
-"Autorisieren Sie Autoshare zum Lesen und Schreiben in die Bluesky-Timeline, "
-"um veröffentlichen zu können."
+"Sie haben Autoshare autorisiert, die Bluesky-Timeline zu lesen und zu "
+"schreiben."
 
 #: includes/Services/Bluesky/Settings.php:15
 msgid "Bluesky"
@@ -183,23 +181,33 @@ msgid "Pages"
 msgstr "Seiten"
 
 #: includes/Services/Bluesky/Settings.php:59
+#: includes/Services/Mastodon/Settings.php:54
+#: includes/Services/Twitter/Settings.php:46
+msgid "Featured Images"
+msgstr "Beitragsbild"
+
+#: includes/Services/Bluesky/Settings.php:60
+#: includes/Services/Mastodon/Settings.php:55
+#: includes/Services/Twitter/Settings.php:47
+msgid "Include featured images"
+msgstr "Beitragsbild hinzufügen"
+
+#: includes/Services/Bluesky/Settings.php:65
 #: includes/Services/Mastodon/Settings.php:60
 msgid "Access"
 msgstr "Zugriff"
 
-#: includes/Services/Mastodon/API.php:306
+#: includes/Services/Mastodon/API.php:309
 msgid "You’ve authorized Autoshare to read and write to the Mastodon timeline."
 msgstr ""
 "Sie haben Autoshare autorisiert, die Mastodon-Timeline zu lesen und zu "
 "schreiben."
 
-#: includes/Services/Mastodon/API.php:306
-msgid ""
-"Authorize Autoshare to read and write to the Mastodon timeline in order to "
-"publish."
+#: includes/Services/Mastodon/API.php:310
+msgid "Authorize Autoshare to read and write to the Mastodon timeline."
 msgstr ""
-"Autorisieren Sie Autoshare zum Lesen und Schreiben in die Mastodon-Timeline, "
-"um veröffentlichen zu können."
+"Sie haben Autoshare autorisiert, die Mastodon-Timeline zu lesen und zu "
+"schreiben."
 
 #: includes/Services/Mastodon/Settings.php:15
 msgid "Mastodon"
@@ -231,16 +239,6 @@ msgstr "Benutzername"
 #: includes/Services/Mastodon/Settings.php:39
 msgid "The Mastodon account username."
 msgstr "Der Benutzername des Mastodon-Kontos."
-
-#: includes/Services/Mastodon/Settings.php:54
-#: includes/Services/Twitter/Settings.php:46
-msgid "Featured Images"
-msgstr "Beitragsbild"
-
-#: includes/Services/Mastodon/Settings.php:55
-#: includes/Services/Twitter/Settings.php:47
-msgid "Include featured images"
-msgstr "Beitragsbild hinzufügen"
 
 #: includes/Services/Twitter/Settings.php:17
 msgid "X"
@@ -431,6 +429,20 @@ msgstr "Nicht auf Mastodon teilen"
 #: src/blockeditor/script.js:107
 msgid "Autoshare"
 msgstr "Autoshare"
+
+#~ msgid ""
+#~ "Authorize Autoshare to read and write to the Bluesky timeline in order to "
+#~ "publish."
+#~ msgstr ""
+#~ "Autorisieren Sie Autoshare zum Lesen und Schreiben in die Bluesky-"
+#~ "Timeline, um veröffentlichen zu können."
+
+#~ msgid ""
+#~ "Authorize Autoshare to read and write to the Mastodon timeline in order "
+#~ "to publish."
+#~ msgstr ""
+#~ "Autorisieren Sie Autoshare zum Lesen und Schreiben in die Mastodon-"
+#~ "Timeline, um veröffentlichen zu können."
 
 #~ msgid "Share on Bluesky is syndicated"
 #~ msgstr "Teilen auf Bluesky wird syndiziert"

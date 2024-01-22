@@ -66,17 +66,17 @@ class Post
         API::publishPost($postId);
     }
 
-    public static function getExcerpt($post_id, $maxLength = 125)
+    public static function getExcerpt($postId, $maxLength = 125)
     {
         if (0 === $maxLength) {
             return '';
         }
 
-        $excerpt_more = apply_filters('excerpt_more', ' [&hellip;]');
+        $excerptMore = apply_filters('excerpt_more', ' [&hellip;]');
 
-        $orig = apply_filters('the_excerpt', get_the_excerpt($post_id));
+        $orig = apply_filters('the_excerpt', get_the_excerpt($postId));
 
-        $excerpt = preg_replace("~$excerpt_more$~", '', $orig);
+        $excerpt = preg_replace("~$excerptMore$~", '', $orig);
 
         $excerpt = wp_strip_all_tags($orig);
         $excerpt = html_entity_decode($orig, ENT_QUOTES | ENT_HTML5, get_bloginfo('charset'));
@@ -95,10 +95,10 @@ class Post
         return $shortened;
     }
 
-    public static function getTags($post_id)
+    public static function getTags($postId)
     {
         $hashtags = '';
-        $tags = get_the_tags($post_id);
+        $tags = get_the_tags($postId);
 
         if ($tags && !is_wp_error($tags)) {
             foreach ($tags as $tag) {
