@@ -54,6 +54,12 @@ class Settings
             ],
             'default' => ['post']
         ]);
+        $sectionMain->addOption('checkbox', [
+            'name' => 'bluesky_featured_image',
+            'label' => __('Featured Images', 'rrze-autoshare'),
+            'description' => __('Include featured images', 'rrze-autoshare'),
+            'default' => true
+        ]);
         $sectionMain->addOption('button-link', [
             'name' => 'bluesky_authorize_access_url',
             'label' => __('Access', 'rrze-autoshare'),
