@@ -14,12 +14,9 @@ class Settings
     {
         $this->settings = $settings;
 
-        $this->tab = $this->settings->addTab(__('Twitter', 'rrze-autoshare'));
+        $this->tab = $this->settings->addTab(__('X', 'rrze-autoshare'));
 
-        // Are API keys available?
-        // if ($this->settings->getOption('twitter_api_key') && $this->settings->getOption('twitter_api_key_secret')) {
         $this->sectionMain();
-        // }
 
         $this->sectionKeys();
     }
@@ -36,7 +33,7 @@ class Settings
         $sectionMain->addOption('checkbox-multiple', [
             'name' => 'twitter_post_types',
             'label' => __('Content Types', 'rrze-autoshare'),
-            'description' => __('Select the type of content that Autoshare could use to write a tweet.', 'rrze-autoshare'),
+            'description' => __('Select the type of content that Autoshare could use.', 'rrze-autoshare'),
             'options' => [
                 'post' => __('Posts', 'rrze-autoshare'),
                 'page' => __('Pages', 'rrze-autoshare')
@@ -45,16 +42,9 @@ class Settings
         ]);
 
         $sectionMain->addOption('checkbox', [
-            'name' => 'twitter_enable_default',
-            'label' => __('Enable by default', 'rrze-autoshare'),
-            'description' => __('Enable Autoshare by default when publishing content', 'rrze-autoshare'),
-            'default' => true
-        ]);
-
-        $sectionMain->addOption('checkbox', [
-            'name' => 'twitter_enable_upload',
-            'label' => __('Image setting', 'rrze-autoshare'),
-            'description' => __('Always add the featured image to tweets', 'rrze-autoshare'),
+            'name' => 'twitter_featured_image',
+            'label' => __('Featured Images', 'rrze-autoshare'),
+            'description' => __('Include featured images', 'rrze-autoshare'),
             'default' => true
         ]);
     }
@@ -62,7 +52,7 @@ class Settings
     private function sectionKeys()
     {
         $sectionKeys = $this->tab->addSection(
-            __('Twitter Consumer Keys', 'rrze-autoshare'),
+            __('X Consumer Keys', 'rrze-autoshare'),
             [
                 'description' => $this->sectionKeysDescription()
             ]
@@ -153,7 +143,7 @@ class Settings
             <li><?php _e('After saving settings, you will see the option to connect your Twitter account.', 'rrze-autoshare'); ?></li>
             <li><?php _e('Click the <code>Connect Twitter account</code> button and follow the instructions provided there to connect your Twitter account with this site.', 'rrze-autoshare'); ?></li>
         </ul>
-        <?php
+<?php
         $content = ob_get_contents();
         ob_end_clean();
         return $content;
