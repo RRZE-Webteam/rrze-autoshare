@@ -38,7 +38,7 @@ class Cron
     // Method to be executed when the scheduled event is triggered
     public static function blueskyRefreshToken()
     {
-        Bluesky::connect();
+        Bluesky::refreshToken();
     }
 
     // Clear the scheduled event hook
