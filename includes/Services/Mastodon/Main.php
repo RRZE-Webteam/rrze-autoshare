@@ -11,6 +11,8 @@ class Main
     public static function init()
     {
         add_action('init', [__CLASS__, 'registerPostMeta']);
+
+        Post::init();
     }
 
     public static function isConnected()
@@ -18,9 +20,9 @@ class Main
         return API::isConnected();
     }
 
-    public static function isSyndicated($postType, $postId)
+    public static function isPublished($postType, $postId)
     {
-        return (bool) get_metadata($postType, $postId, 'rrze_autoshare_mastodon_syndicated');
+        return Post::isPublished($postType, $postId);
     }
 
     public static function registerPostMeta()
