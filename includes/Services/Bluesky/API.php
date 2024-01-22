@@ -18,82 +18,112 @@ class API
 
     public static function connect()
     {
-        $blueskyIdentifier = settings()->getOption('bluesky_identifier');
-        $blueskyDomain = settings()->getOption('bluesky_domain');
-        $blueskyPassword = settings()->getOption('bluesky_password');
+        $host = settings()->getOption('bluesky_domain');
+        $identifier = settings()->getOption('bluesky_identifier');
+        $password = settings()->getOption('bluesky_password');
 
-        if ($blueskyDomain && $blueskyIdentifier && $blueskyPassword) {
-            $blueskyDomain = trailingslashit($blueskyDomain);
-            $blueskyPassword = Encryption::decrypt($blueskyPassword);
-            $sessionUrl = $blueskyDomain . 'xrpc/com.atproto.server.createSession';
-            $wpVersion = get_bloginfo('version');
-            $userAgent = 'WordPress/' . $wpVersion . '; ' . get_bloginfo('url');
+        if (!$host || !$identifier || !$password) {
+            return false;
+        }
 
-            $response = wp_safe_remote_post(
-                esc_url_raw($sessionUrl),
-                [
-                    'user-agent' => "$userAgent; ActivityPub",
-                    'headers'    => [
-                        'Content-Type' => 'application/json',
-                    ],
-                    'body' => wp_json_encode(
-                        [
-                            'identifier' => $blueskyIdentifier,
-                            'password'   => $blueskyPassword,
-                        ]
-                    ),
-                ]
-            );
-
-            if (
-                is_wp_error($response) ||
-                wp_remote_retrieve_response_code($response) >= 300
-            ) {
-                delete_option(self::ACCESS_JWT);
-                delete_option(self::REFRESH_JWT);
-                delete_option(self::DID);
-                return;
+        if (
+            isset($_GET['action']) &&
+            'authorize' === $_GET['action'] &&
+            isset($_GET['_wpnonce']) &&
+            wp_verify_nonce(sanitize_key($_GET['_wpnonce']), 'rrze-autoshare-bluesky-authorize')
+        ) {
+            if (!self::authorizeAccess($host, $identifier, $password)) {
+                self::revokeAccess();
             }
-
-            $data = json_decode(wp_remote_retrieve_body($response), true);
-
-            if (
-                !empty($data['accessJwt'])
-                && !empty($data['refreshJwt'])
-                && !empty($data['did'])
-            ) {
-                update_option(self::ACCESS_JWT, $data['accessJwt']);
-                update_option(self::REFRESH_JWT, $data['refreshJwt']);
-                update_option(self::DID, $data['did']);
-            } else {
-                delete_option(self::ACCESS_JWT);
-                delete_option(self::REFRESH_JWT);
-                delete_option(self::DID);
-            }
+        } elseif (
+            isset($_GET['action']) &&
+            'revoke' === $_GET['action'] &&
+            isset($_GET['_wpnonce']) &&
+            wp_verify_nonce(sanitize_key($_GET['_wpnonce']), 'rrze-autoshare-bluesky-revoke')
+        ) {
+            self::revokeAccess();
+        } else {
+            // Refresh token
+            self::authorizeAccess($host, $identifier, $password);
         }
     }
 
-    public static function isConnected()
+    private static function authorizeAccess($host, $identifier, $password)
     {
-        return (bool) get_option(self::ACCESS_JWT);
+        $host = trailingslashit($host);
+        $password = Encryption::decrypt($password);
+        $sessionUrl = $host . 'xrpc/com.atproto.server.createSession';
+        $wpVersion = get_bloginfo('version');
+        $userAgent = 'WordPress/' . $wpVersion . '; ' . get_bloginfo('url');
+
+        $response = wp_safe_remote_post(
+            esc_url_raw($sessionUrl),
+            [
+                'user-agent' => "$userAgent; ActivityPub",
+                'headers'    => [
+                    'Content-Type' => 'application/json',
+                ],
+                'body' => wp_json_encode(
+                    [
+                        'identifier' => $identifier,
+                        'password'   => $password,
+                    ]
+                ),
+            ]
+        );
+
+        if (
+            is_wp_error($response) ||
+            wp_remote_retrieve_response_code($response) >= 300
+        ) {
+            return false;
+        }
+
+        $data = json_decode(wp_remote_retrieve_body($response), true);
+
+        if (
+            empty($data['accessJwt']) ||
+            empty($data['refreshJwt']) ||
+            empty($data['did'])
+        ) {
+            return false;
+        }
+
+        update_option(self::ACCESS_JWT, $data['accessJwt']);
+        update_option(self::REFRESH_JWT, $data['refreshJwt']);
+        update_option(self::DID, $data['did']);
+        return true;
     }
 
-    public static function syndicatePost($postId)
+    private static function revokeAccess()
+    {
+        delete_option(self::ACCESS_JWT);
+        delete_option(self::REFRESH_JWT);
+        delete_option(self::DID);
+        return;
+    }
+
+    public static function refreshToken()
+    {
+        self::connect();
+    }
+
+    public static function publishPost($postId)
     {
         $post = get_post($postId);
 
         $accessToken = get_option(self::ACCESS_JWT);
-        $blueskyDomain = settings()->getOption('bluesky_domain');
+        $host = settings()->getOption('bluesky_domain');
         $did = get_option(self::DID);
 
-        $blueskyDomain = trailingslashit($blueskyDomain);
+        $host = trailingslashit($host);
 
         $wpVersion = get_bloginfo('version');
         $pluginVersion = plugin()->getVersion();
         $userAgent = 'WordPress/' . $wpVersion . '; ' . get_bloginfo('url');
 
         $response = wp_safe_remote_post(
-            $blueskyDomain . 'xrpc/com.atproto.repo.createRecord',
+            $host . 'xrpc/com.atproto.repo.createRecord',
             [
                 'user-agent' => "$userAgent; RRZE-Autoshare/$pluginVersion",
                 'headers' => [
@@ -131,16 +161,64 @@ class API
                 update_metadata($post->post_type, $postId, 'rrze_autoshare_bluesky_error', $code);
             } else {
                 delete_metadata($post->post_type, $postId, 'rrze_autoshare_bluesky_error');
-                update_metadata($post->post_type, $postId, 'rrze_autoshare_bluesky_syndicated', true);
+                update_metadata($post->post_type, $postId, 'rrze_autoshare_bluesky_published', true);
             }
         }
     }
 
-    public static function getConnectionStatus()
+    public static function isConnected()
     {
-        if (get_option(self::ACCESS_JWT)) {
-            return __('Connected', 'rrze-autoshare');
+        return (bool) get_option(self::ACCESS_JWT);
+    }
+
+    public static function authorizeAccessText()
+    {
+        return self::isConnected() ? __('Revoke Access', 'rrze-autoshare') : __('Authorize Access', 'rrze-autoshare');
+    }
+
+    public static function authorizeAccessDescription()
+    {
+        return self::isConnected() ? __('You’ve authorized Autoshare to read and write to the Bluesky timeline.', 'rrze-autoshare') : __('Authorize Autoshare to read and write to the Bluesky timeline in order to publish.', 'rrze-autoshare');
+    }
+
+    public static function authoriteAccessUrl()
+    {
+        if (self::isConnected()) {
+            return self::revokeUrl();
+        } else {
+            return self::authorizeUrl();
         }
-        return __('Not connected', 'rrze-autoshare');
+    }
+
+    private static function authorizeUrl()
+    {
+        return wp_nonce_url(
+            add_query_arg(
+                [
+                    'page' => 'rrze_autoshare',
+                    'tab'  => 'bluesky',
+                    'action' => 'authorize'
+                ],
+                admin_url('options-general.php')
+            ),
+            'rrze-autoshare-bluesky-authorize',
+            '_wpnonce'
+        );
+    }
+
+    private static function revokeUrl()
+    {
+        return wp_nonce_url(
+            add_query_arg(
+                [
+                    'page' => 'rrze_autoshare',
+                    'tab'  => 'bluesky',
+                    'action' => 'revoke'
+                ],
+                admin_url('options-general.php')
+            ),
+            'rrze-autoshare-bluesky-revoke',
+            '_wpnonce'
+        );
     }
 }
