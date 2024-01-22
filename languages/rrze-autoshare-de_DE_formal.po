@@ -1,0 +1,442 @@
+# Copyright (C) 2024 RRZE-Webteam
+# This file is distributed under the GNU General Public License v3.0.
+msgid ""
+msgstr ""
+"Project-Id-Version: RRZE Autoshare\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/rrze-autoshare\n"
+"POT-Creation-Date: 2024-01-22T08:14:19+00:00\n"
+"PO-Revision-Date: 2024-01-22 09:25+0100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: de_DE@formal\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.4.2\n"
+"X-Domain: rrze-autoshare\n"
+
+#. Plugin Name of the plugin
+msgid "RRZE Autoshare"
+msgstr "RRZE Autoshare"
+
+#. Plugin URI of the plugin
+msgid "https://github.com/RRZE-Webteam/rrze-autoshare"
+msgstr "https://github.com/RRZE-Webteam/rrze-autoshare"
+
+#. Description of the plugin
+msgid ""
+"Automatically share the post title or custom message and a link to the post "
+"to Bluesky, Twitter and other social media."
+msgstr ""
+"Dieses Plugin teilt automatisch den Beitragstitel, einen Teil des "
+"Textauszugs, das Beitragsbild (falls verfügbar) und einen Link zum Beitrag "
+"auf Bluesky und Mastodon."
+
+#. Author of the plugin
+msgid "RRZE-Webteam"
+msgstr "RRZE-Webteam"
+
+#. Author URI of the plugin
+msgid "https://blogs.fau.de/webworking/"
+msgstr "https://blogs.fau.de/webworking/"
+
+#: includes/Metabox.php:59
+msgid "Share on Bluesky"
+msgstr "Auf Bluesky teilen"
+
+#: includes/Metabox.php:59 src/blockeditor/script.js:64
+msgid "Share on Bluesky is disabled"
+msgstr "Teilen auf Bluesky ist deaktiviert"
+
+#: includes/Metabox.php:60 src/blockeditor/script.js:69
+msgid "Share on Bluesky is published"
+msgstr "Share on Bluesky ist veröffentlicht"
+
+#: includes/Metabox.php:82
+msgid "Share on Mastodon"
+msgstr "Auf Mastodon teilen"
+
+#: includes/Metabox.php:82 src/blockeditor/script.js:82
+msgid "Share on Mastodon is disabled"
+msgstr "Teilen auf Mastodon ist deaktiviert"
+
+#: includes/Metabox.php:83 src/blockeditor/script.js:87
+msgid "Share on Mastodon is published"
+msgstr "Share on Mastodon ist veröffentlicht"
+
+#: includes/Metabox.php:105
+msgid "Share on X"
+msgstr "Auf X teilen"
+
+#: includes/Metabox.php:105
+msgid "Share on X is disabled"
+msgstr "Teilen auf X ist deaktiviert"
+
+#: includes/Metabox.php:106
+msgid "Share on X is published"
+msgstr "Share on X ist veröffentlicht"
+
+#: includes/Options/Settings.php:267
+msgid "You do not have enough permissions to do that."
+msgstr "Dazu haben Sie nicht genügend Berechtigungen."
+
+#: includes/Options/Settings.php:292
+msgid "Settings saved."
+msgstr "Die Einstellungen wurden gespeichert."
+
+#: includes/Options/templates/settings-page.php:18
+msgid "Settings issues detected."
+msgstr "Einstellungsprobleme erkannt."
+
+#: includes/Services/Bluesky/API.php:176 includes/Services/Mastodon/API.php:301
+msgid "Revoke Access"
+msgstr "Zugriff widerrufen"
+
+#: includes/Services/Bluesky/API.php:176 includes/Services/Mastodon/API.php:301
+msgid "Authorize Access"
+msgstr "Zugriff autorisieren"
+
+#: includes/Services/Bluesky/API.php:181
+msgid "You’ve authorized Autoshare to read and write to the Bluesky timeline."
+msgstr ""
+"Sie haben Autoshare autorisiert, die Bluesky-Timeline zu lesen und zu "
+"schreiben."
+
+#: includes/Services/Bluesky/API.php:181
+msgid ""
+"Authorize Autoshare to read and write to the Bluesky timeline in order to "
+"publish."
+msgstr ""
+"Autorisieren Sie Autoshare zum Lesen und Schreiben in die Bluesky-Timeline, "
+"um veröffentlichen zu können."
+
+#: includes/Services/Bluesky/Settings.php:15
+msgid "Bluesky"
+msgstr "Bluesky"
+
+#: includes/Services/Bluesky/Settings.php:18
+msgid "Bluesky Settings"
+msgstr "Bluesky Einstellungen"
+
+#: includes/Services/Bluesky/Settings.php:20
+msgid ""
+"Bluesky, also known as Bluesky Social, is a social microblogging platform."
+"<br>Please complete the settings fields so that Autoshare can read and write "
+"to the Bluesky timeline."
+msgstr ""
+"Bluesky, auch bekannt als Bluesky Social, ist eine soziale Microblogging-"
+"Plattform.<br>Bitte füllen Sie die Einstellungsfelder aus, damit Autoshare "
+"die Bluesky-Timeline lesen und schreiben kann."
+
+#: includes/Services/Bluesky/Settings.php:26
+#: includes/Services/Mastodon/Settings.php:26
+msgid "Domain"
+msgstr "Domain"
+
+#: includes/Services/Bluesky/Settings.php:27
+msgid "The domain (URL) of the Bluesky service."
+msgstr "Die Domäne (URL) des Bluesky-Dienstes."
+
+#: includes/Services/Bluesky/Settings.php:31
+#: includes/Services/Mastodon/Settings.php:31
+msgid "The URL entered is not valid."
+msgstr "Die eingegebene URL ist ungültig."
+
+#: includes/Services/Bluesky/Settings.php:38
+msgid "Indentifier"
+msgstr "Kennung"
+
+#: includes/Services/Bluesky/Settings.php:39
+msgid "The Bluesky account identifier."
+msgstr "Die Bluesky-Kontokennung."
+
+#: includes/Services/Bluesky/Settings.php:44
+msgid "Password"
+msgstr "Passwort"
+
+#: includes/Services/Bluesky/Settings.php:45
+msgid "The Bluesky account password."
+msgstr "Das Passwort des Bluesky-Kontos."
+
+#: includes/Services/Bluesky/Settings.php:49
+#: includes/Services/Mastodon/Settings.php:44
+#: includes/Services/Twitter/Settings.php:35
+msgid "Content Types"
+msgstr "Inhaltstypen"
+
+#: includes/Services/Bluesky/Settings.php:50
+#: includes/Services/Mastodon/Settings.php:45
+#: includes/Services/Twitter/Settings.php:36
+msgid "Select the type of content that Autoshare could use."
+msgstr "Wählen Sie die Art von Inhalten aus, die Autoshare verwenden könnte."
+
+#: includes/Services/Bluesky/Settings.php:52
+#: includes/Services/Mastodon/Settings.php:47
+#: includes/Services/Twitter/Settings.php:38
+msgid "Posts"
+msgstr "Beiträge"
+
+#: includes/Services/Bluesky/Settings.php:53
+#: includes/Services/Mastodon/Settings.php:48
+#: includes/Services/Twitter/Settings.php:39
+msgid "Pages"
+msgstr "Seiten"
+
+#: includes/Services/Bluesky/Settings.php:59
+#: includes/Services/Mastodon/Settings.php:60
+msgid "Access"
+msgstr "Zugriff"
+
+#: includes/Services/Mastodon/API.php:306
+msgid "You’ve authorized Autoshare to read and write to the Mastodon timeline."
+msgstr ""
+"Sie haben Autoshare autorisiert, die Mastodon-Timeline zu lesen und zu "
+"schreiben."
+
+#: includes/Services/Mastodon/API.php:306
+msgid ""
+"Authorize Autoshare to read and write to the Mastodon timeline in order to "
+"publish."
+msgstr ""
+"Autorisieren Sie Autoshare zum Lesen und Schreiben in die Mastodon-Timeline, "
+"um veröffentlichen zu können."
+
+#: includes/Services/Mastodon/Settings.php:15
+msgid "Mastodon"
+msgstr "Mastodon"
+
+#: includes/Services/Mastodon/Settings.php:18
+msgid "Mastodon Settings"
+msgstr "Mastodon Einstellungen"
+
+#: includes/Services/Mastodon/Settings.php:20
+msgid ""
+"Mastodon is a free social networking service. It has microblogging features "
+"similar to X.<br>Please complete the settings fields so that Autoshare can "
+"read and write to the Mastodon timeline."
+msgstr ""
+"Mastodon ist ein kostenloser sozialer Netzwerkdienst. Es verfügt über "
+"ähnliche Microblogging-Funktionen wie X.<br>Bitte füllen Sie die "
+"Einstellungsfelder aus, damit Autoshare die Mastodon-Timeline lesen und "
+"schreiben kann."
+
+#: includes/Services/Mastodon/Settings.php:27
+msgid "The domain (URL) of the Mastodon service."
+msgstr "Die Domäne (URL) des Mastodon-Dienstes."
+
+#: includes/Services/Mastodon/Settings.php:38
+msgid "Username"
+msgstr "Benutzername"
+
+#: includes/Services/Mastodon/Settings.php:39
+msgid "The Mastodon account username."
+msgstr "Der Benutzername des Mastodon-Kontos."
+
+#: includes/Services/Mastodon/Settings.php:54
+#: includes/Services/Twitter/Settings.php:46
+msgid "Featured Images"
+msgstr "Beitragsbild"
+
+#: includes/Services/Mastodon/Settings.php:55
+#: includes/Services/Twitter/Settings.php:47
+msgid "Include featured images"
+msgstr "Beitragsbild hinzufügen"
+
+#: includes/Services/Twitter/Settings.php:17
+msgid "X"
+msgstr "X"
+
+#: includes/Services/Twitter/Settings.php:27
+msgid "Main"
+msgstr "Allgemein"
+
+#: includes/Services/Twitter/Settings.php:55
+msgid "X Consumer Keys"
+msgstr "X Consumer Keys"
+
+#: includes/Services/Twitter/Settings.php:63
+msgid "API Key"
+msgstr "API-Key"
+
+#: includes/Services/Twitter/Settings.php:64
+msgid "paste your API Key here"
+msgstr "Fügen Sie hier Ihren API-Key ein"
+
+#: includes/Services/Twitter/Settings.php:69
+msgid "API Key Secret"
+msgstr "API-Key-Secret"
+
+#: includes/Services/Twitter/Settings.php:70
+msgid "paste your API Key Secret here"
+msgstr "Fügen Sie hier Ihren API-Key-Secret ein"
+
+#: includes/Services/Twitter/Settings.php:77
+#: includes/Services/Twitter/Settings.php:87
+msgid ""
+"Think of these as the user name and password that represents your App when "
+"making API requests."
+msgstr ""
+
+#: includes/Services/Twitter/Settings.php:90
+msgid "Sign up for a X (Twitter) developer account"
+msgstr ""
+
+#: includes/Services/Twitter/Settings.php:93
+msgid "2. Configure the Twitter Consumer Keys"
+msgstr ""
+
+#. translators: %1$s: opening HTML <a> link tag, %2$s: closing HTML </a> link tag.
+#: includes/Services/Twitter/Settings.php:99
+msgid ""
+"Go to the %1$sX (Twitter) developer portal%2$s and Sign up for Free Account."
+msgstr ""
+
+#: includes/Services/Twitter/Settings.php:105
+msgid ""
+"Complete the \"Developer agreement & policy\" and click on the <code>Submit</"
+"code> button."
+msgstr ""
+
+#: includes/Services/Twitter/Settings.php:106
+msgid "Click on Projects & Apps on the left navigation menu."
+msgstr ""
+
+#: includes/Services/Twitter/Settings.php:107
+msgid ""
+"Note: The free plan only supports one App. If the App quota has been "
+"exceeded, an App must be deleted to create a new one."
+msgstr ""
+
+#: includes/Services/Twitter/Settings.php:108
+msgid ""
+"In the section Standalone Apps click on the <code>Create App</code> button."
+msgstr ""
+
+#: includes/Services/Twitter/Settings.php:109
+msgid "Name the App and click on the <code>Next</code> button."
+msgstr ""
+
+#: includes/Services/Twitter/Settings.php:110
+msgid ""
+"Copy the API Key and API Key Secret. These values will be required in the "
+"plugin settings. Click on the <code>App settings</code> button."
+msgstr ""
+
+#: includes/Services/Twitter/Settings.php:111
+msgid ""
+"Click \"Setup\" under User authentication settings to setup Authentication."
+msgstr ""
+
+#: includes/Services/Twitter/Settings.php:112
+msgid ""
+"Enable <code>OAuth 1.0a</code> and Set App permissions to <strong>Read and "
+"write</strong>."
+msgstr ""
+
+#. translators: %s: Site URL.
+#: includes/Services/Twitter/Settings.php:117
+msgid "Set the <code>Website URL</code> to <code>%s</code>."
+msgstr ""
+
+#. translators: %s: Callback URL for Twitter Auth
+#: includes/Services/Twitter/Settings.php:126
+msgid ""
+"Set the <code>Callback URLs</code> fields to <code>%s</code> and click "
+"<code>Save</code>."
+msgstr ""
+
+#: includes/Services/Twitter/Settings.php:131
+msgid "Switch from the \"Settings\" tab to the \"Keys and tokens\" tab."
+msgstr ""
+
+#: includes/Services/Twitter/Settings.php:132
+msgid ""
+"Click on the <code>Generate</code>/<code>Regenerate</code> button in the "
+"<code>Consumer Keys</code> section."
+msgstr ""
+
+#: includes/Services/Twitter/Settings.php:133
+msgid ""
+"Copy the <code>API Key</code> and <code>API Key Secret</code> values and "
+"paste them below."
+msgstr ""
+
+#: includes/Services/Twitter/Settings.php:136
+msgid "3. Save settings"
+msgstr ""
+
+#: includes/Services/Twitter/Settings.php:138
+msgid "Click the <code>Save Changes</code> button below to save settings."
+msgstr ""
+
+#: includes/Services/Twitter/Settings.php:141
+msgid "4. Connect your Twitter account"
+msgstr ""
+
+#: includes/Services/Twitter/Settings.php:143
+msgid ""
+"After saving settings, you will see the option to connect your Twitter "
+"account."
+msgstr ""
+
+#: includes/Services/Twitter/Settings.php:144
+msgid ""
+"Click the <code>Connect Twitter account</code> button and follow the "
+"instructions provided there to connect your Twitter account with this site."
+msgstr ""
+
+#: includes/Settings.php:21
+msgid "Autoshare Settings"
+msgstr "Einstellungen › Autoshare"
+
+#. translators: %1$s: Server PHP version number, %2$s: Required PHP version number.
+#: rrze-autoshare.php:57
+msgid ""
+"The server is running PHP version %1$s. The Plugin requires at least PHP "
+"version %2$s."
+msgstr ""
+"Auf dem Server wird die PHP-Version %1$s ausgeführt. Das Plugin erfordert "
+"mindestens die PHP-Version %2$s."
+
+#. translators: %1$s: Server WordPress version number, %2$s: Required WordPress version number.
+#: rrze-autoshare.php:64
+msgid ""
+"The server is running WordPress version %1$s. The Plugin requires at least "
+"WordPress version %2$s."
+msgstr ""
+"Auf dem Server wird die WordPress-Version %1$s ausgeführt. Das Plugin "
+"erfordert mindestens die WordPress-Version %2$s."
+
+#. translators: %1$s: The plugin name, %2$s: The error string.
+#: rrze-autoshare.php:83 rrze-autoshare.php:143
+msgid "Plugins: %1$s: %2$s"
+msgstr "Plugins: %1$s: %2$s"
+
+#: src/blockeditor/script.js:59
+msgid "Share on Bluesky when published"
+msgstr "Bei Veröffentlichung auf Bluesky teilen"
+
+#: src/blockeditor/script.js:74
+msgid "Don't share on Bluesky"
+msgstr "Nicht auf Bluesky teilen"
+
+#: src/blockeditor/script.js:77
+msgid "Share on Mastodon when published"
+msgstr "Bei Veröffentlichung auf Mastodon teilen"
+
+#: src/blockeditor/script.js:92
+msgid "Don't share on Mastodon"
+msgstr "Nicht auf Mastodon teilen"
+
+#: src/blockeditor/script.js:107
+msgid "Autoshare"
+msgstr "Autoshare"
+
+#~ msgid "Share on Bluesky is syndicated"
+#~ msgstr "Teilen auf Bluesky wird syndiziert"
+
+#~ msgid "Share on Mastodon is syndicated"
+#~ msgstr "Teilen auf Mastodon wird syndiziert"
+
+#~ msgid "Share on X is syndicated"
+#~ msgstr "Teilen auf X wird syndiziert"
