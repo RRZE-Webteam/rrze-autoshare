@@ -52,14 +52,14 @@ class API
     {
         $host = trailingslashit($host);
         $password = Encryption::decrypt($password);
-        $sessionUrl = $host . 'xrpc/com.atproto.server.createSession';
         $wpVersion = get_bloginfo('version');
+        $pluginVersion = plugin()->getVersion();
         $userAgent = 'WordPress/' . $wpVersion . '; ' . get_bloginfo('url');
 
         $response = wp_safe_remote_post(
-            esc_url_raw($sessionUrl),
+            esc_url_raw($host . 'xrpc/com.atproto.server.createSession'),
             [
-                'user-agent' => "$userAgent; ActivityPub",
+                'user-agent' => "$userAgent; RRZE-Autoshare/$pluginVersion",
                 'headers'    => [
                     'Content-Type' => 'application/json',
                 ],
@@ -86,6 +86,7 @@ class API
             empty($data['refreshJwt']) ||
             empty($data['did'])
         ) {
+            self::revokeAccess();
             return false;
         }
 
@@ -112,6 +113,26 @@ class API
     {
         $post = get_post($postId);
 
+        $external = [
+            'uri' => wp_get_shortlink($post->ID),
+            'title' => esc_html($post->post_title),
+            'description' => esc_html(wp_trim_words(get_the_excerpt($post), 55, ' ...')),
+        ];
+
+        $thumb = '';
+        $media = Media::getImages($post);
+        if (!empty($media)) {
+            $count = 1;
+            $media = array_slice($media, 0, $count, true);
+
+            foreach ($media as $id => $alt) {
+                $thumb = Media::uploadImage($id, $alt);
+            }
+        }
+        if (!empty($thumb)) {
+            $external['thumb'] = $thumb;
+        }
+
         $accessToken = get_option(self::ACCESS_JWT);
         $host = settings()->getOption('bluesky_domain');
         $did = get_option(self::DID);
@@ -123,7 +144,7 @@ class API
         $userAgent = 'WordPress/' . $wpVersion . '; ' . get_bloginfo('url');
 
         $response = wp_safe_remote_post(
-            $host . 'xrpc/com.atproto.repo.createRecord',
+            esc_url_raw($host . 'xrpc/com.atproto.repo.createRecord'),
             [
                 'user-agent' => "$userAgent; RRZE-Autoshare/$pluginVersion",
                 'headers' => [
@@ -141,11 +162,7 @@ class API
                             'createdAt' => gmdate('c', strtotime($post->post_date_gmt)),
                             'embed'     => [
                                 '$type'    => 'app.bsky.embed.external',
-                                'external' => [
-                                    'uri'         => wp_get_shortlink($post->ID),
-                                    'title'       => esc_html($post->post_title),
-                                    'description' => esc_html(wp_trim_words(get_the_excerpt($post), 55, ' ...')),
-                                ],
+                                'external' => $external,
                             ],
                         ],
                     ]
@@ -173,12 +190,16 @@ class API
 
     public static function authorizeAccessText()
     {
-        return self::isConnected() ? __('Revoke Access', 'rrze-autoshare') : __('Authorize Access', 'rrze-autoshare');
+        return self::isConnected() ?
+            __('Revoke Access', 'rrze-autoshare') :
+            __('Authorize Access', 'rrze-autoshare');
     }
 
     public static function authorizeAccessDescription()
     {
-        return self::isConnected() ? __('You’ve authorized Autoshare to read and write to the Bluesky timeline.', 'rrze-autoshare') : __('Authorize Autoshare to read and write to the Bluesky timeline in order to publish.', 'rrze-autoshare');
+        return self::isConnected() ?
+            __('You’ve authorized Autoshare to read and write to the Bluesky timeline.', 'rrze-autoshare') :
+            __('Authorize Autoshare to read and write to the Bluesky.', 'rrze-autoshare');
     }
 
     public static function authoriteAccessUrl()
