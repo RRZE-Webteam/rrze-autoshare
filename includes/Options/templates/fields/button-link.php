@@ -9,6 +9,7 @@ defined('ABSPATH') || exit;
         <label for="<?php echo $option->getIdAttribute(); ?>" class="<?php echo $option->getLabelClassAttribute(); ?>"><?php echo $option->getLabel(); ?></label>
     </th>
     <td class="rrze-wp-form rrze-wp-form-input">
+        <input name="<?php echo esc_attr($option->getNameAttribute()); ?>" type="hidden" value="">
         <a href="<?php echo esc_url($option->getArg('href')); ?>" class="button button-secondary">
             <?php echo esc_html($option->getArg('text')); ?>
         </a>
