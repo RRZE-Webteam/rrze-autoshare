@@ -175,7 +175,10 @@ class API
 
     public static function connect()
     {
-        if (!settings()->getOption('mastodon_domain')) {
+        if (
+            !settings()->getOption('mastodon_domain') ||
+            !settings()->getOption('mastodon_username')
+        ) {
             return;
         }
 
@@ -199,6 +202,95 @@ class API
         }
     }
 
+    public static function publishPost($postId)
+    {
+        $post = get_post($postId);
+
+        $status = '%title% %permalink%';
+
+        $status = self::parseStatus($status, $post->ID);
+
+        $status = wp_strip_all_tags(
+            html_entity_decode($status, ENT_QUOTES | ENT_HTML5, get_bloginfo('charset'))
+        );
+
+        $permalink = esc_url_raw(get_permalink($post->ID));
+
+        if (false === strpos($status, $permalink)) {
+            if (false === strpos($status, "\n")) {
+                $status .= ' ' . $permalink;
+            } else {
+                $status .= "\r\n\r\n" . $permalink;
+            }
+        }
+
+        $args = ['status' => $status];
+
+        $query_string = http_build_query($args);
+
+        $media = Media::getImages($post);
+
+        if (!empty($media)) {
+            $count = 1;
+            $media = array_slice($media, 0, $count, true);
+
+            foreach ($media as $id => $alt) {
+                $media_id = Media::uploadImage($id, $alt);
+
+                if (!empty($media_id)) {
+                    $query_string .= '&media_ids[]=' . rawurlencode($media_id);
+                }
+            }
+        }
+
+        $host = settings()->getOption('mastodon_domain');
+        $accessToken = get_option(self::ACCESS_TOKEN);
+
+        $response = wp_remote_post(
+            esc_url_raw($host . '/api/v1/statuses'),
+            [
+                'headers'     => [
+                    'Authorization' => 'Bearer ' . $accessToken,
+                ],
+                'data_format' => 'body',
+                'body'        => $query_string,
+                'timeout'     => 15,
+            ]
+        );
+
+        if (is_wp_error($response)) {
+            return;
+        }
+
+        $status = json_decode($response['body']);
+
+        if (!empty($status->url)) {
+            delete_metadata($post->post_type, $postId, 'rrze_autoshare_mastodon_error');
+            update_metadata($post->post_type, $post->ID, 'rrze_autoshare_mastodon_url', esc_url_raw($status->url));
+            update_metadata($post->post_type, $postId, 'rrze_autoshare_mastodon_published', true);
+        } elseif (!empty($status->error)) {
+            update_metadata($post->post_type, $post->ID, 'rrze_autoshare_mastodon_error', sanitize_text_field($status->error));
+        }
+    }
+
+    public static function parseStatus($status, $post_id)
+    {
+        $status = str_replace('%title%', get_the_title($post_id), $status);
+        $status = str_replace('%tags%', Post::getTags($post_id), $status);
+
+        $maxLength = mb_strlen(str_replace(array('%excerpt%', '%permalink%'), '', $status));
+        $maxLength = max(0, 450 - $maxLength);
+
+        $status = str_replace('%excerpt%', Post::getExcerpt($post_id, $maxLength), $status);
+
+        $status = preg_replace('~(\r\n){2,}~', "\r\n\r\n", $status);
+        $status = sanitize_textarea_field($status);
+
+        $status = str_replace('%permalink%', esc_url_raw(get_permalink($post_id)), $status);
+
+        return $status;
+    }
+
     public static function isConnected()
     {
         return (bool) get_option(self::ACCESS_TOKEN);
@@ -206,20 +298,20 @@ class API
 
     public static function authorizeAccessText()
     {
-        return get_option(self::ACCESS_TOKEN) ? __('Revoke Access', 'rrze-autoshare') : __('Authorize Access', 'rrze-autoshare');
+        return self::isConnected() ? __('Revoke Access', 'rrze-autoshare') : __('Authorize Access', 'rrze-autoshare');
     }
 
     public static function authorizeAccessDescription()
     {
-        return get_option(self::ACCESS_TOKEN) ? __('You’ve authorized Autoshare to read and write to the Mastodon timeline.', 'rrze-autoshare') : __('Authorize Autoshare to read and write to the Mastodon timeline in order to enable syndication.', 'rrze-autoshare');
+        return self::isConnected() ? __('You’ve authorized Autoshare to read and write to the Mastodon timeline.', 'rrze-autoshare') : __('Authorize Autoshare to read and write to the Mastodon timeline in order to publish.', 'rrze-autoshare');
     }
 
     public static function authoriteAccessUrl()
     {
-        if (!get_option(self::ACCESS_TOKEN)) {
-            return self::authorizeUrl();
-        } else {
+        if (self::isConnected()) {
             return self::revokeUrl();
+        } else {
+            return self::authorizeUrl();
         }
     }
 
@@ -262,15 +354,5 @@ class API
             'rrze-autoshare-mastodon-revoke',
             '_wpnonce'
         );
-    }
-
-    public static function getConnectionStatus()
-    {
-        if (get_option(API::ACCESS_TOKEN)) {
-            return __('Connected', 'rrze-autoshare');
-        } elseif (get_option(API::CLIENT_ID)) {
-            return __('Registered', 'rrze-autoshare');
-        }
-        return __('Not connected', 'rrze-autoshare');
     }
 }
