@@ -117,7 +117,7 @@ class Main
         );
 
         wp_set_script_translations(
-            'rrze-autoshare',
+            'rrze-autoshare-blockeditor',
             'rrze-autoshare',
             plugin()->getPath('languages')
         );
