@@ -150,5 +150,5 @@ function loaded()
         });
         return;
     }
-    new Main;
+    new Main();
 }
