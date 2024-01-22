@@ -17,6 +17,14 @@ class Metabox
 
     public static function autoshareMetabox($postType, $post)
     {
+        if (
+            !in_array($postType, settings()->getOption('bluesky_post_types'))
+            && !in_array($postType, settings()->getOption('mastodon_post_types'))
+            // && !in_array($postType, settings()->getOption('twitter_post_types'))
+        ) {
+            return;
+        }
+
         add_meta_box(
             'rrze_autoshare_metabox',
             __('Autoshare', 'rrze_autoshare'),
@@ -42,66 +50,69 @@ class Metabox
     private static function blueskyMarkup($post)
     {
         $inputName = 'rrze_autoshare_bluesky_enabled';
+        $checked = (bool) get_metadata($post->post_type, $post->ID, $inputName, true);
         $isEnabled = Bluesky::isConnected();
-        $isSyndicated = Bluesky::isSyndicated($post->post_type, $post->ID);
-        $disabled = !$isEnabled || $isSyndicated ? ' disabled' : '';
+        $isPublished = Bluesky::isPublished($post->post_type, $post->ID);
+        $disabled = !$isEnabled || $isPublished ? ' disabled' : '';
         $disabledClass = $disabled ? 'class = "rrze-autoshare-disabled_input__label" ' : '';
-        $checked = !$disabled ? (bool) get_metadata($post->post_type, $post->ID, $inputName, true) : false;
+        $checked = !$disabled ? $checked : false;
         $label = !$disabled ? __('Share on Bluesky', 'rrze-autoshare') : __('Share on Bluesky is disabled', 'rrze-autoshare');
-        $label = $isSyndicated ? __('Share on Bluesky is syndicated', 'rrze-autoshare') : $label;
+        $label = $isPublished ? __('Share on Bluesky is published', 'rrze-autoshare') : $label;
         ob_start();
-        ?>
+?>
         <li>
             <input type="checkbox" id="rrze-autoshare-bluesky-enabled" name="<?php echo esc_attr($inputName); ?>" value="1" <?php checked($checked); ?><?php echo $disabled; ?>>
             <label <?php echo $disabledClass; ?>for="rrze-autoshare-bluesky-enabled">
                 <?php echo esc_html($label); ?>
             </label>
         </li>
-        <?php
+    <?php
         return ob_get_clean();
     }
 
     private static function mastodonMarkup($post)
     {
         $inputName = 'rrze_autoshare_mastodon_enabled';
+        $checked = (bool) get_metadata($post->post_type, $post->ID, $inputName, true);
         $isEnabled = Mastodon::isConnected();
-        $isSyndicated = Mastodon::isSyndicated($post->post_type, $post->ID);
-        $disabled = !$isEnabled || $isSyndicated ? ' disabled' : '';
+        $isPublished = Mastodon::isPublished($post->post_type, $post->ID);
+        $disabled = !$isEnabled || $isPublished ? ' disabled' : '';
         $disabledClass = $disabled ? 'class = "rrze-autoshare-disabled_input__label" ' : '';
-        $checked = !$disabled ? (bool) get_metadata($post->post_type, $post->ID, $inputName, true) : false;
+        $checked = !$disabled ? $checked : false;
         $label = !$disabled ? __('Share on Mastodon', 'rrze-autoshare') : __('Share on Mastodon is disabled', 'rrze-autoshare');
-        $label = $isSyndicated ? __('Share on Mastodon is syndicated', 'rrze-autoshare') : $label;
+        $label = $isPublished ? __('Share on Mastodon is published', 'rrze-autoshare') : $label;
         ob_start();
-        ?>
+    ?>
         <li>
             <input type="checkbox" id="rrze-autoshare-mastodon-enabled" name="<?php echo esc_attr($inputName); ?>" value="1" <?php checked($checked); ?><?php echo $disabled; ?>>
             <label <?php echo $disabledClass; ?>for="rrze-autoshare-mastodon-enabled">
                 <?php echo esc_html($label); ?>
             </label>
         </li>
-        <?php
+    <?php
         return ob_get_clean();
     }
 
     private static function twitterMarkup($post)
     {
         $inputName = 'rrze_autoshare_twitter_enabled';
+        $checked = (bool) get_metadata($post->post_type, $post->ID, $inputName, true);
         $isEnabled = Twitter::isConnected();
-        $isSyndicated = Twitter::isSyndicated($post->post_type, $post->ID);
-        $disabled = !$isEnabled || $isSyndicated ? ' disabled' : '';
+        $isPublished = Twitter::isPublished($post->post_type, $post->ID);
+        $disabled = !$isEnabled || $isPublished ? ' disabled' : '';
         $disabledClass = $disabled ? 'class = "rrze-autoshare-disabled_input__label" ' : '';
-        $checked = !$disabled ? (bool) get_metadata($post->post_type, $post->ID, $inputName, true) : false;
-        $label = !$disabled ? __('Share on Twitter', 'rrze-autoshare') : __('Share on Twitter is disabled', 'rrze-autoshare');
-        $label = $isSyndicated ? __('Share on Twitter is syndicated', 'rrze-autoshare') : $label;
+        $checked = !$disabled ? $checked : false;
+        $label = !$disabled ? __('Share on X', 'rrze-autoshare') : __('Share on X is disabled', 'rrze-autoshare');
+        $label = $isPublished ? __('Share on X is published', 'rrze-autoshare') : $label;
         ob_start();
-        ?>
+    ?>
         <li>
             <input type="checkbox" id="rrze-autoshare-twitter-enabled" name="<?php echo esc_attr($inputName); ?>" value="1" <?php checked($checked); ?><?php echo $disabled; ?>>
             <label <?php echo $disabledClass; ?>for="rrze-autoshare-twitter-enabled">
                 <?php echo esc_html($label); ?>
             </label>
         </li>
-        <?php
+<?php
         return ob_get_clean();
     }
 }
