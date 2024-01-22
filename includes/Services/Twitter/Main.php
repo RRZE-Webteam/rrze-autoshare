@@ -18,9 +18,9 @@ class Main
         return (bool) get_option('rrze_autoshare_twitter_connected');
     }
 
-    public static function isSyndicated($postType, $postId)
+    public static function isPublished($postType, $postId)
     {
-        return (bool) get_metadata($postType, $postId, 'rrze_autoshare_twitter_syndicated');
+        return (bool) get_metadata($postType, $postId, 'rrze_autoshare_twitter_published', true);
     }
 
     public static function registerPostMeta()
