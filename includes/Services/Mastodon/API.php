@@ -235,10 +235,10 @@ class API
             $media = array_slice($media, 0, $count, true);
 
             foreach ($media as $id => $alt) {
-                $media_id = Media::uploadImage($id, $alt);
+                $mediaId = Media::uploadImage($id, $alt);
 
-                if (!empty($media_id)) {
-                    $query_string .= '&media_ids[]=' . rawurlencode($media_id);
+                if (!empty($mediaId)) {
+                    $query_string .= '&media_ids[]=' . rawurlencode($mediaId);
                 }
             }
         }
@@ -298,12 +298,16 @@ class API
 
     public static function authorizeAccessText()
     {
-        return self::isConnected() ? __('Revoke Access', 'rrze-autoshare') : __('Authorize Access', 'rrze-autoshare');
+        return self::isConnected() ?
+            __('Revoke Access', 'rrze-autoshare') :
+            __('Authorize Access', 'rrze-autoshare');
     }
 
     public static function authorizeAccessDescription()
     {
-        return self::isConnected() ? __('You’ve authorized Autoshare to read and write to the Mastodon timeline.', 'rrze-autoshare') : __('Authorize Autoshare to read and write to the Mastodon timeline in order to publish.', 'rrze-autoshare');
+        return self::isConnected() ?
+            __('You’ve authorized Autoshare to read and write to the Mastodon timeline.', 'rrze-autoshare') :
+            __('Authorize Autoshare to read and write to the Mastodon timeline.', 'rrze-autoshare');
     }
 
     public static function authoriteAccessUrl()
