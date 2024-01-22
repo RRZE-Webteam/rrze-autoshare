@@ -33,8 +33,8 @@ class Main
         return API::isConnected();
     }
 
-    public static function isSyndicated($postType, $postId)
+    public static function isPublished($postType, $postId)
     {
-        return (bool) get_metadata($postType, $postId, 'rrze_autoshare_bluesky_syndicated');
+        return Post::isPublished($postType, $postId);
     }
 }
