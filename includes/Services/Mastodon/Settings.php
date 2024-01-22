@@ -17,23 +17,19 @@ class Settings
         $sectionMain = $tab->addSection(
             __('Mastodon Settings', 'rrze-autoshare'),
             [
-                'description' => sprintf(
-                    '%1$s %2$s',
-                    __('Status:', 'rrze-autoshare'),
-                    API::getConnectionStatus()
-                )
+                'description' => __('Mastodon is a free social networking service. It has microblogging features similar to X.<br>Please complete the settings fields so that Autoshare can read and write to the Mastodon timeline.', 'rrze-autoshare')
             ]
         );
 
         $sectionMain->addOption('text', [
             'name' => 'mastodon_domain',
             'label' => __('Domain', 'rrze-autoshare'),
-            'description' => __('The domain (URL) of the Mastodon instance.', 'rrze-autoshare'),
+            'description' => __('The domain (URL) of the Mastodon service.', 'rrze-autoshare'),
             'default' => 'https://mastodon.social',
             'validate' => [
                 [
                     'feedback' => __('The URL entered is not valid.', 'rrze-autoshare'),
-                    'callback' => [__NAMESPACE__ . '\Utils', 'validateUrl']
+                    'callback' => fn ($value) => filter_var($value, FILTER_VALIDATE_URL)
                 ]
             ]
         ]);
@@ -42,7 +38,7 @@ class Settings
             'label' => __('Username', 'rrze-autoshare'),
             'description' => __('The Mastodon account username.', 'rrze-autoshare'),
             'default' => ''
-        ]);        
+        ]);
         $sectionMain->addOption('checkbox-multiple', [
             'name' => 'mastodon_post_types',
             'label' => __('Content Types', 'rrze-autoshare'),
@@ -52,6 +48,12 @@ class Settings
                 'page' => __('Pages', 'rrze-autoshare')
             ],
             'default' => ['post']
+        ]);
+        $sectionMain->addOption('checkbox', [
+            'name' => 'mastodon_featured_image',
+            'label' => __('Featured Images', 'rrze-autoshare'),
+            'description' => __('Include featured images', 'rrze-autoshare'),
+            'default' => true
         ]);
         $sectionMain->addOption('button-link', [
             'name' => 'mastodon_authorize_access_url',
