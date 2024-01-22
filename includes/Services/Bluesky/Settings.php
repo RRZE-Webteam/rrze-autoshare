@@ -17,23 +17,19 @@ class Settings
         $sectionMain = $tab->addSection(
             __('Bluesky Settings', 'rrze-autoshare'),
             [
-                'description' => sprintf(
-                    '%1$s %2$s',
-                    __('Status:', 'rrze-autoshare'),
-                    API::getConnectionStatus()
-                )
+                'description' => __('Bluesky, also known as Bluesky Social, is a social microblogging platform.<br>Please complete the settings fields so that Autoshare can read and write to the Bluesky timeline.', 'rrze-autoshare')
             ]
         );
 
         $sectionMain->addOption('text', [
             'name' => 'bluesky_domain',
             'label' => __('Domain', 'rrze-autoshare'),
-            'description' => __('The domain (URL) of the Bluesky instance.', 'rrze-autoshare'),
+            'description' => __('The domain (URL) of the Bluesky service.', 'rrze-autoshare'),
             'default' => 'https://bsky.social',
             'validate' => [
                 [
                     'feedback' => __('The URL entered is not valid.', 'rrze-autoshare'),
-                    'callback' => [__NAMESPACE__ . '\Utils', 'validateUrl']
+                    'callback' => fn ($value) => filter_var($value, FILTER_VALIDATE_URL)
                 ]
             ]
         ]);
@@ -57,6 +53,13 @@ class Settings
                 'page' => __('Pages', 'rrze-autoshare')
             ],
             'default' => ['post']
+        ]);
+        $sectionMain->addOption('button-link', [
+            'name' => 'bluesky_authorize_access_url',
+            'label' => __('Access', 'rrze-autoshare'),
+            'href' => [__NAMESPACE__ . '\API', 'authoriteAccessUrl'],
+            'text' => [__NAMESPACE__ . '\API', 'authorizeAccessText'],
+            'description' => [__NAMESPACE__ . '\API', 'authorizeAccessDescription'],
         ]);
     }
 }
