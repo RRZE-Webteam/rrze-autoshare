@@ -12,47 +12,47 @@ const AutoshareSettingsPanel = () => {
     const { editPost } = useDispatch("core/editor");
 
     const isBlueskyEnabled = autoshareObject.blueskyEnabled;
+    const isBlueskyPublished = autoshareObject.blueskyPublished;
     const isMastodonEnabled = autoshareObject.mastodonEnabled;
+    const isMastodonPublished = autoshareObject.mastodonPublished;
 
-    const [isBlueskyChecked, setBlueskyIsChecked] = useState(isBlueskyEnabled);
-    const [isMastodonChecked, setMastodonIsChecked] =
-        useState(isMastodonEnabled);
+    const [isBlueskyChecked, setBlueskyIsChecked] = useState(
+        isBlueskyEnabled &&
+            !isBlueskyPublished &&
+            (meta["rrze_autoshare_bluesky_enabled"] !== undefined
+                ? meta["rrze_autoshare_bluesky_enabled"]
+                : false)
+    );
+    const [isMastodonChecked, setMastodonIsChecked] = useState(
+        isMastodonEnabled &&
+            !isMastodonPublished &&
+            (meta["rrze_autoshare_mastodon_enabled"] !== undefined
+                ? meta["rrze_autoshare_mastodon_enabled"]
+                : false)
+    );
 
     useEffect(() => {
-        if (isBlueskyEnabled) {
+        if (isBlueskyEnabled && !isBlueskyPublished) {
             setBlueskyIsChecked(meta["rrze_autoshare_bluesky_enabled"]);
-        } else {
-            setBlueskyIsChecked(false);
         }
 
-        if (isMastodonEnabled) {
+        if (isMastodonEnabled && !isMastodonPublished) {
             setMastodonIsChecked(meta["rrze_autoshare_mastodon_enabled"]);
-        } else {
-            setMastodonIsChecked(false);
         }
-    }, [meta, isBlueskyEnabled, isMastodonEnabled]);
+    }, [
+        meta,
+        isBlueskyEnabled,
+        isBlueskyPublished,
+        isMastodonEnabled,
+        isMastodonPublished,
+    ]);
 
-    useEffect(() => {
+    const updateMeta = (metaKey, newValue) => {
         editPost({
             meta: {
                 ...meta,
-                rrze_autoshare_bluesky_enabled: isBlueskyChecked ? true : false,
-                rrze_autoshare_mastodon_enabled: isMastodonChecked ? true : false,
+                [metaKey]: newValue,
             },
-        });
-    }, [isBlueskyChecked, isMastodonChecked]);
-
-    const onBlueskyChangeCheckbox = (newValue) => {
-        setBlueskyIsChecked(newValue);
-        editPost({
-            meta: { ...meta, rrze_autoshare_bluesky_enabled: newValue },
-        });
-    };
-
-    const onMastodonChangeCheckbox = (newValue) => {
-        setMastodonIsChecked(newValue);
-        editPost({
-            meta: { ...meta, rrze_autoshare_mastodon_enabled: newValue },
         });
     };
 
@@ -63,6 +63,11 @@ const AutoshareSettingsPanel = () => {
     if (!isBlueskyEnabled) {
         blueskyCheckboxLabel = __(
             "Share on Bluesky is disabled",
+            "rrze-autoshare"
+        );
+    } else if (isBlueskyPublished) {
+        blueskyCheckboxLabel = __(
+            "Share on Bluesky is published",
             "rrze-autoshare"
         );
     } else if (!isBlueskyChecked) {
@@ -78,16 +83,23 @@ const AutoshareSettingsPanel = () => {
             "Share on Mastodon is disabled",
             "rrze-autoshare"
         );
+    } else if (isMastodonPublished) {
+        mastodonCheckboxLabel = __(
+            "Share on Mastodon is published",
+            "rrze-autoshare"
+        );
     } else if (!isMastodonChecked) {
         mastodonCheckboxLabel = __("Don't share on Mastodon", "rrze-autoshare");
     }
 
-    const blueskyCheckboxClass = isBlueskyEnabled
-        ? ""
-        : "checkbox-control-disabled";
-    const mastodonCheckboxClass = isMastodonEnabled
-        ? ""
-        : "checkbox-control-disabled";
+    const blueskyCheckboxClass =
+        isBlueskyEnabled && !isBlueskyPublished
+            ? ""
+            : "checkbox-control-disabled";
+    const mastodonCheckboxClass =
+        isMastodonEnabled && !isMastodonPublished
+            ? ""
+            : "checkbox-control-disabled";
 
     return (
         <PluginDocumentSettingPanel
@@ -99,7 +111,9 @@ const AutoshareSettingsPanel = () => {
                 <CheckboxControl
                     label={blueskyCheckboxLabel}
                     checked={isBlueskyChecked}
-                    onChange={onBlueskyChangeCheckbox}
+                    onChange={(isChecked) =>
+                        updateMeta("rrze_autoshare_bluesky_enabled", isChecked)
+                    }
                     disabled={!isBlueskyEnabled}
                 />
             </div>
@@ -107,7 +121,9 @@ const AutoshareSettingsPanel = () => {
                 <CheckboxControl
                     label={mastodonCheckboxLabel}
                     checked={isMastodonChecked}
-                    onChange={onMastodonChangeCheckbox}
+                    onChange={(isChecked) =>
+                        updateMeta("rrze_autoshare_mastodon_enabled", isChecked)
+                    }
                     disabled={!isMastodonEnabled}
                 />
             </div>
