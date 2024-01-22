@@ -6,7 +6,7 @@ defined('ABSPATH') || exit;
 
 use RRZE\Autoshare\Services\Bluesky\Main as Bluesky;
 use RRZE\Autoshare\Services\Mastodon\Main as Mastodon;
-use RRZE\Autoshare\Services\Mastodon\Main as Twitter;
+// use RRZE\Autoshare\Services\Mastodon\Main as Twitter;
 
 class Main
 {
@@ -27,6 +27,7 @@ class Main
 
         Bluesky::init();
         Mastodon::init();
+        // Twitter::init();
 
         Metabox::init();
 
@@ -56,10 +57,11 @@ class Main
             return;
         }
 
+        global $post;
         if (
-            !in_array(get_post_type(), settings()->getOption('bluesky_post_types'))
-            && !in_array(get_post_type(), settings()->getOption('mastodon_post_types'))
-            && !in_array(get_post_type(), settings()->getOption('twitter_post_types'))
+            !in_array(get_post_type($post), settings()->getOption('bluesky_post_types'))
+            && !in_array(get_post_type($post), settings()->getOption('mastodon_post_types'))
+            // && !in_array(get_post_type($post), settings()->getOption('twitter_post_types'))
         ) {
             return;
         }
@@ -74,6 +76,15 @@ class Main
 
     public static function enqueueBlockEditorAssets()
     {
+        global $post;
+        if (
+            !in_array(get_post_type($post), settings()->getOption('bluesky_post_types'))
+            && !in_array(get_post_type($post), settings()->getOption('mastodon_post_types'))
+            // && !in_array(get_post_type($post), settings()->getOption('twitter_post_types'))
+        ) {
+            return;
+        }
+
         wp_enqueue_style(
             'rrze-autoshare-blockeditor',
             plugins_url('build/blockeditor.style.css', plugin()->getBasename()),
@@ -92,8 +103,11 @@ class Main
 
         $localization = [
             'blueskyEnabled' => Bluesky::isConnected(),
+            'blueskyPublished' => Bluesky::isPublished($post->post_type, $post->ID),
             'mastodonEnabled' => Mastodon::isConnected(),
-            'twitterEnabled' => Twitter::isConnected(),
+            'mastodonPublished' => Mastodon::isPublished($post->post_type, $post->ID),
+            // 'twitterEnabled' => Twitter::isConnected(),
+            // 'twitterPublished' => Twitter::isPublished($post->post_type, $post->ID)            
         ];
 
         wp_localize_script(
@@ -103,7 +117,7 @@ class Main
         );
 
         wp_set_script_translations(
-            'rrze-autoshare-blockeditor',
+            'rrze-autoshare',
             'rrze-autoshare',
             plugin()->getPath('languages')
         );
