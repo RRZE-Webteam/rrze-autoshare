@@ -175,6 +175,13 @@ class API
         return (bool) get_option(Account::TWITTER_ACCOUNT);
     }
 
+    public static function getAccountUsername()
+    {
+        $accounts = get_option(Account::TWITTER_ACCOUNT);
+        $accountId = array_key_first($accounts);
+        return $accounts[$accountId]['username'];
+    }
+
     public static function authorizeAccessText()
     {
         return self::isConnected() ?
@@ -185,7 +192,11 @@ class API
     public static function authorizeAccessDescription()
     {
         return self::isConnected() ?
-            __('You’ve authorized Autoshare to read and write to the X timeline.', 'rrze-autoshare') :
+            sprintf(
+                /* translators: %s: Twitter username. */
+                __('You’ve authorized Autoshare to read and write to the X timeline. Authorized account: <code>%s</code>', 'rrze-autoshare'),
+                self::getAccountUsername()
+            ) :
             __('Authorize Autoshare to read and write to the X timeline.', 'rrze-autoshare');
     }
 
