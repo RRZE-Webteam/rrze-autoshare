@@ -4,8 +4,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: RRZE Autoshare\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/rrze-autoshare\n"
-"POT-Creation-Date: 2024-01-22T15:15:10+00:00\n"
-"PO-Revision-Date: 2024-01-22 16:16+0100\n"
+"POT-Creation-Date: 2024-01-26T16:43:48+00:00\n"
+"PO-Revision-Date: 2024-01-26 18:03+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: de\n"
@@ -40,41 +40,41 @@ msgstr "RRZE-Webteam"
 msgid "https://blogs.fau.de/webworking/"
 msgstr "https://blogs.fau.de/webworking/"
 
-#: includes/Metabox.php:59
+#: includes/Metabox.php:59 src/blockeditor/script.js:86
 msgid "Share on Bluesky"
 msgstr "Auf Bluesky teilen"
 
-#: includes/Metabox.php:59 src/blockeditor/script.js:64
+#: includes/Metabox.php:59 src/blockeditor/script.js:88
 msgid "Share on Bluesky is disabled"
 msgstr "Teilen auf Bluesky ist deaktiviert"
 
-#: includes/Metabox.php:60 src/blockeditor/script.js:69
-msgid "Share on Bluesky is published"
-msgstr "Share on Bluesky ist veröffentlicht"
+#: includes/Metabox.php:60 src/blockeditor/script.js:93
+msgid "It is published on Bluesky"
+msgstr "Es ist auf Bluesky veröffentlicht"
 
-#: includes/Metabox.php:82
+#: includes/Metabox.php:82 src/blockeditor/script.js:99
 msgid "Share on Mastodon"
 msgstr "Auf Mastodon teilen"
 
-#: includes/Metabox.php:82 src/blockeditor/script.js:82
+#: includes/Metabox.php:82 src/blockeditor/script.js:101
 msgid "Share on Mastodon is disabled"
 msgstr "Teilen auf Mastodon ist deaktiviert"
 
-#: includes/Metabox.php:83 src/blockeditor/script.js:87
-msgid "Share on Mastodon is published"
-msgstr "Share on Mastodon ist veröffentlicht"
+#: includes/Metabox.php:83 src/blockeditor/script.js:106
+msgid "It is published on Mastodon"
+msgstr "Es ist auf Mastodon veröffentlicht"
 
-#: includes/Metabox.php:105
-msgid "Share on X"
-msgstr "Auf X teilen"
+#: includes/Metabox.php:105 src/blockeditor/script.js:112
+msgid "Share on X (Twitter)"
+msgstr "Auf X (Twitter) teilen"
 
-#: includes/Metabox.php:105
+#: includes/Metabox.php:105 src/blockeditor/script.js:114
 msgid "Share on X is disabled"
 msgstr "Teilen auf X ist deaktiviert"
 
-#: includes/Metabox.php:106
-msgid "Share on X is published"
-msgstr "Share on X ist veröffentlicht"
+#: includes/Metabox.php:106 src/blockeditor/script.js:116
+msgid "It is published on X"
+msgstr "Es ist auf X veröffentlicht"
 
 #: includes/Options/Settings.php:267
 msgid "You do not have enough permissions to do that."
@@ -89,10 +89,12 @@ msgid "Settings issues detected."
 msgstr "Einstellungsprobleme erkannt."
 
 #: includes/Services/Bluesky/API.php:194 includes/Services/Mastodon/API.php:302
+#: includes/Services/Twitter/API.php:188
 msgid "Revoke Access"
 msgstr "Zugriff widerrufen"
 
 #: includes/Services/Bluesky/API.php:195 includes/Services/Mastodon/API.php:303
+#: includes/Services/Twitter/API.php:189
 msgid "Authorize Access"
 msgstr "Zugriff autorisieren"
 
@@ -103,10 +105,9 @@ msgstr ""
 "schreiben."
 
 #: includes/Services/Bluesky/API.php:202
-msgid "Authorize Autoshare to read and write to the Bluesky."
+msgid "Authorize Autoshare to read and write to the Bluesky timeline."
 msgstr ""
-"Sie haben Autoshare autorisiert, die Bluesky-Timeline zu lesen und zu "
-"schreiben."
+"Autorisieren Sie Autoshare zum Lesen und Schreiben in die Bluesky-Timeline."
 
 #: includes/Services/Bluesky/Settings.php:15
 msgid "Bluesky"
@@ -182,18 +183,19 @@ msgstr "Seiten"
 
 #: includes/Services/Bluesky/Settings.php:59
 #: includes/Services/Mastodon/Settings.php:54
-#: includes/Services/Twitter/Settings.php:46
+#: includes/Services/Twitter/Settings.php:45
 msgid "Featured Images"
 msgstr "Beitragsbild"
 
 #: includes/Services/Bluesky/Settings.php:60
 #: includes/Services/Mastodon/Settings.php:55
-#: includes/Services/Twitter/Settings.php:47
+#: includes/Services/Twitter/Settings.php:46
 msgid "Include featured images"
 msgstr "Beitragsbild hinzufügen"
 
 #: includes/Services/Bluesky/Settings.php:65
 #: includes/Services/Mastodon/Settings.php:60
+#: includes/Services/Twitter/Settings.php:51
 msgid "Access"
 msgstr "Zugriff"
 
@@ -206,8 +208,7 @@ msgstr ""
 #: includes/Services/Mastodon/API.php:310
 msgid "Authorize Autoshare to read and write to the Mastodon timeline."
 msgstr ""
-"Sie haben Autoshare autorisiert, die Mastodon-Timeline zu lesen und zu "
-"schreiben."
+"Autorisieren Sie Autoshare zum Lesen und Schreiben in die Mastodon-Timeline."
 
 #: includes/Services/Mastodon/Settings.php:15
 msgid "Mastodon"
@@ -240,150 +241,194 @@ msgstr "Benutzername"
 msgid "The Mastodon account username."
 msgstr "Der Benutzername des Mastodon-Kontos."
 
+#: includes/Services/Twitter/Account.php:39
+#: includes/Services/Twitter/Account.php:95
+#: includes/Services/Twitter/Account.php:149
+msgid "You do not have sufficient permissions to access this page."
+msgstr ""
+"Sie verfügen nicht über ausreichende Berechtigungen, um auf diese Seite "
+"zuzugreifen."
+
+#: includes/Services/Twitter/Account.php:44
+#: includes/Services/Twitter/Account.php:154
+msgid "You are not authorized to perform this operation."
+msgstr "Sie sind nicht berechtigt, diesen Vorgang durchzuführen."
+
+#: includes/Services/Twitter/Account.php:75
+#: includes/Services/Twitter/Account.php:112
+msgid "Something went wrong. Please try again."
+msgstr "Etwas ist schief gelaufen. Bitte versuchen Sie es erneut."
+
+#: includes/Services/Twitter/Account.php:102
+msgid "Authorization denied for this request."
+msgstr "Die Autorisierung für diese Anfrage wurde verweigert."
+
+#: includes/Services/Twitter/Account.php:120
+msgid "Something went wrong while fetching the access token. Please try again."
+msgstr ""
+"Beim Abrufen des Zugriffstokens ist ein Fehler aufgetreten. Bitte versuchen "
+"Sie es erneut."
+
+#: includes/Services/Twitter/Account.php:131
+msgid "X (Twitter) account authenticated successfully."
+msgstr "X-Konto (Twitter) erfolgreich authentifiziert."
+
+#: includes/Services/Twitter/Account.php:159
+msgid "X (Twitter) account ID is required to perform this operation."
+msgstr "Für diesen Vorgang ist die Konto-ID von X (Twitter) erforderlich."
+
+#: includes/Services/Twitter/Account.php:169
+msgid "X (Twitter) account disconnected successfully."
+msgstr "X (Twitter)-Konto erfolgreich getrennt."
+
+#: includes/Services/Twitter/API.php:130
+msgid "Something happened during Twitter update."
+msgstr "Beim Twitter-Update ist etwas passiert."
+
+#. translators: %d is the error code.
+#: includes/Services/Twitter/API.php:157
+msgid "Error: %d. "
+msgstr "Fehler: %d. "
+
+#: includes/Services/Twitter/API.php:167
+msgid "This post was not published on X."
+msgstr "Dieser Beitrag wurde nicht auf X veröffentlicht."
+
+#. translators: %s: Twitter username.
+#: includes/Services/Twitter/API.php:197
+msgid ""
+"You’ve authorized Autoshare to read and write to the X timeline. Authorized "
+"account: <code>%s</code>"
+msgstr ""
+"Sie haben Autoshare autorisiert, die X-Timeline zu lesen und zu schreiben. "
+"Autorisiertes X-Konto: <code>%s</code>"
+
+#: includes/Services/Twitter/API.php:200
+msgid "Authorize Autoshare to read and write to the X timeline."
+msgstr "Autorisieren Sie Autoshare zum Lesen und Schreiben in die X-Timeline."
+
+#: includes/Services/Twitter/OAuth.php:170
+msgid "Something went wrong during getting user details."
+msgstr "Beim Abrufen der Benutzerdaten ist ein Fehler aufgetreten."
+
 #: includes/Services/Twitter/Settings.php:17
-msgid "X"
-msgstr "X"
+msgid "X (Twitter)"
+msgstr "X (Twitter)"
 
 #: includes/Services/Twitter/Settings.php:27
 msgid "Main"
 msgstr "Allgemein"
 
-#: includes/Services/Twitter/Settings.php:55
-msgid "X Consumer Keys"
-msgstr "X Consumer Keys"
+#: includes/Services/Twitter/Settings.php:61
+msgid "Consumer Keys"
+msgstr "Consumer Keys"
 
-#: includes/Services/Twitter/Settings.php:63
+#: includes/Services/Twitter/Settings.php:68
 msgid "API Key"
 msgstr "API-Key"
 
-#: includes/Services/Twitter/Settings.php:64
-msgid "paste your API Key here"
+#: includes/Services/Twitter/Settings.php:69
+msgid "Paste your API Key here"
 msgstr "Fügen Sie hier Ihren API-Key ein"
 
-#: includes/Services/Twitter/Settings.php:69
+#: includes/Services/Twitter/Settings.php:73
 msgid "API Key Secret"
 msgstr "API-Key-Secret"
 
-#: includes/Services/Twitter/Settings.php:70
-msgid "paste your API Key Secret here"
+#: includes/Services/Twitter/Settings.php:74
+msgid "Paste your API Key Secret here"
 msgstr "Fügen Sie hier Ihren API-Key-Secret ein"
 
-#: includes/Services/Twitter/Settings.php:77
-#: includes/Services/Twitter/Settings.php:87
-msgid ""
-"Think of these as the user name and password that represents your App when "
-"making API requests."
-msgstr ""
-
-#: includes/Services/Twitter/Settings.php:90
-msgid "Sign up for a X (Twitter) developer account"
-msgstr ""
-
-#: includes/Services/Twitter/Settings.php:93
-msgid "2. Configure the Twitter Consumer Keys"
-msgstr ""
+#: includes/Services/Twitter/Settings.php:85
+msgid "1. Create a Twitter app"
+msgstr "1. Erstellen Sie eine Twitter-App"
 
 #. translators: %1$s: opening HTML <a> link tag, %2$s: closing HTML </a> link tag.
+#: includes/Services/Twitter/Settings.php:92
+msgid "Go to the %1$sTwitter developer portal%2$s"
+msgstr "Gehen Sie zum %1$sTwitter-Entwicklerportal%2$s"
+
+#: includes/Services/Twitter/Settings.php:98
+msgid ""
+"Click on Projects & Apps on the left navigation menu and create a new App."
+msgstr ""
+"Klicken Sie im linken Navigationsmenü auf Projekte & Apps und erstellen Sie "
+"eine neue App."
+
 #: includes/Services/Twitter/Settings.php:99
-msgid ""
-"Go to the %1$sX (Twitter) developer portal%2$s and Sign up for Free Account."
+msgid "Find the App and click it to show the Settings page for the App."
 msgstr ""
+"Suchen Sie die App und klicken Sie darauf, um die Seite „Settings“ für die "
+"App anzuzeigen."
 
-#: includes/Services/Twitter/Settings.php:105
-msgid ""
-"Complete the \"Developer agreement & policy\" and click on the <code>Submit</"
-"code> button."
-msgstr ""
+#: includes/Services/Twitter/Settings.php:100
+msgid "Edit the User authentication settings of the the App."
+msgstr "Bearbeiten Sie die „User authentication settings“ der App."
 
-#: includes/Services/Twitter/Settings.php:106
-msgid "Click on Projects & Apps on the left navigation menu."
+#: includes/Services/Twitter/Settings.php:101
+msgid "Set App permissions to <strong>Read and write</strong>."
 msgstr ""
+"Setzen Sie die „App permissions“ auf <strong>„Read and write“</strong>."
 
-#: includes/Services/Twitter/Settings.php:107
-msgid ""
-"Note: The free plan only supports one App. If the App quota has been "
-"exceeded, an App must be deleted to create a new one."
+#: includes/Services/Twitter/Settings.php:102
+msgid "Set Types of App to <strong>Web App, Automated App or Bot</strong>."
 msgstr ""
-
-#: includes/Services/Twitter/Settings.php:108
-msgid ""
-"In the section Standalone Apps click on the <code>Create App</code> button."
-msgstr ""
-
-#: includes/Services/Twitter/Settings.php:109
-msgid "Name the App and click on the <code>Next</code> button."
-msgstr ""
-
-#: includes/Services/Twitter/Settings.php:110
-msgid ""
-"Copy the API Key and API Key Secret. These values will be required in the "
-"plugin settings. Click on the <code>App settings</code> button."
-msgstr ""
-
-#: includes/Services/Twitter/Settings.php:111
-msgid ""
-"Click \"Setup\" under User authentication settings to setup Authentication."
-msgstr ""
-
-#: includes/Services/Twitter/Settings.php:112
-msgid ""
-"Enable <code>OAuth 1.0a</code> and Set App permissions to <strong>Read and "
-"write</strong>."
-msgstr ""
-
-#. translators: %s: Site URL.
-#: includes/Services/Twitter/Settings.php:117
-msgid "Set the <code>Website URL</code> to <code>%s</code>."
-msgstr ""
+"Setzen Sie die „Types of App“ auf <strong>„Web App, Automated App or Bot“</"
+"strong>."
 
 #. translators: %s: Callback URL for Twitter Auth
-#: includes/Services/Twitter/Settings.php:126
+#: includes/Services/Twitter/Settings.php:107
 msgid ""
-"Set the <code>Callback URLs</code> fields to <code>%s</code> and click "
-"<code>Save</code>."
+"On App info set the <code>Callback URL / Redirect URL</code> to <code>%s</"
+"code>."
 msgstr ""
+"Setzen Sie unter App-Info die <code>Callback-URL/Redirect-URL</code> auf "
+"<code>%s</code>."
 
-#: includes/Services/Twitter/Settings.php:131
+#. translators: %s: Site URL.
+#: includes/Services/Twitter/Settings.php:116
+msgid ""
+"Set the <code>Website URL</code> to <code>%s</code> and click <code>Save</"
+"code>."
+msgstr ""
+"Setzen Sie die <code>Website URL</code> auf <code>%s</code> und klicken Sie "
+"auf <code>Save</code>."
+
+#: includes/Services/Twitter/Settings.php:121
 msgid "Switch from the \"Settings\" tab to the \"Keys and tokens\" tab."
-msgstr ""
+msgstr "Wechseln Sie vom Reiter „Settings“ zum Reiter „Keys and tokens“."
 
-#: includes/Services/Twitter/Settings.php:132
+#: includes/Services/Twitter/Settings.php:122
 msgid ""
-"Click on the <code>Generate</code>/<code>Regenerate</code> button in the "
-"<code>Consumer Keys</code> section."
+"Click on the <code>Regenerate</code> button in the <code>Consumer Keys</"
+"code> section."
 msgstr ""
+"Klicken Sie im Abschnitt <code>Consumer Keys</code> auf die Schaltfläche "
+"<code>Regenerate</code>."
 
-#: includes/Services/Twitter/Settings.php:133
+#: includes/Services/Twitter/Settings.php:123
 msgid ""
 "Copy the <code>API Key</code> and <code>API Key Secret</code> values and "
 "paste them below."
 msgstr ""
+"Kopieren Sie die Werte für <code>API Key</code> und <code>API Key Secret</"
+"code> und fügen Sie sie unten ein."
 
-#: includes/Services/Twitter/Settings.php:136
-msgid "3. Save settings"
-msgstr ""
+#: includes/Services/Twitter/Settings.php:125
+msgid "2. Connect your Twitter account"
+msgstr "2. Verbinden Sie Ihr Twitter-Konto"
 
-#: includes/Services/Twitter/Settings.php:138
-msgid "Click the <code>Save Changes</code> button below to save settings."
-msgstr ""
-
-#: includes/Services/Twitter/Settings.php:141
-msgid "4. Connect your Twitter account"
-msgstr ""
-
-#: includes/Services/Twitter/Settings.php:143
+#: includes/Services/Twitter/Settings.php:127
 msgid ""
-"After saving settings, you will see the option to connect your Twitter "
-"account."
+"After saving settings, click the <code>Authorize Access</code> button and "
+"follow the instructions provided there to connect your Twitter account with "
+"this website."
 msgstr ""
+"Klicken Sie nach dem Speichern der Einstellungen auf die Schaltfläche "
+"<code>Zugriff autorisieren</code> und befolgen Sie die dort bereitgestellten "
+"Anweisungen, um Ihr Twitter-Konto mit dieser Website zu verbinden."
 
-#: includes/Services/Twitter/Settings.php:144
-msgid ""
-"Click the <code>Connect Twitter account</code> button and follow the "
-"instructions provided there to connect your Twitter account with this site."
-msgstr ""
-
-#: includes/Settings.php:21
+#: includes/Settings.php:23
 msgid "Autoshare Settings"
 msgstr "Einstellungen › Autoshare"
 
@@ -410,45 +455,6 @@ msgstr ""
 msgid "Plugins: %1$s: %2$s"
 msgstr "Plugins: %1$s: %2$s"
 
-#: src/blockeditor/script.js:59
-msgid "Share on Bluesky when published"
-msgstr "Bei Veröffentlichung auf Bluesky teilen"
-
-#: src/blockeditor/script.js:74
-msgid "Don't share on Bluesky"
-msgstr "Nicht auf Bluesky teilen"
-
-#: src/blockeditor/script.js:77
-msgid "Share on Mastodon when published"
-msgstr "Bei Veröffentlichung auf Mastodon teilen"
-
-#: src/blockeditor/script.js:92
-msgid "Don't share on Mastodon"
-msgstr "Nicht auf Mastodon teilen"
-
-#: src/blockeditor/script.js:107
+#: src/blockeditor/script.js:135
 msgid "Autoshare"
 msgstr "Autoshare"
-
-#~ msgid ""
-#~ "Authorize Autoshare to read and write to the Bluesky timeline in order to "
-#~ "publish."
-#~ msgstr ""
-#~ "Autorisieren Sie Autoshare zum Lesen und Schreiben in die Bluesky-"
-#~ "Timeline, um veröffentlichen zu können."
-
-#~ msgid ""
-#~ "Authorize Autoshare to read and write to the Mastodon timeline in order "
-#~ "to publish."
-#~ msgstr ""
-#~ "Autorisieren Sie Autoshare zum Lesen und Schreiben in die Mastodon-"
-#~ "Timeline, um veröffentlichen zu können."
-
-#~ msgid "Share on Bluesky is syndicated"
-#~ msgstr "Teilen auf Bluesky wird syndiziert"
-
-#~ msgid "Share on Mastodon is syndicated"
-#~ msgstr "Teilen auf Mastodon wird syndiziert"
-
-#~ msgid "Share on X is syndicated"
-#~ msgstr "Teilen auf X wird syndiziert"

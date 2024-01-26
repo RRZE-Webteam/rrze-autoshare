@@ -310,7 +310,7 @@ class API
             __('Authorize Autoshare to read and write to the Mastodon timeline.', 'rrze-autoshare');
     }
 
-    public static function authoriteAccessUrl()
+    public static function authorizeAccessUrl()
     {
         if (self::isConnected()) {
             return self::revokeUrl();

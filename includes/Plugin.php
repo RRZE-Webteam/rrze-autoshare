@@ -158,9 +158,9 @@ class Plugin
      */
     public function getVersion(): string
     {
-        // if (defined('WP_DEBUG') && WP_DEBUG) {
-        //     return bin2hex(random_bytes(4));
-        // }
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            return bin2hex(random_bytes(4));
+        }
         return $this->version;
     }
 

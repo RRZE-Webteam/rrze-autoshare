@@ -199,10 +199,10 @@ class API
     {
         return self::isConnected() ?
             __('You’ve authorized Autoshare to read and write to the Bluesky timeline.', 'rrze-autoshare') :
-            __('Authorize Autoshare to read and write to the Bluesky.', 'rrze-autoshare');
+            __('Authorize Autoshare to read and write to the Bluesky timeline.', 'rrze-autoshare');
     }
 
-    public static function authoriteAccessUrl()
+    public static function authorizeAccessUrl()
     {
         if (self::isConnected()) {
             return self::revokeUrl();
