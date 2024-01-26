@@ -6,7 +6,7 @@ defined('ABSPATH') || exit;
 
 use RRZE\Autoshare\Services\Bluesky\Main as Bluesky;
 use RRZE\Autoshare\Services\Mastodon\Main as Mastodon;
-// use RRZE\Autoshare\Services\Mastodon\Main as Twitter;
+use RRZE\Autoshare\Services\Twitter\Main as Twitter;
 
 class Main
 {
@@ -25,11 +25,11 @@ class Main
 
         settings();
 
+        Metabox::init();
+
         Bluesky::init();
         Mastodon::init();
-        // Twitter::init();
-
-        Metabox::init();
+        Twitter::init();
 
         Cron::init();
     }
@@ -61,7 +61,7 @@ class Main
         if (
             !in_array(get_post_type($post), settings()->getOption('bluesky_post_types'))
             && !in_array(get_post_type($post), settings()->getOption('mastodon_post_types'))
-            // && !in_array(get_post_type($post), settings()->getOption('twitter_post_types'))
+            && !in_array(get_post_type($post), settings()->getOption('twitter_post_types'))
         ) {
             return;
         }
@@ -80,7 +80,7 @@ class Main
         if (
             !in_array(get_post_type($post), settings()->getOption('bluesky_post_types'))
             && !in_array(get_post_type($post), settings()->getOption('mastodon_post_types'))
-            // && !in_array(get_post_type($post), settings()->getOption('twitter_post_types'))
+            && !in_array(get_post_type($post), settings()->getOption('twitter_post_types'))
         ) {
             return;
         }
@@ -106,8 +106,8 @@ class Main
             'blueskyPublished' => Bluesky::isPublished($post->post_type, $post->ID),
             'mastodonEnabled' => Mastodon::isConnected(),
             'mastodonPublished' => Mastodon::isPublished($post->post_type, $post->ID),
-            // 'twitterEnabled' => Twitter::isConnected(),
-            // 'twitterPublished' => Twitter::isPublished($post->post_type, $post->ID)            
+            'twitterEnabled' => Twitter::isConnected(),
+            'twitterPublished' => Twitter::isPublished($post->post_type, $post->ID)            
         ];
 
         wp_localize_script(
