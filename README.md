@@ -2,7 +2,7 @@
 
 ## Wordpress-Plugin
 
-Dieses Plugin teilt automatisch den Beitragstitel, einen Teil des Textauszugs, das Beitragsbild (falls verfügbar) und einen Link zum Beitrag auf Bluesky und Mastodon.
+Dieses Plugin teilt automatisch den Beitragstitel, einen Teil des Textauszugs, das Beitragsbild (falls verfügbar) und einen Link zum Beitrag auf Bluesky, Mastodon und X (Twitter).
 
 ### Einstellungsmenü
 
