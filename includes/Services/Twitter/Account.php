@@ -126,10 +126,6 @@ class Account
             // Get account details by access token.
             $account = $this->oauth->getAccountByToken($accessToken['oauth_token'], $accessToken['oauth_token_secret']);
 
-            if ($account['username'] !== settings()->getOption('twitter_username')) {
-                throw new \Exception(esc_html__('Account username do not match. Please verify that the username matches the user being authorized to connect to X.', 'rrze-autoshare'));
-            }
-
             // Save account details.
             $this->saveAccount($account);
             $this->setConnectionNotice('success', esc_html__('X (Twitter) account authenticated successfully.', 'rrze-autoshare'));
