@@ -5,7 +5,7 @@
     "type": "wordpress-plugin",
     "license": "GPL",
     "require": {
-        "abraham/twitteroauth": "^6.2.0"
+        "abraham/twitteroauth": "4.0.1"
     },
     "autoload": {
         "psr-4": {
