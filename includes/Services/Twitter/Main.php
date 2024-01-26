@@ -11,11 +11,15 @@ class Main
     public static function init()
     {
         add_action('init', [__CLASS__, 'registerPostMeta']);
+        add_action('init', function () {
+            API::connect();
+            Post::init();
+        });
     }
 
     public static function isConnected()
     {
-        return (bool) get_option('rrze_autoshare_twitter_connected');
+        return API::isConnected();
     }
 
     public static function isPublished($postType, $postId)
@@ -27,12 +31,16 @@ class Main
     {
         $supportedPostTypes = settings()->getOption('twitter_post_types');
         foreach ($supportedPostTypes as $postType) {
-            register_meta($postType, 'rrze_autoshare_twitter_enabled', [
-                'show_in_rest' => true,
-                'single' => true,
-                'type' => 'boolean',
-                'default' => 'true',
-            ]);
+            register_meta(
+                $postType,
+                'rrze_autoshare_twitter_enabled',
+                [
+                    'show_in_rest' => true,
+                    'type' => 'boolean',
+                    'single' => true,
+                    'default' => 'true',
+                ]
+            );
         }
     }
 }
