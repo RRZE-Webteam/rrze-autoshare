@@ -43,7 +43,7 @@ class Metabox
         echo '<ul>';
         echo self::blueskyMarkup($post);
         echo self::mastodonMarkup($post);
-        // echo self::twitterMarkup($post);
+        echo self::twitterMarkup($post);
         echo '</ul>';
     }
 
@@ -57,7 +57,7 @@ class Metabox
         $disabledClass = $disabled ? 'class = "rrze-autoshare-disabled_input__label" ' : '';
         $checked = !$disabled ? $checked : false;
         $label = !$disabled ? __('Share on Bluesky', 'rrze-autoshare') : __('Share on Bluesky is disabled', 'rrze-autoshare');
-        $label = $isPublished ? __('Share on Bluesky is published', 'rrze-autoshare') : $label;
+        $label = $isPublished ? __('It is published on Bluesky', 'rrze-autoshare') : $label;
         ob_start();
 ?>
         <li>
@@ -80,7 +80,7 @@ class Metabox
         $disabledClass = $disabled ? 'class = "rrze-autoshare-disabled_input__label" ' : '';
         $checked = !$disabled ? $checked : false;
         $label = !$disabled ? __('Share on Mastodon', 'rrze-autoshare') : __('Share on Mastodon is disabled', 'rrze-autoshare');
-        $label = $isPublished ? __('Share on Mastodon is published', 'rrze-autoshare') : $label;
+        $label = $isPublished ? __('It is published on Mastodon', 'rrze-autoshare') : $label;
         ob_start();
     ?>
         <li>
@@ -102,8 +102,8 @@ class Metabox
         $disabled = !$isEnabled || $isPublished ? ' disabled' : '';
         $disabledClass = $disabled ? 'class = "rrze-autoshare-disabled_input__label" ' : '';
         $checked = !$disabled ? $checked : false;
-        $label = !$disabled ? __('Share on X', 'rrze-autoshare') : __('Share on X is disabled', 'rrze-autoshare');
-        $label = $isPublished ? __('Share on X is published', 'rrze-autoshare') : $label;
+        $label = !$disabled ? __('Share on X (Twitter)', 'rrze-autoshare') : __('Share on X is disabled', 'rrze-autoshare');
+        $label = $isPublished ? __('It is published on X', 'rrze-autoshare') : $label;
         ob_start();
     ?>
         <li>
