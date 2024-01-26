@@ -175,6 +175,7 @@ class API
         } else {
             $code = wp_remote_retrieve_response_code($response);
             if ($code >= 300) {
+                error_log(print_r($response, true));
                 update_metadata($post->post_type, $postId, 'rrze_autoshare_bluesky_error', $code);
             } else {
                 delete_metadata($post->post_type, $postId, 'rrze_autoshare_bluesky_error');
@@ -199,10 +200,10 @@ class API
     {
         return self::isConnected() ?
             __('You’ve authorized Autoshare to read and write to the Bluesky timeline.', 'rrze-autoshare') :
-            __('Authorize Autoshare to read and write to the Bluesky.', 'rrze-autoshare');
+            __('Authorize Autoshare to read and write to the Bluesky timeline.', 'rrze-autoshare');
     }
 
-    public static function authoriteAccessUrl()
+    public static function authorizeAccessUrl()
     {
         if (self::isConnected()) {
             return self::revokeUrl();
