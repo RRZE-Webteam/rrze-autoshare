@@ -12,15 +12,19 @@ class Post
     {
         $supportedPostTypes = settings()->getOption('mastodon_post_types');
         foreach ($supportedPostTypes as $postType) {
-            add_action("save_post_{$postType}", [__CLASS__, 'saveMeta'], 12, 2);
-            add_action("save_post_{$postType}", [__CLASS__, 'savePost'], 21, 2);
+            add_action("save_post_{$postType}", [__CLASS__, 'savePost'], 10, 2);
+            add_action("rest_after_insert_{$postType}", [__CLASS__, 'restAfterInsert']);
         }
 
         add_action('rrze_autoshare_mastodon_publish_post', [__CLASS__, 'publishPost']);
     }
 
-    public static function saveMeta($postId, $post)
+    public static function savePost($postId, $post)
     {
+        if (defined('REST_REQUEST') && REST_REQUEST) {
+            return;
+        }
+
         if (wp_is_post_revision($post) || wp_is_post_autosave($post)) {
             return;
         }
@@ -31,34 +35,32 @@ class Post
         }
 
         $metaValue = isset($_POST['rrze_autoshare_mastodon_enabled']) ? true : false;
-
         update_metadata($post->post_type, $postId, 'rrze_autoshare_mastodon_enabled', $metaValue);
+
+        self::publishOnService($post);
     }
 
-    public static function savePost($postId, $post)
+    public static function restAfterInsert($post)
     {
-        if (wp_is_post_revision($post) || wp_is_post_autosave($post)) {
-            return;
-        }
-
-        if (post_password_required($post)) {
-            return;
-        }
-
         $supportedPostTypes = settings()->getOption('mastodon_post_types');
         if (!in_array($post->post_type, $supportedPostTypes)) {
             return;
         }
 
+        self::publishOnService($post);
+    }
+
+    private static function publishOnService($post)
+    {
         if (
             !API::isConnected() ||
-            !self::isEnabled($post->post_type, $postId) ||
-            self::isPublished($post->post_type, $postId)
+            !self::isEnabled($post->post_type, $post->ID) ||
+            self::isPublished($post->post_type, $post->ID)
         ) {
             return;
         }
 
-        wp_schedule_single_event(time(), 'rrze_autoshare_mastodon_publish_post', [$postId]);
+        wp_schedule_single_event(time(), 'rrze_autoshare_mastodon_publish_post', [$post->ID]);
     }
 
     public static function publishPost($postId)
