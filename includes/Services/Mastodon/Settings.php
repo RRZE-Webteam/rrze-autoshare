@@ -58,7 +58,7 @@ class Settings
         $sectionMain->addOption('button-link', [
             'name' => 'mastodon_authorize_access_url',
             'label' => __('Access', 'rrze-autoshare'),
-            'href' => [__NAMESPACE__ . '\API', 'authoriteAccessUrl'],
+            'href' => [__NAMESPACE__ . '\API', 'authorizeAccessUrl'],
             'text' => [__NAMESPACE__ . '\API', 'authorizeAccessText'],
             'description' => [__NAMESPACE__ . '\API', 'authorizeAccessDescription'],
         ]);
