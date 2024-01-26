@@ -18,9 +18,21 @@ const AutoshareSettingsPanel = () => {
     const isTwitterEnabled = autoshareObject.twitterEnabled;
     const isTwitterPublished = autoshareObject.twitterPublished;
 
-    const [isBlueskyChecked, setBlueskyIsChecked] = useState(false);
-    const [isMastodonChecked, setMastodonIsChecked] = useState(false);
-    const [isTwitterChecked, setTwitterIsChecked] = useState(false);
+    const [isBlueskyChecked, setBlueskyIsChecked] = useState(
+        isBlueskyEnabled &&
+            !isBlueskyPublished &&
+            meta["rrze_autoshare_bluesky_enabled"]
+    );
+    const [isMastodonChecked, setMastodonIsChecked] = useState(
+        isMastodonEnabled &&
+            !isMastodonPublished &&
+            meta["rrze_autoshare_mastodon_enabled"]
+    );
+    const [isTwitterChecked, setTwitterIsChecked] = useState(
+        isTwitterEnabled &&
+            !isTwitterPublished &&
+            meta["rrze_autoshare_twitter_enabled"]
+    );
 
     useEffect(() => {
         if (isBlueskyEnabled && !isBlueskyPublished) {
