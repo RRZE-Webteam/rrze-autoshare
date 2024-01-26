@@ -25,7 +25,7 @@ class Main
                     'show_in_rest' => true,
                     'type' => 'boolean',
                     'single' => true,
-                    'default' => 'true',
+                    'default' => 'false',
                 ]
             );
         }
