@@ -114,8 +114,8 @@ class API
         $post = get_post($postId);
 
         $external = [
-            'uri' => wp_get_shortlink($post->ID),
-            'title' => esc_html($post->post_title),
+            'uri' => esc_url_raw(wp_get_shortlink($postId)),
+            'title' => sanitize_text_field($post->post_title),
             'description' => esc_html(wp_trim_words(get_the_excerpt($post), 55, ' ...')),
         ];
 
