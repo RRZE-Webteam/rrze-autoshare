@@ -50,7 +50,7 @@ class Metabox
     private static function blueskyMarkup($post)
     {
         $inputName = 'rrze_autoshare_bluesky_enabled';
-        $checked = (bool) get_metadata($post->post_type, $post->ID, $inputName, true);
+        $checked = (bool) get_metadata($post->post_type, $post->ID, $inputName, false);
         $isEnabled = Bluesky::isConnected();
         $isPublished = Bluesky::isPublished($post->post_type, $post->ID);
         $disabled = !$isEnabled || $isPublished ? ' disabled' : '';
@@ -73,7 +73,7 @@ class Metabox
     private static function mastodonMarkup($post)
     {
         $inputName = 'rrze_autoshare_mastodon_enabled';
-        $checked = (bool) get_metadata($post->post_type, $post->ID, $inputName, true);
+        $checked = (bool) get_metadata($post->post_type, $post->ID, $inputName, false);
         $isEnabled = Mastodon::isConnected();
         $isPublished = Mastodon::isPublished($post->post_type, $post->ID);
         $disabled = !$isEnabled || $isPublished ? ' disabled' : '';
@@ -96,7 +96,7 @@ class Metabox
     private static function twitterMarkup($post)
     {
         $inputName = 'rrze_autoshare_twitter_enabled';
-        $checked = (bool) get_metadata($post->post_type, $post->ID, $inputName, true);
+        $checked = (bool) get_metadata($post->post_type, $post->ID, $inputName, false);
         $isEnabled = Twitter::isConnected();
         $isPublished = Twitter::isPublished($post->post_type, $post->ID);
         $disabled = !$isEnabled || $isPublished ? ' disabled' : '';

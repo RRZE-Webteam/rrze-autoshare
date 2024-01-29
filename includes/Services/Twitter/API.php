@@ -79,9 +79,11 @@ class API
         );
 
         if (settings()->getOption('twitter_featured_image')) {
+            $response = null;
             $image = Media::getFeaturedImageFile($post);
-            $response = $oauth->uploadMedia($image);
-
+            if (!is_null($image)) {
+                $response = $oauth->uploadMedia($image);
+            }
             if (!is_object($response) || !isset($response->media_id)) {
                 $mediaId = 0;
             } else {
