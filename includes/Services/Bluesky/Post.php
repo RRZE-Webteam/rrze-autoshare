@@ -16,7 +16,7 @@ class Post
             add_action("rest_after_insert_{$postType}", [__CLASS__, 'restAfterInsert']);
         }
 
-        add_action('rrze_autoshare_bluesky_publish_post', [__CLASS__, 'publishPost']);
+        add_action('rrze_autoshare_bluesky_publish_post', [__CLASS__, 'publishPost'], 10, 2);
     }
 
     public static function savePost($postId, $post)
@@ -60,11 +60,13 @@ class Post
             return;
         }
 
-        wp_schedule_single_event(time(), 'rrze_autoshare_bluesky_publish_post', [$post->ID]);
+        update_metadata($post->post_type, $post->ID, 'rrze_autoshare_twitter_sent', gmdate('c'));
+        wp_schedule_single_event(time(), 'rrze_autoshare_bluesky_publish_post', [$post->post_type, $post->ID]);
     }
 
-    public static function publishPost($postId)
+    public static function publishPost($postType, $postId)
     {
+        delete_metadata($postType, $postId, 'rrze_autoshare_twitter_sent');
         API::publishPost($postId);
     }
 
