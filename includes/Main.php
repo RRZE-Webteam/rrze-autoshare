@@ -107,7 +107,7 @@ class Main
             'mastodonEnabled' => Mastodon::isConnected(),
             'mastodonPublished' => Mastodon::isPublished($post->post_type, $post->ID),
             'twitterEnabled' => Twitter::isConnected(),
-            'twitterPublished' => Twitter::isPublished($post->post_type, $post->ID)            
+            'twitterPublished' => Twitter::isPublished($post->post_type, $post->ID)
         ];
 
         wp_localize_script(
