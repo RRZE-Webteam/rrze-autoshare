@@ -49,8 +49,8 @@ class Metabox
 
     private static function blueskyMarkup($post)
     {
-        $inputName = 'rrze_autoshare_bluesky_enabled';
-        $checked = (bool) get_metadata($post->post_type, $post->ID, $inputName, false);
+        $metaKey = 'rrze_autoshare_bluesky_enabled';
+        $checked = (bool) get_metadata($post->post_type, $post->ID, $metaKey, true);
         $isEnabled = Bluesky::isConnected();
         $isPublished = Bluesky::isPublished($post->post_type, $post->ID);
         $disabled = !$isEnabled || $isPublished ? ' disabled' : '';
@@ -61,7 +61,7 @@ class Metabox
         ob_start();
 ?>
         <li>
-            <input type="checkbox" id="rrze-autoshare-bluesky-enabled" name="<?php echo esc_attr($inputName); ?>" value="1" <?php checked($checked); ?><?php echo $disabled; ?>>
+            <input type="checkbox" id="rrze-autoshare-bluesky-enabled" name="<?php echo esc_attr($metaKey); ?>" value="1" <?php checked($checked); ?><?php echo $disabled; ?>>
             <label <?php echo $disabledClass; ?>for="rrze-autoshare-bluesky-enabled">
                 <?php echo esc_html($label); ?>
             </label>
@@ -72,8 +72,8 @@ class Metabox
 
     private static function mastodonMarkup($post)
     {
-        $inputName = 'rrze_autoshare_mastodon_enabled';
-        $checked = (bool) get_metadata($post->post_type, $post->ID, $inputName, false);
+        $metaKey = 'rrze_autoshare_mastodon_enabled';
+        $checked = (bool) get_metadata($post->post_type, $post->ID, $metaKey, true);
         $isEnabled = Mastodon::isConnected();
         $isPublished = Mastodon::isPublished($post->post_type, $post->ID);
         $disabled = !$isEnabled || $isPublished ? ' disabled' : '';
@@ -84,7 +84,7 @@ class Metabox
         ob_start();
     ?>
         <li>
-            <input type="checkbox" id="rrze-autoshare-mastodon-enabled" name="<?php echo esc_attr($inputName); ?>" value="1" <?php checked($checked); ?><?php echo $disabled; ?>>
+            <input type="checkbox" id="rrze-autoshare-mastodon-enabled" name="<?php echo esc_attr($metaKey); ?>" value="1" <?php checked($checked); ?><?php echo $disabled; ?>>
             <label <?php echo $disabledClass; ?>for="rrze-autoshare-mastodon-enabled">
                 <?php echo esc_html($label); ?>
             </label>
@@ -95,8 +95,8 @@ class Metabox
 
     private static function twitterMarkup($post)
     {
-        $inputName = 'rrze_autoshare_twitter_enabled';
-        $checked = (bool) get_metadata($post->post_type, $post->ID, $inputName, false);
+        $metaKey = 'rrze_autoshare_twitter_enabled';
+        $checked = (bool) get_metadata($post->post_type, $post->ID, $metaKey, true);
         $isEnabled = Twitter::isConnected();
         $isPublished = Twitter::isPublished($post->post_type, $post->ID);
         $disabled = !$isEnabled || $isPublished ? ' disabled' : '';
@@ -107,7 +107,7 @@ class Metabox
         ob_start();
     ?>
         <li>
-            <input type="checkbox" id="rrze-autoshare-twitter-enabled" name="<?php echo esc_attr($inputName); ?>" value="1" <?php checked($checked); ?><?php echo $disabled; ?>>
+            <input type="checkbox" id="rrze-autoshare-twitter-enabled" name="<?php echo esc_attr($metaKey); ?>" value="1" <?php checked($checked); ?><?php echo $disabled; ?>>
             <label <?php echo $disabledClass; ?>for="rrze-autoshare-twitter-enabled">
                 <?php echo esc_html($label); ?>
             </label>
