@@ -24,7 +24,7 @@ class Settings
     private function sectionMain()
     {
         $sectionMain = $this->tab->addSection(
-            __('Main', 'rrze-autoshare'),
+            __('X (Twitter) Settings', 'rrze-autoshare'),
             [
                 'description' => self::sectionMainDescription(),
             ]
