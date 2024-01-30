@@ -82,12 +82,7 @@ class Media
             return false;
         }
 
-        $data = json_decode(wp_remote_retrieve_body($response), true);
-        if (empty($data['blob'])) {
-            return false;
-        }
-
-        return $data['blob'];
+        return json_decode(wp_remote_retrieve_body($response), true);
     }
 
     private static function addAltText($postType, $imageIds)

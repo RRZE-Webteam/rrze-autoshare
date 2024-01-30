@@ -1,4 +1,5 @@
 const defaultConfig = require("@wordpress/scripts/config/webpack.config");
+const webpack = require("webpack");
 const { basename, dirname, resolve } = require("path");
 const srcDir = "src";
 
@@ -36,4 +37,11 @@ module.exports = {
             },
         },
     },
+    plugins: [
+        ...defaultConfig.plugins,
+        new webpack.ProvidePlugin({
+            $: "jquery",
+            jQuery: "jquery",
+        }),
+    ],
 };

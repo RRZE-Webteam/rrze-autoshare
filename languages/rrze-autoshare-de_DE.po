@@ -4,8 +4,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: RRZE Autoshare\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/rrze-autoshare\n"
-"POT-Creation-Date: 2024-01-26T16:43:48+00:00\n"
-"PO-Revision-Date: 2024-01-26 18:03+0100\n"
+"POT-Creation-Date: 2024-01-30T17:02:49+00:00\n"
+"PO-Revision-Date: 2024-01-30 18:06+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: de\n"
@@ -40,39 +40,39 @@ msgstr "RRZE-Webteam"
 msgid "https://blogs.fau.de/webworking/"
 msgstr "https://blogs.fau.de/webworking/"
 
-#: includes/Metabox.php:59 src/blockeditor/script.js:86
+#: includes/Metabox.php:68 src/blockeditor/script.js:86
 msgid "Share on Bluesky"
 msgstr "Auf Bluesky teilen"
 
-#: includes/Metabox.php:59 src/blockeditor/script.js:88
+#: includes/Metabox.php:68 src/blockeditor/script.js:88
 msgid "Share on Bluesky is disabled"
 msgstr "Teilen auf Bluesky ist deaktiviert"
 
-#: includes/Metabox.php:60 src/blockeditor/script.js:93
+#: includes/Metabox.php:69 src/blockeditor/script.js:93
 msgid "It is published on Bluesky"
 msgstr "Es ist auf Bluesky veröffentlicht"
 
-#: includes/Metabox.php:82 src/blockeditor/script.js:99
+#: includes/Metabox.php:91 src/blockeditor/script.js:99
 msgid "Share on Mastodon"
 msgstr "Auf Mastodon teilen"
 
-#: includes/Metabox.php:82 src/blockeditor/script.js:101
+#: includes/Metabox.php:91 src/blockeditor/script.js:101
 msgid "Share on Mastodon is disabled"
 msgstr "Teilen auf Mastodon ist deaktiviert"
 
-#: includes/Metabox.php:83 src/blockeditor/script.js:106
+#: includes/Metabox.php:92 src/blockeditor/script.js:106
 msgid "It is published on Mastodon"
 msgstr "Es ist auf Mastodon veröffentlicht"
 
-#: includes/Metabox.php:105 src/blockeditor/script.js:112
+#: includes/Metabox.php:114 src/blockeditor/script.js:112
 msgid "Share on X (Twitter)"
 msgstr "Auf X (Twitter) teilen"
 
-#: includes/Metabox.php:105 src/blockeditor/script.js:114
+#: includes/Metabox.php:114 src/blockeditor/script.js:114
 msgid "Share on X is disabled"
 msgstr "Teilen auf X ist deaktiviert"
 
-#: includes/Metabox.php:106 src/blockeditor/script.js:116
+#: includes/Metabox.php:115 src/blockeditor/script.js:116
 msgid "It is published on X"
 msgstr "Es ist auf X veröffentlicht"
 
@@ -88,23 +88,38 @@ msgstr "Die Einstellungen wurden gespeichert."
 msgid "Settings issues detected."
 msgstr "Einstellungsprobleme erkannt."
 
-#: includes/Services/Bluesky/API.php:194 includes/Services/Mastodon/API.php:302
-#: includes/Services/Twitter/API.php:188
+#: includes/Services/Bluesky/API.php:268 includes/Services/Mastodon/API.php:277
+#: includes/Services/Twitter/API.php:117
+msgid "An error occurred while trying to publish."
+msgstr "Beim Versuch der Veröffentlichung ist ein Fehler aufgetreten."
+
+#. translators: %d is the error code.
+#: includes/Services/Bluesky/API.php:288 includes/Services/Mastodon/API.php:297
+#: includes/Services/Twitter/API.php:137
+msgid "Error: %d. "
+msgstr "Fehler: %d. "
+
+#: includes/Services/Bluesky/API.php:298
+msgid "This post was not published on Bluesky."
+msgstr "Dieser Beitrag wurde nicht auf Bluesky veröffentlicht."
+
+#: includes/Services/Bluesky/API.php:313 includes/Services/Mastodon/API.php:322
+#: includes/Services/Twitter/API.php:169
 msgid "Revoke Access"
 msgstr "Zugriff widerrufen"
 
-#: includes/Services/Bluesky/API.php:195 includes/Services/Mastodon/API.php:303
-#: includes/Services/Twitter/API.php:189
+#: includes/Services/Bluesky/API.php:314 includes/Services/Mastodon/API.php:323
+#: includes/Services/Twitter/API.php:170
 msgid "Authorize Access"
 msgstr "Zugriff autorisieren"
 
-#: includes/Services/Bluesky/API.php:201
+#: includes/Services/Bluesky/API.php:320
 msgid "You’ve authorized Autoshare to read and write to the Bluesky timeline."
 msgstr ""
 "Sie haben Autoshare autorisiert, die Bluesky-Timeline zu lesen und zu "
 "schreiben."
 
-#: includes/Services/Bluesky/API.php:202
+#: includes/Services/Bluesky/API.php:321
 msgid "Authorize Autoshare to read and write to the Bluesky timeline."
 msgstr ""
 "Autorisieren Sie Autoshare zum Lesen und Schreiben in die Bluesky-Timeline."
@@ -199,13 +214,17 @@ msgstr "Beitragsbild hinzufügen"
 msgid "Access"
 msgstr "Zugriff"
 
-#: includes/Services/Mastodon/API.php:309
+#: includes/Services/Mastodon/API.php:307
+msgid "This post was not published on Mastodon."
+msgstr "Dieser Beitrag wurde nicht auf Mastodon veröffentlicht."
+
+#: includes/Services/Mastodon/API.php:329
 msgid "You’ve authorized Autoshare to read and write to the Mastodon timeline."
 msgstr ""
 "Sie haben Autoshare autorisiert, die Mastodon-Timeline zu lesen und zu "
 "schreiben."
 
-#: includes/Services/Mastodon/API.php:310
+#: includes/Services/Mastodon/API.php:330
 msgid "Authorize Autoshare to read and write to the Mastodon timeline."
 msgstr ""
 "Autorisieren Sie Autoshare zum Lesen und Schreiben in die Mastodon-Timeline."
@@ -281,21 +300,12 @@ msgstr "Für diesen Vorgang ist die Konto-ID von X (Twitter) erforderlich."
 msgid "X (Twitter) account disconnected successfully."
 msgstr "X (Twitter)-Konto erfolgreich getrennt."
 
-#: includes/Services/Twitter/API.php:130
-msgid "Something happened during Twitter update."
-msgstr "Beim Twitter-Update ist etwas passiert."
-
-#. translators: %d is the error code.
-#: includes/Services/Twitter/API.php:157
-msgid "Error: %d. "
-msgstr "Fehler: %d. "
-
-#: includes/Services/Twitter/API.php:167
+#: includes/Services/Twitter/API.php:147
 msgid "This post was not published on X."
 msgstr "Dieser Beitrag wurde nicht auf X veröffentlicht."
 
 #. translators: %s: Twitter username.
-#: includes/Services/Twitter/API.php:197
+#: includes/Services/Twitter/API.php:178
 msgid ""
 "You’ve authorized Autoshare to read and write to the X timeline. Authorized "
 "account: <code>%s</code>"
@@ -303,7 +313,7 @@ msgstr ""
 "Sie haben Autoshare autorisiert, die X-Timeline zu lesen und zu schreiben. "
 "Autorisiertes X-Konto: <code>%s</code>"
 
-#: includes/Services/Twitter/API.php:200
+#: includes/Services/Twitter/API.php:181
 msgid "Authorize Autoshare to read and write to the X timeline."
 msgstr "Autorisieren Sie Autoshare zum Lesen und Schreiben in die X-Timeline."
 
@@ -316,8 +326,8 @@ msgid "X (Twitter)"
 msgstr "X (Twitter)"
 
 #: includes/Services/Twitter/Settings.php:27
-msgid "Main"
-msgstr "Allgemein"
+msgid "X (Twitter) Settings"
+msgstr "X (Twitter) Einstellungen"
 
 #: includes/Services/Twitter/Settings.php:61
 msgid "Consumer Keys"

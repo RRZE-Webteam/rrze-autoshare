@@ -113,24 +113,48 @@ class API
     {
         $post = get_post($postId);
 
-        $external = [
-            'uri' => wp_get_shortlink($post->ID),
-            'title' => esc_html($post->post_title),
-            'description' => esc_html(wp_trim_words(get_the_excerpt($post), 55, ' ...')),
+        $locale = get_locale();
+        $langCode = substr($locale, 0, 2);
+        $title = sanitize_text_field($post->post_title);
+        $text = Post::getContent($post);
+        if (empty($text)) {
+            return;
+        }
+
+        $record = [
+            '$type'     => 'app.bsky.feed.post',
+            'text'      => $text,
+            'langs'     => [$langCode],
+            'createdAt' => gmdate('c', strtotime($post->post_date_gmt))
         ];
 
-        $thumb = '';
+        $links = self::getLinks($text);
+        if (!empty($links)) {
+            $record = array_merge($record, $links);
+        }
+
         $media = Media::getImages($post);
         if (!empty($media)) {
             $count = 1;
             $media = array_slice($media, 0, $count, true);
 
             foreach ($media as $id => $alt) {
-                $thumb = Media::uploadImage($id, $alt);
+                $image = Media::uploadImage($id, $alt);
             }
         }
-        if (!empty($thumb)) {
-            $external['thumb'] = $thumb;
+        if (!empty($image['blob'])) {
+            $embed = [
+                'embed' => [
+                    '$type' => 'app.bsky.embed.images',
+                    'images' => [
+                        [
+                            'alt' => $title,
+                            'image' => $image['blob']
+                        ],
+                    ],
+                ]
+            ];
+            $record = array_merge($record, $embed);
         }
 
         $accessToken = get_option(self::ACCESS_JWT);
@@ -156,31 +180,126 @@ class API
                         'collection' => 'app.bsky.feed.post',
                         'did'        => esc_html($did),
                         'repo'       => esc_html($did),
-                        'record'     => [
-                            '$type'     => 'app.bsky.feed.post',
-                            'text'      => esc_html(wp_trim_words(get_the_excerpt($post), 400, ' ...')),
-                            'createdAt' => gmdate('c', strtotime($post->post_date_gmt)),
-                            'embed'     => [
-                                '$type'    => 'app.bsky.embed.external',
-                                'external' => $external,
-                            ],
-                        ],
+                        'record'     => $record,
                     ]
                 ),
             ]
         );
 
-        if (is_wp_error($response)) {
-            update_metadata($post->post_type, $postId, 'rrze_autoshare_bluesky_error', $response->get_error_message());
-        } else {
-            $code = wp_remote_retrieve_response_code($response);
-            if ($code >= 300) {
-                update_metadata($post->post_type, $postId, 'rrze_autoshare_bluesky_error', $code);
-            } else {
-                delete_metadata($post->post_type, $postId, 'rrze_autoshare_bluesky_error');
-                update_metadata($post->post_type, $postId, 'rrze_autoshare_bluesky_published', true);
+        $response = self::validateResponse($response);
+
+        self::updateStatusMeta($post->post_type, $postId, $response);
+    }
+
+    private static function getLinks($text)
+    {
+        $urls = self::getUrlsFromText($text);
+        $links = [];
+        if (!empty($urls)) {
+            foreach ($urls as $url) {
+                $a = [
+                    "index" => [
+                        "byteStart" => $url['start'],
+                        "byteEnd" => $url['end'],
+                    ],
+                    "features" => [
+                        [
+                            '$type' => "app.bsky.richtext.facet#link",
+                            'uri' => $url['url'],
+                        ],
+                    ],
+                ];
+
+                $links[] = $a;
             }
+            $links = [
+                'facets' =>
+                $links,
+            ];
         }
+
+        return $links;
+    }
+
+    private static function getUrlsFromText($text)
+    {
+        $regex = '/(https?:\/\/[^\s]+)/';
+        preg_match_all($regex, $text, $matches, PREG_OFFSET_CAPTURE);
+
+        $urlData = [];
+
+        foreach ($matches[0] as $match) {
+            $url = $match[0];
+            $start = $match[1];
+            $end = $start + strlen($url);
+
+            $urlData[] = [
+                'start' => $start,
+                'end' => $end,
+                'url' => $url,
+            ];
+        }
+
+        return $urlData;
+    }
+
+    private static function validateResponse($response)
+    {
+        if (!is_wp_error($response)) {
+            $body = json_decode($response['body']);
+        }
+
+        if (!empty($body->uri)) {
+            $validatedResponse = [
+                'id' => $body->uri,
+                'created_at' => $body->created_at ?? gmdate('c'),
+            ];
+        } else {
+            $code = is_wp_error($response) ? '500' : wp_remote_retrieve_response_code($response);
+            $message = is_wp_error($response) ? $response->get_error_message() : $body->error;
+            $errors = [
+                (object) [
+                    'code' => sanitize_text_field($code),
+                    'message' => sanitize_text_field($message),
+                ],
+            ];
+            $validatedResponse = new \WP_Error(
+                'rrze_autoshare_bluesky_error',
+                __('An error occurred while trying to publish.', 'rrze-autoshare'),
+                $errors
+            );
+        }
+
+        return $validatedResponse;
+    }
+
+    private static function updateStatusMeta($postType, $postId, $data)
+    {
+        if (!is_wp_error($data)) {
+            $status = 'published';
+            $response = [
+                'status' => $status,
+                'bluesky_id' => sanitize_text_field($data['id']),
+                'created_at' => sanitize_text_field($data['created_at']),
+            ];
+        } elseif (is_wp_error($data)) {
+            $errorMessage = $data->error_data['rrze_autoshare_bluesky_error'][0];
+            // translators: %d is the error code.
+            $errorCodeText = $errorMessage->code ? sprintf(__('Error: %d. ', 'rrze-autoshare'), $errorMessage->code) : '';
+            $status = 'error';
+            $response = [
+                'status'  => $status,
+                'message' => sanitize_text_field($errorCodeText . $errorMessage->message),
+            ];
+        } else {
+            $status = 'unknown';
+            $response = [
+                'status'  => $status,
+                'message' => __('This post was not published on Bluesky.', 'rrze-autoshare'),
+            ];
+        }
+
+        update_metadata($postType, $postId, sprintf('rrze_autoshare_bluesky_%s', $status), $response);
     }
 
     public static function isConnected()

@@ -103,9 +103,9 @@ class API
     public static function revokeAccess()
     {
         $host = settings()->getOption('mastodon_domain');
-        $accessToken = get_option(self::ACCESS_TOKEN);
         $clientId = get_option(self::CLIENT_ID);
         $clientSecret = get_option(self::CLIENT_SECRET);
+        $accessToken = get_option(self::ACCESS_TOKEN);
 
         if (!$host || !$accessToken || !$clientId || !$clientSecret) {
             return false;
@@ -129,6 +129,8 @@ class API
             return false;
         }
 
+        delete_option(self::CLIENT_ID);
+        delete_option(self::CLIENT_SECRET);
         delete_option(self::ACCESS_TOKEN);
         return true;
     }
@@ -206,27 +208,14 @@ class API
     {
         $post = get_post($postId);
 
-        $status = '%title% %permalink%';
-
-        $status = self::parseStatus($status, $post->ID);
-
-        $status = wp_strip_all_tags(
-            html_entity_decode($status, ENT_QUOTES | ENT_HTML5, get_bloginfo('charset'))
-        );
-
-        $permalink = esc_url_raw(get_permalink($post->ID));
-
-        if (false === strpos($status, $permalink)) {
-            if (false === strpos($status, "\n")) {
-                $status .= ' ' . $permalink;
-            } else {
-                $status .= "\r\n\r\n" . $permalink;
-            }
+        $text = Post::getContent($post);
+        if (empty($text)) {
+            return;
         }
 
-        $args = ['status' => $status];
+        $args = ['status' => $text];
 
-        $query_string = http_build_query($args);
+        $queryString = http_build_query($args);
 
         $media = Media::getImages($post);
 
@@ -238,7 +227,7 @@ class API
                 $mediaId = Media::uploadImage($id, $alt);
 
                 if (!empty($mediaId)) {
-                    $query_string .= '&media_ids[]=' . rawurlencode($mediaId);
+                    $queryString .= '&media_ids[]=' . rawurlencode($mediaId);
                 }
             }
         }
@@ -253,42 +242,73 @@ class API
                     'Authorization' => 'Bearer ' . $accessToken,
                 ],
                 'data_format' => 'body',
-                'body'        => $query_string,
+                'body'        => $queryString,
                 'timeout'     => 15,
             ]
         );
 
-        if (is_wp_error($response)) {
-            return;
-        }
+        $response = self::validateResponse($response);
 
-        $status = json_decode($response['body']);
-
-        if (!empty($status->url)) {
-            delete_metadata($post->post_type, $postId, 'rrze_autoshare_mastodon_error');
-            update_metadata($post->post_type, $post->ID, 'rrze_autoshare_mastodon_url', esc_url_raw($status->url));
-            update_metadata($post->post_type, $postId, 'rrze_autoshare_mastodon_published', true);
-        } elseif (!empty($status->error)) {
-            update_metadata($post->post_type, $post->ID, 'rrze_autoshare_mastodon_error', sanitize_text_field($status->error));
-        }
+        self::updateStatusMeta($post->post_type, $postId, $response);
     }
 
-    public static function parseStatus($status, $post_id)
+    private static function validateResponse($response)
     {
-        $status = str_replace('%title%', get_the_title($post_id), $status);
-        $status = str_replace('%tags%', Post::getTags($post_id), $status);
+        if (!is_wp_error($response)) {
+            $body = json_decode($response['body']);
+        }
 
-        $maxLength = mb_strlen(str_replace(array('%excerpt%', '%permalink%'), '', $status));
-        $maxLength = max(0, 450 - $maxLength);
+        if (!empty($body->id)) {
+            $validatedResponse = [
+                'id' => $body->id,
+                'created_at' => $body->created_at ?? gmdate('c'),
+            ];
+        } else {
+            $code = is_wp_error($response) ? '500' : wp_remote_retrieve_response_code($response);
+            $message = is_wp_error($response) ? $response->get_error_message() : $body->error;
+            $errors = [
+                (object) [
+                    'code' => sanitize_text_field($code),
+                    'message' => sanitize_text_field($message),
+                ],
+            ];
+            $validatedResponse = new \WP_Error(
+                'rrze_autoshare_mastodon_error',
+                __('An error occurred while trying to publish.', 'rrze-autoshare'),
+                $errors
+            );
+        }
 
-        $status = str_replace('%excerpt%', Post::getExcerpt($post_id, $maxLength), $status);
+        return $validatedResponse;
+    }
 
-        $status = preg_replace('~(\r\n){2,}~', "\r\n\r\n", $status);
-        $status = sanitize_textarea_field($status);
+    private static function updateStatusMeta($postType, $postId, $data)
+    {
+        if (!is_wp_error($data)) {
+            $status = 'published';
+            $response = [
+                'status' => $status,
+                'mastodon_id' => sanitize_text_field($data['id']),
+                'created_at' => sanitize_text_field($data['created_at']),
+            ];
+        } elseif (is_wp_error($data)) {
+            $errorMessage = $data->error_data['rrze_autoshare_mastodon_error'][0];
+            // translators: %d is the error code.
+            $errorCodeText = $errorMessage->code ? sprintf(__('Error: %d. ', 'rrze-autoshare'), $errorMessage->code) : '';
+            $status = 'error';
+            $response = [
+                'status'  => $status,
+                'message' => sanitize_text_field($errorCodeText . $errorMessage->message),
+            ];
+        } else {
+            $status = 'unknown';
+            $response = [
+                'status'  => $status,
+                'message' => __('This post was not published on Mastodon.', 'rrze-autoshare'),
+            ];
+        }
 
-        $status = str_replace('%permalink%', esc_url_raw(get_permalink($post_id)), $status);
-
-        return $status;
+        update_metadata($postType, $postId, sprintf('rrze_autoshare_mastodon_%s', $status), $response);
     }
 
     public static function isConnected()

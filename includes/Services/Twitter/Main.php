@@ -24,7 +24,7 @@ class Main
 
     public static function isPublished($postType, $postId)
     {
-        return (bool) get_metadata($postType, $postId, 'rrze_autoshare_twitter_published', true);
+        return Post::isPublished($postType, $postId);
     }
 
     public static function registerPostMeta()

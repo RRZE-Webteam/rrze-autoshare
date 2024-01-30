@@ -28,8 +28,6 @@ class API
             return false;
         }
 
-        $tweet = Post::buildBody($post);
-
         $accounts = get_option(Account::TWITTER_ACCOUNT, []);
         if (empty($accounts)) {
             return false;
@@ -38,7 +36,7 @@ class API
         $accountId = array_key_first($accounts);
 
         try {
-            $response = self::publishTweet($tweet, $post, $accountId);
+            $response = self::publish($post, $accountId);
             $response = self::validateResponse($response);
         } catch (\Exception $e) {
             $response = new \WP_Error(
@@ -50,33 +48,29 @@ class API
             );
         }
 
-        if (!is_wp_error($response)) {
-            delete_metadata($post->post_type, $postId, 'rrze_autoshare_twitter_error');
-        }
-
         self::updateStatusMeta($post->post_type, $postId, $response);
     }
 
     /**
-     * Publish a tweet.
+     * Publish on X.
      *
-     * @param string $body The tweet body.
      * @param \WP_Post $post The post object.
      * @param int|null $accountId The Twitter account ID.
      *
      * @return object
      */
-    private static function publishTweet($body, $post, $accountId = null)
+    private static function publish($post, $accountId = null)
     {
         $oauth = new OAuth($accountId);
 
-        if (empty($body)) {
+        $text = Post::getContent($post);
+        if (empty($text)) {
             return;
         }
 
-        $update_data = array(
-            'text' => $body,
-        );
+        $updateData = [
+            'text' => $text,
+        ];
 
         if (settings()->getOption('twitter_featured_image')) {
             $response = null;
@@ -90,32 +84,23 @@ class API
                 $mediaId = $response->media_id;
             }
             if ($mediaId) {
-                $update_data['media'] = [
+                $updateData['media'] = [
                     'media_ids' => [(string) $mediaId],
                 ];
             }
         }
 
-        // Send tweet to Twitter.
-        $response = $oauth->tweet($update_data);
+        $response = $oauth->tweet($updateData);
 
         return $response;
     }
 
-    /**
-     * Validate and build response message.
-     *
-     * @param object $response The api response to validate.
-     *
-     * @return mixed
-     */
     private static function validateResponse($response)
     {
         if (!empty($response->id)) {
             $validatedResponse = [
                 'id' => $response->id,
-                // Twitter API v2 doesn't return created_at.
-                'created_at' => gmdate('c'),
+                'created_at' => $response->created_at ?? gmdate('c'),
             ];
         } else {
             $errors = $response->errors;
@@ -129,7 +114,7 @@ class API
             }
             $validatedResponse = new \WP_Error(
                 'rrze_autoshare_twitter_error',
-                __('Something happened during Twitter update.', 'rrze-autoshare'),
+                __('An error occurred while trying to publish.', 'rrze-autoshare'),
                 $errors
             );
         }
@@ -137,13 +122,6 @@ class API
         return $validatedResponse;
     }
 
-    /**
-     * Add validated response as post meta.
-     *
-     * @param $postType The post type.
-     * @param int $postId The post id.
-     * @param object $data The tweet request data.
-     */
     private static function updateStatusMeta($postType, $postId, $data)
     {
         if (!is_wp_error($data)) {
@@ -169,6 +147,7 @@ class API
                 'message' => __('This post was not published on X.', 'rrze-autoshare'),
             ];
         }
+
         update_metadata($postType, $postId, sprintf('rrze_autoshare_twitter_%s', $status), $response);
     }
 
