@@ -113,24 +113,48 @@ class API
     {
         $post = get_post($postId);
 
-        $external = [
-            'uri' => esc_url_raw(wp_get_shortlink($postId)),
-            'title' => sanitize_text_field($post->post_title),
-            'description' => esc_html(wp_trim_words(get_the_excerpt($post), 55, ' ...')),
+        $locale = get_locale();
+        $langCode = substr($locale, 0, 2);
+        $title = sanitize_text_field($post->post_title);
+        $text = Post::getContent($post);
+        if (empty($text)) {
+            return;
+        }
+
+        $record = [
+            '$type'     => 'app.bsky.feed.post',
+            'text'      => $text,
+            'langs'     => [$langCode],
+            'createdAt' => gmdate('c', strtotime($post->post_date_gmt))
         ];
 
-        $thumb = '';
+        $links = self::getLinks($text);
+        if (!empty($links)) {
+            $record = array_merge($record, $links);
+        }
+
         $media = Media::getImages($post);
         if (!empty($media)) {
             $count = 1;
             $media = array_slice($media, 0, $count, true);
 
             foreach ($media as $id => $alt) {
-                $thumb = Media::uploadImage($id, $alt);
+                $image = Media::uploadImage($id, $alt);
             }
         }
-        if (!empty($thumb)) {
-            $external['thumb'] = $thumb;
+        if (!empty($image['blob'])) {
+            $embed = [
+                'embed' => [
+                    '$type' => 'app.bsky.embed.images',
+                    'images' => [
+                        [
+                            'alt' => $title,
+                            'image' => $image['blob']
+                        ],
+                    ],
+                ]
+            ];
+            $record = array_merge($record, $embed);
         }
 
         $accessToken = get_option(self::ACCESS_JWT);
@@ -156,15 +180,7 @@ class API
                         'collection' => 'app.bsky.feed.post',
                         'did'        => esc_html($did),
                         'repo'       => esc_html($did),
-                        'record'     => [
-                            '$type'     => 'app.bsky.feed.post',
-                            'text'      => esc_html(wp_trim_words(get_the_excerpt($post), 400, ' ...')),
-                            'createdAt' => gmdate('c', strtotime($post->post_date_gmt)),
-                            'embed'     => [
-                                '$type'    => 'app.bsky.embed.external',
-                                'external' => $external,
-                            ],
-                        ],
+                        'record'     => $record,
                     ]
                 ),
             ]
@@ -173,6 +189,58 @@ class API
         $response = self::validateResponse($response);
 
         self::updateStatusMeta($post->post_type, $postId, $response);
+    }
+
+    private static function getLinks($text)
+    {
+        $urls = self::getUrlsFromText($text);
+        $links = [];
+        if (!empty($urls)) {
+            foreach ($urls as $url) {
+                $a = [
+                    "index" => [
+                        "byteStart" => $url['start'],
+                        "byteEnd" => $url['end'],
+                    ],
+                    "features" => [
+                        [
+                            '$type' => "app.bsky.richtext.facet#link",
+                            'uri' => $url['url'],
+                        ],
+                    ],
+                ];
+
+                $links[] = $a;
+            }
+            $links = [
+                'facets' =>
+                $links,
+            ];
+        }
+
+        return $links;
+    }
+
+    private static function getUrlsFromText($text)
+    {
+        $regex = '/(https?:\/\/[^\s]+)/';
+        preg_match_all($regex, $text, $matches, PREG_OFFSET_CAPTURE);
+
+        $urlData = [];
+
+        foreach ($matches[0] as $match) {
+            $url = $match[0];
+            $start = $match[1];
+            $end = $start + strlen($url);
+
+            $urlData[] = [
+                'start' => $start,
+                'end' => $end,
+                'url' => $url,
+            ];
+        }
+
+        return $urlData;
     }
 
     private static function validateResponse($response)
