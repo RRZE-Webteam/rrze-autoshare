@@ -61,6 +61,8 @@ class Post
         }
 
         update_metadata($post->post_type, $post->ID, 'rrze_autoshare_twitter_sent', gmdate('c'));
+        delete_metadata($post->post_type, $post->ID, 'rrze_autoshare_twitter_error');
+
         wp_schedule_single_event(time(), 'rrze_autoshare_twitter_publish_post', [$post->post_type, $post->ID]);
     }
 
