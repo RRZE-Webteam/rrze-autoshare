@@ -86,18 +86,21 @@ class Post
 
     public static function getContent(\WP_Post $post)
     {
-        // Don't use get_the_title() because may introduce texturized characters.
-        $text = sanitize_text_field($post->post_title);
         $permalink = esc_url_raw(get_the_permalink($post->ID));
 
         $isLocalEnv = in_array(wp_get_environment_type(), ['local', 'development'], true);
         $isLocalUrl = strpos(home_url(), '.test') || strpos(home_url(), '.local') || strpos(home_url(), '.localhost');
         $isLocal = $isLocalEnv || $isLocalUrl;
         $permalinkLength = (!$isLocal) ? 23 : strlen($permalink); // 23 is the length of t.co URL.
-        $textMaxLength = 275 - $permalinkLength; // 275 instead of 280 because of the space between body and URL and the ellipsis.
-        $text = sanitize_text_field($text);
-        $text = html_entity_decode($text, ENT_QUOTES, get_bloginfo('charset'));
-        $textLength = strlen($text);
+        // 275 instead of 280 because of the space between body and URL and the ellipsis.
+        $textMaxLength = 275 - $permalinkLength;
+
+        // Don't use get_the_title() because may introduce texturized characters.
+        $title = $post->post_title;
+        $excerpt = self::getExcerpt($post);
+        $text = sanitize_text_field($title) . PHP_EOL . sanitize_textarea_field($excerpt);
+        $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, get_bloginfo('charset'));
+        $textLength = mb_strlen($text);
         $ellipsis = ''; // Initialize as empty. Will be set if the text is too long.
 
         while ($textMaxLength < $textLength) {
@@ -106,12 +109,12 @@ class Post
 
             // If there are no spaces in the text for whatever reason, 
             // truncate regardless of where spaces fall.
-            if (false === strpos($text, ' ')) {
-                $text = substr($text, 0, $textMaxLength);
+            if (false === mb_strpos($text, ' ')) {
+                $text = mb_substr($text, 0, $textMaxLength);
                 break;
             }
 
-            // Cut off the last word in the text until the tweet is short enough.
+            // Cut off the last word in the text until the text is short enough.
             $words = explode(' ', $text);
             array_pop($words);
             $text = implode(' ', $words);
@@ -119,5 +122,14 @@ class Post
         }
 
         return sprintf('%s%s %s', $text, $ellipsis, $permalink);
+    }
+
+    private static function getExcerpt($post)
+    {
+        $excerpt = $post->post_excerpt;
+        $excerpt = preg_replace('~$excerptMore$~', '', $excerpt);
+        $excerpt = wp_strip_all_tags($excerpt);
+        $excerpt = html_entity_decode($excerpt, ENT_QUOTES | ENT_HTML5, get_bloginfo('charset'));
+        return $excerpt;
     }
 }
