@@ -248,45 +248,28 @@ class API
         $host = settings()->getOption('mastodon_domain');
         $accessToken = get_option(self::ACCESS_TOKEN);
 
-        try {
-            $response = wp_remote_post(
-                esc_url_raw($host . '/api/v1/statuses'),
-                [
-                    'headers'     => [
-                        'Authorization' => 'Bearer ' . $accessToken,
-                    ],
-                    'data_format' => 'body',
-                    'body'        => $queryString,
-                    'timeout'     => 15,
-                ]
-            );
-            $response = self::validateResponse($response);
-        } catch (\Exception $e) {
-            $response = new \WP_Error(
-                'rrze_autoshare_twitter_error',
-                esc_html__('Something went wrong, please try again.', 'rrze_autoshare'),
-                [
-                    (object) ['message' => $e->getMessage()],
-                ]
-            );
-        }
+        $response = wp_remote_post(
+            esc_url_raw($host . '/api/v1/statuses'),
+            [
+                'headers'     => [
+                    'Authorization' => 'Bearer ' . $accessToken,
+                ],
+                'data_format' => 'body',
+                'body'        => $queryString,
+                'timeout'     => 15,
+            ]
+        );
 
-        delete_metadata($post->post_type, $postId, 'rrze_autoshare_twitter_error');
+        $response = self::validateResponse($response);
 
         self::updateStatusMeta($post->post_type, $postId, $response);
     }
 
-    /**
-     * Validate and build response message.
-     *
-     * @param object $response The API response to validate.
-     *
-     * @return mixed
-     */
     private static function validateResponse($response)
     {
-        error_log(print_r($response, true));
-        $body = json_decode($response['body']);
+        if (!is_wp_error($response)) {
+            $body = json_decode($response['body']);
+        }
 
         if (!empty($body->id)) {
             $validatedResponse = [
@@ -294,10 +277,12 @@ class API
                 'created_at' => $body->created_at ?? gmdate('c'),
             ];
         } else {
+            $code = is_wp_error($response) ? '500' : wp_remote_retrieve_response_code($response);
+            $message = is_wp_error($response) ? $response->get_error_message() : $body->error;
             $errors = [
                 (object) [
-                    'code' => sanitize_text_field(wp_remote_retrieve_response_code($response)),
-                    'message' => sanitize_text_field($body->error),
+                    'code' => sanitize_text_field($code),
+                    'message' => sanitize_text_field($message),
                 ],
             ];
             $validatedResponse = new \WP_Error(
@@ -310,20 +295,13 @@ class API
         return $validatedResponse;
     }
 
-    /**
-     * Update response as post meta.
-     *
-     * @param $postType The post type.
-     * @param int $postId The post id.
-     * @param object $data The tweet request data.
-     */
     private static function updateStatusMeta($postType, $postId, $data)
     {
         if (!is_wp_error($data)) {
             $status = 'published';
             $response = [
                 'status' => $status,
-                'mastodon_id' => (int) $data['id'],
+                'mastodon_id' => sanitize_text_field($data['id']),
                 'created_at' => sanitize_text_field($data['created_at']),
             ];
         } elseif (is_wp_error($data)) {
@@ -339,9 +317,10 @@ class API
             $status = 'unknown';
             $response = [
                 'status'  => $status,
-                'message' => __('This post was not published on X.', 'rrze-autoshare'),
+                'message' => __('This post was not published on Mastodon.', 'rrze-autoshare'),
             ];
         }
+
         update_metadata($postType, $postId, sprintf('rrze_autoshare_mastodon_%s', $status), $response);
     }
 
