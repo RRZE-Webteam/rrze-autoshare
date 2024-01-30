@@ -170,17 +170,68 @@ class API
             ]
         );
 
-        if (is_wp_error($response)) {
-            update_metadata($post->post_type, $postId, 'rrze_autoshare_bluesky_error', $response->get_error_message());
-        } else {
-            $code = wp_remote_retrieve_response_code($response);
-            if ($code >= 300) {
-                update_metadata($post->post_type, $postId, 'rrze_autoshare_bluesky_error', $code);
-            } else {
-                delete_metadata($post->post_type, $postId, 'rrze_autoshare_bluesky_error');
-                update_metadata($post->post_type, $postId, 'rrze_autoshare_bluesky_published', true);
-            }
+        $response = self::validateResponse($response);
+
+        self::updateStatusMeta($post->post_type, $postId, $response);
+    }
+
+    private static function validateResponse($response)
+    {
+        if (!is_wp_error($response)) {
+            $body = json_decode($response['body']);
         }
+
+        if (!empty($body->uri)) {
+            $validatedResponse = [
+                'id' => $body->uri,
+                'created_at' => $body->created_at ?? gmdate('c'),
+            ];
+        } else {
+            $code = is_wp_error($response) ? '500' : wp_remote_retrieve_response_code($response);
+            $message = is_wp_error($response) ? $response->get_error_message() : $body->error;
+            $errors = [
+                (object) [
+                    'code' => sanitize_text_field($code),
+                    'message' => sanitize_text_field($message),
+                ],
+            ];
+            $validatedResponse = new \WP_Error(
+                'rrze_autoshare_bluesky_error',
+                __('An error occurred while trying to publish.', 'rrze-autoshare'),
+                $errors
+            );
+        }
+
+        return $validatedResponse;
+    }
+
+    private static function updateStatusMeta($postType, $postId, $data)
+    {
+        if (!is_wp_error($data)) {
+            $status = 'published';
+            $response = [
+                'status' => $status,
+                'bluesky_id' => sanitize_text_field($data['id']),
+                'created_at' => sanitize_text_field($data['created_at']),
+            ];
+        } elseif (is_wp_error($data)) {
+            $errorMessage = $data->error_data['rrze_autoshare_bluesky_error'][0];
+            // translators: %d is the error code.
+            $errorCodeText = $errorMessage->code ? sprintf(__('Error: %d. ', 'rrze-autoshare'), $errorMessage->code) : '';
+            $status = 'error';
+            $response = [
+                'status'  => $status,
+                'message' => sanitize_text_field($errorCodeText . $errorMessage->message),
+            ];
+        } else {
+            $status = 'unknown';
+            $response = [
+                'status'  => $status,
+                'message' => __('This post was not published on Bluesky.', 'rrze-autoshare'),
+            ];
+        }
+
+        update_metadata($postType, $postId, sprintf('rrze_autoshare_bluesky_%s', $status), $response);
     }
 
     public static function isConnected()
