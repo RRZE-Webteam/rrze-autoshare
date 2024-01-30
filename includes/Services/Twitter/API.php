@@ -48,8 +48,6 @@ class API
             );
         }
 
-        delete_metadata($post->post_type, $postId, 'rrze_autoshare_twitter_error');
-
         self::updateStatusMeta($post->post_type, $postId, $response);
     }
 
@@ -97,13 +95,6 @@ class API
         return $response;
     }
 
-    /**
-     * Validate and build response message.
-     *
-     * @param object $response The API response to validate.
-     *
-     * @return mixed
-     */
     private static function validateResponse($response)
     {
         if (!empty($response->id)) {
@@ -131,13 +122,6 @@ class API
         return $validatedResponse;
     }
 
-    /**
-     * Update response as post meta.
-     *
-     * @param $postType The post type.
-     * @param int $postId The post id.
-     * @param object $data The tweet request data.
-     */
     private static function updateStatusMeta($postType, $postId, $data)
     {
         if (!is_wp_error($data)) {
@@ -163,6 +147,7 @@ class API
                 'message' => __('This post was not published on X.', 'rrze-autoshare'),
             ];
         }
+
         update_metadata($postType, $postId, sprintf('rrze_autoshare_twitter_%s', $status), $response);
     }
 
