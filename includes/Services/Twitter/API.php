@@ -68,9 +68,9 @@ class API
             return;
         }
 
-        $updateData = array(
+        $updateData = [
             'text' => $text,
-        );
+        ];
 
         if (settings()->getOption('twitter_featured_image')) {
             $response = null;
