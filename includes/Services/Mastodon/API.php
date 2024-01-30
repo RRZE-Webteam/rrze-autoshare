@@ -208,25 +208,12 @@ class API
     {
         $post = get_post($postId);
 
-        $status = '%title% %permalink%';
-
-        $status = self::parseContent($status, $post);
-
-        $status = wp_strip_all_tags(
-            html_entity_decode($status, ENT_QUOTES | ENT_HTML5, get_bloginfo('charset'))
-        );
-
-        $permalink = esc_url_raw(get_permalink($post->ID));
-
-        if (false === strpos($status, $permalink)) {
-            if (false === strpos($status, "\n")) {
-                $status .= ' ' . $permalink;
-            } else {
-                $status .= "\r\n\r\n" . $permalink;
-            }
+        $text = Post::getContent($post);
+        if (empty($text)) {
+            return;
         }
 
-        $args = ['status' => $status];
+        $args = ['status' => $text];
 
         $queryString = http_build_query($args);
 
@@ -322,27 +309,6 @@ class API
         }
 
         update_metadata($postType, $postId, sprintf('rrze_autoshare_mastodon_%s', $status), $response);
-    }
-
-    public static function parseContent($text, \WP_Post $post)
-    {
-        $title = sanitize_text_field($post->post_title);
-        $permalink = esc_url_raw(get_the_permalink($post->ID));
-
-        $text = str_replace('%title%', $title, $text);
-        $text = str_replace('%tags%', Post::getTags($post->ID), $text);
-
-        $maxLength = mb_strlen(str_replace(['%excerpt%', '%permalink%'], '', $text));
-        $maxLength = max(0, 450 - $maxLength);
-
-        $text = str_replace('%excerpt%', Post::getExcerpt($post->ID, $maxLength), $text);
-
-        $text = preg_replace('~(\r\n){2,}~', "\r\n\r\n", $text);
-        $text = sanitize_textarea_field($text);
-
-        $text = str_replace('%permalink%', $permalink, $text);
-
-        return $text;
     }
 
     public static function isConnected()
