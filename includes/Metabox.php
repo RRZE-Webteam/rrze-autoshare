@@ -13,6 +13,7 @@ class Metabox
     public static function init()
     {
         add_action('add_meta_boxes', [__CLASS__, 'autoshareMetabox'], 10, 2);
+        // add_action('wp_ajax_rrze_autoshare_update_metabox', [__CLASS__, 'updateMetabox'], 10, 2);
     }
 
     public static function autoshareMetabox($postType, $post)
@@ -20,7 +21,7 @@ class Metabox
         if (
             !in_array($postType, settings()->getOption('bluesky_post_types'))
             && !in_array($postType, settings()->getOption('mastodon_post_types'))
-            // && !in_array($postType, settings()->getOption('twitter_post_types'))
+            && !in_array($postType, settings()->getOption('twitter_post_types'))
         ) {
             return;
         }
@@ -38,9 +39,17 @@ class Metabox
         );
     }
 
+    public static function updateMetabox()
+    {
+        $postId = $_POST['postId'] ?? null;
+        $post = get_post(absint($postId));
+        $content = Metabox::renderSubmitbox($post);
+        echo $content;
+    }
+
     public static function renderSubmitbox($post)
     {
-        echo '<ul>';
+        echo '<ul id="rrze_autoshare_metabox__ul">';
         echo self::blueskyMarkup($post);
         echo self::mastodonMarkup($post);
         echo self::twitterMarkup($post);
