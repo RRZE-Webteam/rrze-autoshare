@@ -4,7 +4,7 @@
 Plugin Name:      RRZE Autoshare
 Plugin URI:       https://github.com/RRZE-Webteam/rrze-autoshare
 Description:      Automatically share the post title or custom message and a link to the post to Bluesky, Twitter and other social media.
-Version:          1.2.2
+Version:          1.2.3
 Author:           RRZE-Webteam
 Author URI:       https://blogs.fau.de/webworking/
 License:          GNU General Public License v3.0
