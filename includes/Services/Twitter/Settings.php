@@ -41,6 +41,12 @@ class Settings
             'default' => ['post']
         ]);
         $sectionMain->addOption('checkbox', [
+            'name' => 'twitter_enable_default',
+            'label' => __('Enable by default', 'rrze-autoshare'),
+            'description' => __('Enable Autoshare by default when publishing content', 'rrze-autoshare'),
+            'default' => true
+        ]);
+        $sectionMain->addOption('checkbox', [
             'name' => 'twitter_featured_image',
             'label' => __('Featured Images', 'rrze-autoshare'),
             'description' => __('Include featured images', 'rrze-autoshare'),
