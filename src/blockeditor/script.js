@@ -11,27 +11,24 @@ const AutoshareSettingsPanel = () => {
     );
     const { editPost } = useDispatch("core/editor");
 
+    const isBlueskyEnableByDefault = autoshareObject.blueskyEnableByDefault;
     const isBlueskyEnabled = autoshareObject.blueskyEnabled;
     const isBlueskyPublished = autoshareObject.blueskyPublished;
+    const isMastodonEnableByDefault = autoshareObject.mastodonEnableByDefault;
     const isMastodonEnabled = autoshareObject.mastodonEnabled;
     const isMastodonPublished = autoshareObject.mastodonPublished;
+    const isTwitterEnableByDefault = autoshareObject.twitterEnableByDefault;
     const isTwitterEnabled = autoshareObject.twitterEnabled;
     const isTwitterPublished = autoshareObject.twitterPublished;
 
     const [isBlueskyChecked, setBlueskyIsChecked] = useState(
-        isBlueskyEnabled &&
-            !isBlueskyPublished &&
-            meta["rrze_autoshare_bluesky_enabled"]
+        isBlueskyEnabled && !isBlueskyPublished && isBlueskyEnableByDefault
     );
     const [isMastodonChecked, setMastodonIsChecked] = useState(
-        isMastodonEnabled &&
-            !isMastodonPublished &&
-            meta["rrze_autoshare_mastodon_enabled"]
+        isMastodonEnabled && !isMastodonPublished && isMastodonEnableByDefault
     );
     const [isTwitterChecked, setTwitterIsChecked] = useState(
-        isTwitterEnabled &&
-            !isTwitterPublished &&
-            meta["rrze_autoshare_twitter_enabled"]
+        isTwitterEnabled && !isTwitterPublished && isTwitterEnableByDefault
     );
 
     useEffect(() => {
