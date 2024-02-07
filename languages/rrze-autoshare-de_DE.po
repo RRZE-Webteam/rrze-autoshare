@@ -4,8 +4,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: RRZE Autoshare\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/rrze-autoshare\n"
-"POT-Creation-Date: 2024-01-30T17:02:49+00:00\n"
-"PO-Revision-Date: 2024-01-30 18:06+0100\n"
+"POT-Creation-Date: 2024-02-07T15:48:38+00:00\n"
+"PO-Revision-Date: 2024-02-07 16:50+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: de\n"
@@ -40,39 +40,39 @@ msgstr "RRZE-Webteam"
 msgid "https://blogs.fau.de/webworking/"
 msgstr "https://blogs.fau.de/webworking/"
 
-#: includes/Metabox.php:68 src/blockeditor/script.js:86
+#: includes/Metabox.php:68 src/blockeditor/script.js:83
 msgid "Share on Bluesky"
 msgstr "Auf Bluesky teilen"
 
-#: includes/Metabox.php:68 src/blockeditor/script.js:88
+#: includes/Metabox.php:68 src/blockeditor/script.js:85
 msgid "Share on Bluesky is disabled"
 msgstr "Teilen auf Bluesky ist deaktiviert"
 
-#: includes/Metabox.php:69 src/blockeditor/script.js:93
+#: includes/Metabox.php:69 src/blockeditor/script.js:90
 msgid "It is published on Bluesky"
 msgstr "Es ist auf Bluesky veröffentlicht"
 
-#: includes/Metabox.php:91 src/blockeditor/script.js:99
+#: includes/Metabox.php:91 src/blockeditor/script.js:96
 msgid "Share on Mastodon"
 msgstr "Auf Mastodon teilen"
 
-#: includes/Metabox.php:91 src/blockeditor/script.js:101
+#: includes/Metabox.php:91 src/blockeditor/script.js:98
 msgid "Share on Mastodon is disabled"
 msgstr "Teilen auf Mastodon ist deaktiviert"
 
-#: includes/Metabox.php:92 src/blockeditor/script.js:106
+#: includes/Metabox.php:92 src/blockeditor/script.js:103
 msgid "It is published on Mastodon"
 msgstr "Es ist auf Mastodon veröffentlicht"
 
-#: includes/Metabox.php:114 src/blockeditor/script.js:112
+#: includes/Metabox.php:114 src/blockeditor/script.js:109
 msgid "Share on X (Twitter)"
 msgstr "Auf X (Twitter) teilen"
 
-#: includes/Metabox.php:114 src/blockeditor/script.js:114
+#: includes/Metabox.php:114 src/blockeditor/script.js:111
 msgid "Share on X is disabled"
 msgstr "Teilen auf X ist deaktiviert"
 
-#: includes/Metabox.php:115 src/blockeditor/script.js:116
+#: includes/Metabox.php:115 src/blockeditor/script.js:113
 msgid "It is published on X"
 msgstr "Es ist auf X veröffentlicht"
 
@@ -199,18 +199,30 @@ msgstr "Seiten"
 #: includes/Services/Bluesky/Settings.php:59
 #: includes/Services/Mastodon/Settings.php:54
 #: includes/Services/Twitter/Settings.php:45
-msgid "Featured Images"
-msgstr "Beitragsbild"
+msgid "Enable by default"
+msgstr "Standardmäßig aktivieren"
 
 #: includes/Services/Bluesky/Settings.php:60
 #: includes/Services/Mastodon/Settings.php:55
 #: includes/Services/Twitter/Settings.php:46
-msgid "Include featured images"
-msgstr "Beitragsbild hinzufügen"
+msgid "Enable Autoshare by default when publishing content"
+msgstr "Standardmäßig Autoshare aktivieren beim Veröffentlichen von Inhalten"
 
 #: includes/Services/Bluesky/Settings.php:65
 #: includes/Services/Mastodon/Settings.php:60
 #: includes/Services/Twitter/Settings.php:51
+msgid "Featured Images"
+msgstr "Beitragsbild"
+
+#: includes/Services/Bluesky/Settings.php:66
+#: includes/Services/Mastodon/Settings.php:61
+#: includes/Services/Twitter/Settings.php:52
+msgid "Include featured images"
+msgstr "Beitragsbild hinzufügen"
+
+#: includes/Services/Bluesky/Settings.php:71
+#: includes/Services/Mastodon/Settings.php:66
+#: includes/Services/Twitter/Settings.php:57
 msgid "Access"
 msgstr "Zugriff"
 
@@ -329,65 +341,65 @@ msgstr "X (Twitter)"
 msgid "X (Twitter) Settings"
 msgstr "X (Twitter) Einstellungen"
 
-#: includes/Services/Twitter/Settings.php:61
+#: includes/Services/Twitter/Settings.php:67
 msgid "Consumer Keys"
 msgstr "Consumer Keys"
 
-#: includes/Services/Twitter/Settings.php:68
+#: includes/Services/Twitter/Settings.php:74
 msgid "API Key"
 msgstr "API-Key"
 
-#: includes/Services/Twitter/Settings.php:69
+#: includes/Services/Twitter/Settings.php:75
 msgid "Paste your API Key here"
 msgstr "Fügen Sie hier Ihren API-Key ein"
 
-#: includes/Services/Twitter/Settings.php:73
+#: includes/Services/Twitter/Settings.php:79
 msgid "API Key Secret"
 msgstr "API-Key-Secret"
 
-#: includes/Services/Twitter/Settings.php:74
+#: includes/Services/Twitter/Settings.php:80
 msgid "Paste your API Key Secret here"
 msgstr "Fügen Sie hier Ihren API-Key-Secret ein"
 
-#: includes/Services/Twitter/Settings.php:85
+#: includes/Services/Twitter/Settings.php:91
 msgid "1. Create a Twitter app"
 msgstr "1. Erstellen Sie eine Twitter-App"
 
 #. translators: %1$s: opening HTML <a> link tag, %2$s: closing HTML </a> link tag.
-#: includes/Services/Twitter/Settings.php:92
+#: includes/Services/Twitter/Settings.php:98
 msgid "Go to the %1$sTwitter developer portal%2$s"
 msgstr "Gehen Sie zum %1$sTwitter-Entwicklerportal%2$s"
 
-#: includes/Services/Twitter/Settings.php:98
+#: includes/Services/Twitter/Settings.php:104
 msgid ""
 "Click on Projects & Apps on the left navigation menu and create a new App."
 msgstr ""
 "Klicken Sie im linken Navigationsmenü auf Projekte & Apps und erstellen Sie "
 "eine neue App."
 
-#: includes/Services/Twitter/Settings.php:99
+#: includes/Services/Twitter/Settings.php:105
 msgid "Find the App and click it to show the Settings page for the App."
 msgstr ""
 "Suchen Sie die App und klicken Sie darauf, um die Seite „Settings“ für die "
 "App anzuzeigen."
 
-#: includes/Services/Twitter/Settings.php:100
+#: includes/Services/Twitter/Settings.php:106
 msgid "Edit the User authentication settings of the the App."
 msgstr "Bearbeiten Sie die „User authentication settings“ der App."
 
-#: includes/Services/Twitter/Settings.php:101
+#: includes/Services/Twitter/Settings.php:107
 msgid "Set App permissions to <strong>Read and write</strong>."
 msgstr ""
 "Setzen Sie die „App permissions“ auf <strong>„Read and write“</strong>."
 
-#: includes/Services/Twitter/Settings.php:102
+#: includes/Services/Twitter/Settings.php:108
 msgid "Set Types of App to <strong>Web App, Automated App or Bot</strong>."
 msgstr ""
 "Setzen Sie die „Types of App“ auf <strong>„Web App, Automated App or Bot“</"
 "strong>."
 
 #. translators: %s: Callback URL for Twitter Auth
-#: includes/Services/Twitter/Settings.php:107
+#: includes/Services/Twitter/Settings.php:113
 msgid ""
 "On App info set the <code>Callback URL / Redirect URL</code> to <code>%s</"
 "code>."
@@ -396,7 +408,7 @@ msgstr ""
 "<code>%s</code>."
 
 #. translators: %s: Site URL.
-#: includes/Services/Twitter/Settings.php:116
+#: includes/Services/Twitter/Settings.php:122
 msgid ""
 "Set the <code>Website URL</code> to <code>%s</code> and click <code>Save</"
 "code>."
@@ -404,11 +416,11 @@ msgstr ""
 "Setzen Sie die <code>Website URL</code> auf <code>%s</code> und klicken Sie "
 "auf <code>Save</code>."
 
-#: includes/Services/Twitter/Settings.php:121
+#: includes/Services/Twitter/Settings.php:127
 msgid "Switch from the \"Settings\" tab to the \"Keys and tokens\" tab."
 msgstr "Wechseln Sie vom Reiter „Settings“ zum Reiter „Keys and tokens“."
 
-#: includes/Services/Twitter/Settings.php:122
+#: includes/Services/Twitter/Settings.php:128
 msgid ""
 "Click on the <code>Regenerate</code> button in the <code>Consumer Keys</"
 "code> section."
@@ -416,7 +428,7 @@ msgstr ""
 "Klicken Sie im Abschnitt <code>Consumer Keys</code> auf die Schaltfläche "
 "<code>Regenerate</code>."
 
-#: includes/Services/Twitter/Settings.php:123
+#: includes/Services/Twitter/Settings.php:129
 msgid ""
 "Copy the <code>API Key</code> and <code>API Key Secret</code> values and "
 "paste them below."
@@ -424,11 +436,11 @@ msgstr ""
 "Kopieren Sie die Werte für <code>API Key</code> und <code>API Key Secret</"
 "code> und fügen Sie sie unten ein."
 
-#: includes/Services/Twitter/Settings.php:125
+#: includes/Services/Twitter/Settings.php:131
 msgid "2. Connect your Twitter account"
 msgstr "2. Verbinden Sie Ihr Twitter-Konto"
 
-#: includes/Services/Twitter/Settings.php:127
+#: includes/Services/Twitter/Settings.php:133
 msgid ""
 "After saving settings, click the <code>Authorize Access</code> button and "
 "follow the instructions provided there to connect your Twitter account with "
@@ -465,6 +477,6 @@ msgstr ""
 msgid "Plugins: %1$s: %2$s"
 msgstr "Plugins: %1$s: %2$s"
 
-#: src/blockeditor/script.js:135
+#: src/blockeditor/script.js:132
 msgid "Autoshare"
 msgstr "Autoshare"
