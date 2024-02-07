@@ -102,10 +102,13 @@ class Main
         );
 
         $localization = [
+            'blueskyEnableByDefault' => (bool) settings()->getOption('bluesky_enable_default'),
             'blueskyEnabled' => Bluesky::isConnected(),
             'blueskyPublished' => Bluesky::isPublished($post->post_type, $post->ID),
+            'mastodonEnableByDefault' => (bool) settings()->getOption('mastodon_enable_default'),
             'mastodonEnabled' => Mastodon::isConnected(),
             'mastodonPublished' => Mastodon::isPublished($post->post_type, $post->ID),
+            'twitterEnableByDefault' => (bool) settings()->getOption('twitter_enable_default'),
             'twitterEnabled' => Twitter::isConnected(),
             'twitterPublished' => Twitter::isPublished($post->post_type, $post->ID)
         ];
