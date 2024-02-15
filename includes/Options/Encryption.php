@@ -30,7 +30,7 @@ class Encryption
 
         $method = self::CIPHER_METHOD;
         $ivlen  = openssl_cipher_iv_length($method);
-        $iv     = openssl_random_pseudo_bytes($ivlen);
+        $iv = openssl_random_pseudo_bytes($ivlen);
 
         $rawValue = openssl_encrypt($value . self::getSalt(), $method, self::getKey(), 0, $iv);
         if (!$rawValue) {
@@ -50,7 +50,7 @@ class Encryption
      */
     public static function decrypt($rawValue)
     {
-        if (!extension_loaded('openssl')) {
+        if (!extension_loaded('openssl') || empty($rawValue)) {
             return $rawValue;
         }
 
