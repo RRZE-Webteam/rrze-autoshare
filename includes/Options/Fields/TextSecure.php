@@ -19,7 +19,7 @@ class TextSecure extends Field
         
     public function sanitize($value)
     {
-        if (false !== stripos($value, '***')) {
+        if (false !== mb_stripos($value, '•••')) {
             $value = $this->getValueAttribute();
         }
         $value = sanitize_text_field($value);

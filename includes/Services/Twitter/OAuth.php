@@ -55,6 +55,10 @@ class OAuth
         $this->consumerKey = Encryption::decrypt(settings()->getOption('twitter_api_key'));
         $this->consumerSecret = Encryption::decrypt(settings()->getOption('twitter_api_key_secret'));
 
+        if (empty($this->consumerKey) || empty($this->consumerSecret)) {
+            return;
+        }
+
         $this->client = new TwitterOAuth(
             $this->consumerKey,
             $this->consumerSecret
