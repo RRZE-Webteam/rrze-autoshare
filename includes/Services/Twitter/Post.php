@@ -96,9 +96,16 @@ class Post
         $textMaxLength = 275 - $permalinkLength;
 
         // Don't use get_the_title() because may introduce texturized characters.
-        $title = $post->post_title;
+        $title = sanitize_text_field($post->post_title);
+        $tags = self::getTags($post->ID);
         $excerpt = self::getExcerpt($post);
-        $text = sanitize_text_field($title) . PHP_EOL . sanitize_textarea_field($excerpt);
+        $text = $title;
+        if ($tags) {
+            $text .= PHP_EOL . $tags;
+        }
+        if ($excerpt) {
+            $text .= PHP_EOL . $excerpt;
+        }
         $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, get_bloginfo('charset'));
         $textLength = mb_strlen($text);
         $ellipsis = ''; // Initialize as empty. Will be set if the text is too long.
@@ -118,18 +125,42 @@ class Post
             $words = explode(' ', $text);
             array_pop($words);
             $text = implode(' ', $words);
-            $textLength = strlen($text);
+            $textLength = mb_strlen($text);
         }
 
         return sprintf('%s%s %s', $text, $ellipsis, $permalink);
     }
 
-    private static function getExcerpt($post)
+    protected static function getExcerpt($post)
     {
-        $excerpt = $post->post_excerpt;
-        $excerpt = preg_replace('~$excerptMore$~', '', $excerpt);
-        $excerpt = wp_strip_all_tags($excerpt);
-        $excerpt = html_entity_decode($excerpt, ENT_QUOTES | ENT_HTML5, get_bloginfo('charset'));
+        $excerpt = sanitize_textarea_field($post->post_excerpt);
+        if (!empty($excerpt)) {
+            $excerpt = preg_replace('~$excerptMore$~', '', $excerpt);
+            $excerpt = wp_strip_all_tags($excerpt);
+            $excerpt = html_entity_decode($excerpt, ENT_QUOTES | ENT_HTML5, get_bloginfo('charset'));
+        }
         return $excerpt;
+    }
+
+    protected static function getTags($postId)
+    {
+        $hashtags = '';
+        $tags = get_the_tags($postId);
+
+        if ($tags && !is_wp_error($tags)) {
+            foreach ($tags as $tag) {
+                $tagName = $tag->name;
+
+                if (preg_match('/(\s|-)+/', $tagName)) {
+                    $tagName = preg_replace('~(\s|-)+~', ' ', $tagName);
+                    $tagName = explode(' ', $tagName);
+                    $tagName = implode('', array_map('ucfirst', $tagName));
+                }
+
+                $hashtags .= '#' . $tagName . ' ';
+            }
+        }
+
+        return trim($hashtags);
     }
 }
