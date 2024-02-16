@@ -5,14 +5,14 @@ namespace RRZE\Autoshare\Options;
 defined('ABSPATH') || exit;
 ?>
 <tr valign="top">
-    <th scope="row" class="rrze-wp-form-label">
-        <label for="<?php echo $option->getIdAttribute(); ?>" class="<?php echo $option->getLabelClassAttribute(); ?>"><?php echo $option->getLabel(); ?></label>
+    <th scope="row">
+        <label for="<?php echo $option->getIdAttribute(); ?>"><?php echo $option->getLabel(); ?></label>
     </th>
-    <td class="rrze-wp-form rrze-wp-form-input">
+    <td>
         <?php foreach ($option->getArg('options', []) as $key => $label) { ?>
             <div>
                 <label>
-                    <input name="<?php echo esc_attr($option->getNameAttribute()); ?>" id="<?php echo $option->getIdAttribute(); ?>" type="radio" value="<?php echo $key; ?>" <?php checked($key, $option->getValueAttribute()); ?> class="<?php echo $option->getInputClassAttribute(); ?>">
+                    <input name="<?php echo esc_attr($option->getNameAttribute()); ?>" id="<?php echo $option->getIdAttribute(); ?>" type="radio" value="<?php echo $key; ?>" <?php checked($key, $option->getValueAttribute()); ?>>
                     <?php echo $label; ?>
                 </label>
             </div>
