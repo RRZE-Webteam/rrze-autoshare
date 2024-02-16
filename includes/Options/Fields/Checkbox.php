@@ -10,11 +10,15 @@ class Checkbox extends Field
 
     public function getValueAttribute()
     {
-        return '1';
+        $value = get_option($this->section->tab->settings->optionName)[$this->getArg('name')] ?? false;
+        if ($value === false) {
+            $value = $this->getArg('default');
+        }
+        return $value;
     }
 
     public function isChecked()
     {
-        return parent::getValueAttribute();
+        return (bool) $this->getValueAttribute();
     }
 }

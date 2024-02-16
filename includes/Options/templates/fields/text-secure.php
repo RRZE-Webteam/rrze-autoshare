@@ -7,11 +7,11 @@ defined('ABSPATH') || exit;
 $value = Utils::maskSecureValues($option->getValueAttribute());
 ?>
 <tr valign="top">
-    <th scope="row" class="rrze-wp-form-label">
-        <label for="<?php echo $option->getIdAttribute(); ?>" class="<?php echo $option->getLabelClassAttribute(); ?>"><?php echo $option->getLabel(); ?></label>
+    <th scope="row">
+        <label for="<?php echo $option->getIdAttribute(); ?>"><?php echo $option->getLabel(); ?></label>
     </th>
-    <td class="rrze-wp-form rrze-wp-form-input">
-        <input name="<?php echo esc_attr($option->getNameAttribute()); ?>" id="<?php echo $option->getIdAttribute(); ?>" type="text" value="<?php echo $value; ?>" placeholder="<?php echo $option->getPlaceholderAttribute() ?: ''; ?>" class="<?php echo $option->getInputClassAttribute() ?: 'regular-text'; ?>">
+    <td>
+        <input name="<?php echo esc_attr($option->getNameAttribute()); ?>" id="<?php echo $option->getIdAttribute(); ?>" type="text" value="<?php echo $value; ?>" placeholder="<?php echo $option->getPlaceholderAttribute() ?: ''; ?>" class="regular-text">
         <?php if ($description = $option->getArg('description')) { ?>
             <p class="description"><?php echo $description; ?></p>
         <?php } ?>

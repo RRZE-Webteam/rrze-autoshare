@@ -11,7 +11,7 @@ defined('ABSPATH') || exit;
             <legend class="screen-reader-text"><span>Standardeinstellungen für Beiträge</span></legend>
             <?php foreach ($option->getArg('options', []) as $key => $label) : ?>
                 <label for="<?php echo $option->getIdAttribute() . '_' . $key; ?>">
-                    <input name="<?php echo esc_attr($option->getNameAttribute()); ?>" id="<?php echo $option->getIdAttribute() . '_' . $key; ?>" type="checkbox" value="<?php echo $key; ?>" <?php echo in_array($key, $option->getValueAttribute() ?? []) ? 'checked' : null; ?> class="<?php echo $option->getInputClassAttribute(); ?>"> <?php echo $label; ?>
+                    <input name="<?php echo esc_attr($option->getNameAttribute()); ?>" id="<?php echo $option->getIdAttribute() . '_' . $key; ?>" type="checkbox" value="<?php echo $key; ?>" <?php echo in_array($key, $option->getValueAttribute() ?? []) ? 'checked' : null; ?>> <?php echo $label; ?>
                 </label><br>
             <?php endforeach ?>
             <?php if ($description = $option->getArg('description')) : ?>

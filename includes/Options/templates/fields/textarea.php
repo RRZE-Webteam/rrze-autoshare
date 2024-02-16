@@ -5,11 +5,11 @@ namespace RRZE\Autoshare\Options;
 defined('ABSPATH') || exit;
 ?>
 <tr valign="top">
-    <th scope="row" class="rrze-wp-form-label">
-        <label for="<?php echo $option->getIdAttribute(); ?>" class="<?php echo $option->getLabelClassAttribute(); ?>"><?php echo $option->getLabel(); ?></label>
+    <th scope="row">
+        <label for="<?php echo $option->getIdAttribute(); ?>"><?php echo $option->getLabel(); ?></label>
     </th>
-    <td class="rrze-wp-form rrze-wp-form-input">
-        <textarea name="<?php echo esc_attr($option->getNameAttribute()); ?>" id="<?php echo $option->getIdAttribute(); ?>" class="<?php echo $option->getInputClassAttribute(); ?>"><?php echo $option->getValueAttribute(); ?></textarea>
+    <td>
+        <textarea name="<?php echo esc_attr($option->getNameAttribute()); ?>" id="<?php echo $option->getIdAttribute(); ?>"><?php echo $option->getValueAttribute(); ?></textarea>
         <?php if ($description = $option->getArg('description')) { ?>
             <p class="description"><?php echo $description; ?></p>
         <?php } ?>
