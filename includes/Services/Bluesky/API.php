@@ -4,7 +4,7 @@ namespace RRZE\Autoshare\Services\Bluesky;
 
 defined('ABSPATH') || exit;
 
-use RRZE\Autoshare\Options\Encryption;
+use RRZE\WP\Settings\Encryption;
 use function RRZE\Autoshare\plugin;
 use function RRZE\Autoshare\settings;
 
