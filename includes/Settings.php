@@ -26,6 +26,11 @@ class Settings
             return $options;
         });
 
+        add_action('admin_init', [$this, 'connectAPI']);
+    }
+
+    public function loaded()
+    {
         $this->settings = new OptionsSettings(__('Autoshare Settings', 'rrze-autoshare'), 'rrze_autoshare');
 
         $this->settings->setCapability('manage_options')
@@ -44,8 +49,6 @@ class Settings
         new TwitterSettings(@$this->settings);
 
         $this->settings->build();
-
-        add_action('admin_init', [$this, 'connectAPI']);
     }
 
     public function getOption($option)
