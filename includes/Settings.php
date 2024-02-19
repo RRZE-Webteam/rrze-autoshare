@@ -4,7 +4,7 @@ namespace RRZE\Autoshare;
 
 defined('ABSPATH') || exit;
 
-use RRZE\Autoshare\Options\Settings as OptionsSettings;
+use RRZE\WP\Settings\Main as OptionsSettings;
 use RRZE\Autoshare\Services\Bluesky\API as BlueskyAPI;
 use RRZE\Autoshare\Services\Bluesky\Settings as BlueskySettings;
 use RRZE\Autoshare\Services\Mastodon\API as MastodonAPI;
@@ -20,6 +20,12 @@ class Settings
 
     public function __construct()
     {
+        add_filter('rrze_wp_settings_option_type_map', function ($options) {
+            $options['button-link'] = __NAMESPACE__ . '\Options\ButtonLink';
+            $options['text-secure'] = __NAMESPACE__ . '\Options\TextSecure';
+            return $options;
+        });
+
         $this->settings = new OptionsSettings(__('Autoshare Settings', 'rrze-autoshare'), 'rrze_autoshare');
 
         $this->settings->setCapability('manage_options')
