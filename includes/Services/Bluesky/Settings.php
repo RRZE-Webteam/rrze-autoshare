@@ -8,7 +8,7 @@ class Settings
 {
     protected $settings;
 
-    public function __construct(\RRZE\Autoshare\Options\Settings $settings)
+    public function __construct(\RRZE\WP\Settings\Main $settings)
     {
         $this->settings = $settings;
 
@@ -25,6 +25,9 @@ class Settings
             'name' => 'bluesky_domain',
             'label' => __('Domain', 'rrze-autoshare'),
             'description' => __('The domain (URL) of the Bluesky service.', 'rrze-autoshare'),
+            'css' => [
+                'input_class' => 'regular-text'
+            ],
             'default' => 'https://bsky.social',
             'validate' => [
                 [
@@ -37,12 +40,18 @@ class Settings
             'name' => 'bluesky_identifier',
             'label' => __('Indentifier', 'rrze-autoshare'),
             'description' => __('The Bluesky account identifier.', 'rrze-autoshare'),
+            'css' => [
+                'input_class' => 'regular-text'
+            ],
             'default' => ''
         ]);
         $sectionMain->addOption('password', [
             'name' => 'bluesky_password',
             'label' => __('Password', 'rrze-autoshare'),
-            'description' => __('The Bluesky account password.', 'rrze-autoshare')
+            'description' => __('The Bluesky account password.', 'rrze-autoshare'),
+            'css' => [
+                'input_class' => 'regular-text'
+            ],
         ]);
         $sectionMain->addOption('checkbox-multiple', [
             'name' => 'bluesky_post_types',
@@ -72,6 +81,9 @@ class Settings
             'href' => [__NAMESPACE__ . '\API', 'authorizeAccessUrl'],
             'text' => [__NAMESPACE__ . '\API', 'authorizeAccessText'],
             'description' => [__NAMESPACE__ . '\API', 'authorizeAccessDescription'],
+            'css' => [
+                'input_class' => 'button button-secondary'
+            ],
         ]);
     }
 }
