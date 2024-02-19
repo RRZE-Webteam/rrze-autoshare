@@ -1,15 +1,24 @@
 <?php return array(
     'root' => array(
-        'name' => 'rrze/rrze-autoshare',
-        'pretty_version' => '1.0.0',
-        'version' => '1.0.0.0',
-        'reference' => NULL,
-        'type' => 'wordpress-plugin',
+        'name' => '__root__',
+        'pretty_version' => 'dev-main',
+        'version' => 'dev-main',
+        'reference' => '70fbe5a7c805b1584305f4505071a1946efb0989',
+        'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
         'dev' => true,
     ),
     'versions' => array(
+        '__root__' => array(
+            'pretty_version' => 'dev-main',
+            'version' => 'dev-main',
+            'reference' => '70fbe5a7c805b1584305f4505071a1946efb0989',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../../',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'abraham/twitteroauth' => array(
             'pretty_version' => '4.0.1',
             'version' => '4.0.1.0',
@@ -28,12 +37,12 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
-        'rrze/rrze-autoshare' => array(
-            'pretty_version' => '1.0.0',
-            'version' => '1.0.0.0',
-            'reference' => NULL,
-            'type' => 'wordpress-plugin',
-            'install_path' => __DIR__ . '/../../',
+        'rrze/wp' => array(
+            'pretty_version' => '2.0.0',
+            'version' => '2.0.0.0',
+            'reference' => 'c382835ce4a22684458a0b9e6f18d3d34e30071a',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../rrze/wp',
             'aliases' => array(),
             'dev_requirement' => false,
         ),
