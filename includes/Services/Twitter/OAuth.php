@@ -4,8 +4,8 @@ namespace RRZE\Autoshare\Services\Twitter;
 
 defined('ABSPATH') || exit;
 
+use RRZE\WP\Settings\Encryption;
 use Abraham\TwitterOAuth\TwitterOAuth as TwitterOAuth;
-use RRZE\Autoshare\Options\Encryption;
 use function RRZE\Autoshare\settings;
 
 class OAuth
