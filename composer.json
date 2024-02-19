@@ -1,10 +1,7 @@
 {
-    "name": "rrze/rrze-autoshare",
-    "description": "Automatically shares the post title, part of the text excerpt, the post image (if available) and a link to the post on Bluesky and Twitter.",
-    "version": "1.0.0",
-    "type": "wordpress-plugin",
-    "license": "GPL",
     "require": {
+        "php": "^8.1.0",
+        "rrze/wp": "^2.0",
         "abraham/twitteroauth": "4.0.1"
     },
     "autoload": {

@@ -10,7 +10,7 @@ class Settings
 
     protected $tab;
 
-    public function __construct(\RRZE\Autoshare\Options\Settings $settings)
+    public function __construct(\RRZE\WP\Settings\Settings $settings)
     {
         $this->settings = $settings;
 
@@ -58,6 +58,9 @@ class Settings
             'href' => [__NAMESPACE__ . '\API', 'authorizeAccessUrl'],
             'text' => [__NAMESPACE__ . '\API', 'authorizeAccessText'],
             'description' => [__NAMESPACE__ . '\API', 'authorizeAccessDescription'],
+            'css' => [
+                'input_class' => 'button button-secondary'
+            ],
         ]);
     }
 
@@ -72,11 +75,17 @@ class Settings
         $sectionKeys->addOption('text-secure', [
             'name' => 'twitter_api_key',
             'label' => __('API Key', 'rrze-autoshare'),
+            'css' => [
+                'input_class' => 'regular-text'
+            ],
             'placeholder' => __('Paste your API Key here', 'rrze-autoshare')
         ]);
         $sectionKeys->addOption('text-secure', [
             'name' => 'twitter_api_key_secret',
             'label' => __('API Key Secret', 'rrze-autoshare'),
+            'css' => [
+                'input_class' => 'regular-text'
+            ],
             'placeholder' => __('Paste your API Key Secret here', 'rrze-autoshare')
         ]);
     }

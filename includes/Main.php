@@ -23,7 +23,7 @@ class Main
         /* Enqueue Block Editor Assets */
         add_action('enqueue_block_editor_assets', [__CLASS__, 'enqueueBlockEditorAssets'], 10, 0);
 
-        settings();
+        settings()->loaded();
 
         Metabox::init();
 

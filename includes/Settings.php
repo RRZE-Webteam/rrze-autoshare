@@ -4,7 +4,7 @@ namespace RRZE\Autoshare;
 
 defined('ABSPATH') || exit;
 
-use RRZE\Autoshare\Options\Settings as OptionsSettings;
+use RRZE\WP\Settings\Settings as OptionsSettings;
 use RRZE\Autoshare\Services\Bluesky\API as BlueskyAPI;
 use RRZE\Autoshare\Services\Bluesky\Settings as BlueskySettings;
 use RRZE\Autoshare\Services\Mastodon\API as MastodonAPI;
@@ -19,6 +19,17 @@ class Settings
     protected $settings;
 
     public function __construct()
+    {
+        add_filter('rrze_wp_settings_option_type_map', function ($options) {
+            $options['button-link'] = __NAMESPACE__ . '\Options\ButtonLink';
+            $options['text-secure'] = __NAMESPACE__ . '\Options\TextSecure';
+            return $options;
+        });
+
+        add_action('admin_init', [$this, 'connectAPI']);
+    }
+
+    public function loaded()
     {
         $this->settings = new OptionsSettings(__('Autoshare Settings', 'rrze-autoshare'), 'rrze_autoshare');
 
@@ -38,8 +49,6 @@ class Settings
         new TwitterSettings(@$this->settings);
 
         $this->settings->build();
-
-        add_action('admin_init', [$this, 'connectAPI']);
     }
 
     public function getOption($option)

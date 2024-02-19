@@ -8,7 +8,7 @@ class Settings
 {
     protected $settings;
 
-    public function __construct(\RRZE\Autoshare\Options\Settings $settings)
+    public function __construct(\RRZE\WP\Settings\Settings $settings)
     {
         $this->settings = $settings;
 
@@ -25,6 +25,9 @@ class Settings
             'name' => 'mastodon_domain',
             'label' => __('Domain', 'rrze-autoshare'),
             'description' => __('The domain (URL) of the Mastodon service.', 'rrze-autoshare'),
+            'css' => [
+                'input_class' => 'regular-text'
+            ],
             'default' => 'https://mastodon.social',
             'validate' => [
                 [
@@ -37,6 +40,9 @@ class Settings
             'name' => 'mastodon_username',
             'label' => __('Username', 'rrze-autoshare'),
             'description' => __('The Mastodon account username.', 'rrze-autoshare'),
+            'css' => [
+                'input_class' => 'regular-text'
+            ],
             'default' => ''
         ]);
         $sectionMain->addOption('checkbox-multiple', [
@@ -67,6 +73,9 @@ class Settings
             'href' => [__NAMESPACE__ . '\API', 'authorizeAccessUrl'],
             'text' => [__NAMESPACE__ . '\API', 'authorizeAccessText'],
             'description' => [__NAMESPACE__ . '\API', 'authorizeAccessDescription'],
+            'css' => [
+                'input_class' => 'button button-secondary'
+            ],
         ]);
     }
 }

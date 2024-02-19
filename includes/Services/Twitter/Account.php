@@ -4,8 +4,7 @@ namespace RRZE\Autoshare\Services\Twitter;
 
 defined('ABSPATH') || exit;
 
-use RRZE\Autoshare\Options\Encryption;
-use function RRZE\Autoshare\settings;
+use RRZE\WP\Settings\Encryption;
 
 class Account
 {

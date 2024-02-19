@@ -4,11 +4,12 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit56b574ea1c3d61f938fbd326936a01b9
+class ComposerStaticInita0c87cbe665b87ad76b9e15ead74830e
 {
     public static $prefixLengthsPsr4 = array (
         'R' => 
         array (
+            'RRZE\\WP\\' => 8,
             'RRZE\\Autoshare\\' => 15,
         ),
         'C' => 
@@ -22,6 +23,10 @@ class ComposerStaticInit56b574ea1c3d61f938fbd326936a01b9
     );
 
     public static $prefixDirsPsr4 = array (
+        'RRZE\\WP\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/rrze/wp/src',
+        ),
         'RRZE\\Autoshare\\' => 
         array (
             0 => __DIR__ . '/../..' . '/includes',
@@ -43,9 +48,9 @@ class ComposerStaticInit56b574ea1c3d61f938fbd326936a01b9
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit56b574ea1c3d61f938fbd326936a01b9::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit56b574ea1c3d61f938fbd326936a01b9::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit56b574ea1c3d61f938fbd326936a01b9::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInita0c87cbe665b87ad76b9e15ead74830e::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInita0c87cbe665b87ad76b9e15ead74830e::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInita0c87cbe665b87ad76b9e15ead74830e::$classMap;
 
         }, null, ClassLoader::class);
     }
