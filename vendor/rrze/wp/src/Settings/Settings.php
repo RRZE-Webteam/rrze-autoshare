@@ -4,7 +4,7 @@ namespace RRZE\WP\Settings;
 
 defined('ABSPATH') || exit;
 
-class Main
+class Settings
 {
     public $title;
 
@@ -325,6 +325,6 @@ class Main
     public function updateOptions($options)
     {
         update_option($this->optionName, $options);
-        do_action('rrze_wp_settings_after_update_option', $options);
+        do_action('rrze_wp_settings_after_update_option', $this->optionName, $options);
     }
 }

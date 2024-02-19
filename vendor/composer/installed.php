@@ -3,7 +3,7 @@
         'name' => '__root__',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '70fbe5a7c805b1584305f4505071a1946efb0989',
+        'reference' => '3a0b9c16e1dadbd85048d4353abeaf2a930e1a5b',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         '__root__' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '70fbe5a7c805b1584305f4505071a1946efb0989',
+            'reference' => '3a0b9c16e1dadbd85048d4353abeaf2a930e1a5b',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -40,7 +40,7 @@
         'rrze/wp' => array(
             'pretty_version' => '2.0.0',
             'version' => '2.0.0.0',
-            'reference' => 'c382835ce4a22684458a0b9e6f18d3d34e30071a',
+            'reference' => 'e44c01ddc4a69a38be1a9c6a900eeee87f6d6aac',
             'type' => 'library',
             'install_path' => __DIR__ . '/../rrze/wp',
             'aliases' => array(),

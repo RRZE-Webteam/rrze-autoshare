@@ -151,18 +151,18 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/RRZE-Webteam/rrze-wp.git",
-                "reference": "c382835ce4a22684458a0b9e6f18d3d34e30071a"
+                "reference": "e44c01ddc4a69a38be1a9c6a900eeee87f6d6aac"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/RRZE-Webteam/rrze-wp/zipball/c382835ce4a22684458a0b9e6f18d3d34e30071a",
-                "reference": "c382835ce4a22684458a0b9e6f18d3d34e30071a",
+                "url": "https://api.github.com/repos/RRZE-Webteam/rrze-wp/zipball/e44c01ddc4a69a38be1a9c6a900eeee87f6d6aac",
+                "reference": "e44c01ddc4a69a38be1a9c6a900eeee87f6d6aac",
                 "shasum": ""
             },
             "require": {
                 "php": ">=8.0"
             },
-            "time": "2024-02-19T07:08:27+00:00",
+            "time": "2024-02-19T13:55:11+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {

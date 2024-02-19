@@ -1,6 +1,6 @@
 <?php
 
-namespace RRZE\WP;
+namespace RRZE\WP\Plugin;
 
 defined('ABSPATH') || exit;
 

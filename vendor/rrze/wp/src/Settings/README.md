@@ -1,6 +1,6 @@
 # RRZE\WP\Settings
 
-The objective of this package is to simplify the process of creating settings pages for WordPress plugins. Traditionally, developers have utilized the Settings API or custom code for this purpose. Although the Settings API functions well, it necessitates substantial setup effort. For instance, developers must manually write the HTML code for their options. Additionally, incorporating tabs and tab-sections can become rather complex. This package aims to streamline these tasks and make settings page creation more straightforward.
+The objective of this PHP library is to simplify the process of creating settings pages for WordPress plugins. Traditionally, developers have utilized the Settings API or custom code for this purpose. Although the Settings API functions well, it necessitates substantial setup effort. For instance, developers must manually write the HTML code for their options. Additionally, incorporating tabs and tab-sections can become rather complex. This PHP library aims to streamline these tasks and make settings page creation more straightforward.
 
 Based on the package `jeffreyvanrossum/wp-settings`.
 
@@ -9,7 +9,7 @@ Based on the package `jeffreyvanrossum/wp-settings`.
 ### Basic example
 
 ```php
-use RRZE\WP\Settings;
+use RRZE\WP\Settings\Settings;
 
 $settings = new Settings(__('My Plugin Settings'));
 
@@ -28,7 +28,7 @@ $settings->build();
 ### Initializing the Settings class
 
 ```php
-use RRZE\WP\Settings;
+use RRZE\WP\Settings\Settings;
 
 $settings = new Settings(__('Custom Settings', 'textdomain'));
 ```
@@ -236,7 +236,7 @@ $section->addOption('text', [
 ]);
 ```
 
-### Filters
+### Hooks
 
 ```php
 add_filter('rrze_wp_settings_new_options', array $newOptions, array $currentOptions)
@@ -255,7 +255,7 @@ add_filter('rrze_wp_settings_template_include', string $fileName, array $vars)
 ```
 
 ```php
-add_action('rrze_wp_settings_after_update_option', array $newOptions)
+add_action('rrze_wp_settings_after_update_option', string $optionName, array $options)
 ```
 
 ### Adding a custom option type
