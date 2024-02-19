@@ -10,7 +10,7 @@ class Settings
 
     protected $tab;
 
-    public function __construct(\RRZE\WP\Settings\Main $settings)
+    public function __construct(\RRZE\WP\Settings\Settings $settings)
     {
         $this->settings = $settings;
 
