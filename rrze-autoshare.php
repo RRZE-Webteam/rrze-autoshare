@@ -17,7 +17,7 @@ namespace RRZE\Autoshare;
 
 defined('ABSPATH') || exit;
 
-use RRZE\WP\Plugin;
+use RRZE\WP\Plugin\Plugin;
 
 const RRZE_PHP_VERSION = '8.1';
 const RRZE_WP_VERSION = '6.4';
