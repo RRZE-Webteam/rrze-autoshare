@@ -249,7 +249,7 @@ class API
 
         $response = self::validateResponse($response);
 
-        self::updateStatusMeta($post->post_type, $postId, $response);
+        self::updateStatusMeta($postId, $response);
     }
 
     private static function validateResponse($response)
@@ -282,7 +282,7 @@ class API
         return $validatedResponse;
     }
 
-    private static function updateStatusMeta($postType, $postId, $data)
+    private static function updateStatusMeta($postId, $data)
     {
         if (!is_wp_error($data)) {
             $status = 'published';
@@ -308,7 +308,7 @@ class API
             ];
         }
 
-        update_metadata($postType, $postId, sprintf('rrze_autoshare_mastodon_%s', $status), $response);
+        update_post_meta($postId, sprintf('rrze_autoshare_mastodon_%s', $status), $response);
     }
 
     public static function isConnected()
