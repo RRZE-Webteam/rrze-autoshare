@@ -36,7 +36,7 @@ class Main
     {
         $supportedPostTypes = settings()->getOption('twitter_post_types');
         foreach ($supportedPostTypes as $postType) {
-            register_meta(
+            register_post_meta(
                 $postType,
                 'rrze_autoshare_twitter_enabled',
                 [
