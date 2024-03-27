@@ -11,20 +11,33 @@ class Post
     public static function init()
     {
         add_action('transition_post_status', [__CLASS__, 'maybePublishOnService'], 10, 3);
+        add_action('save_post', [__CLASS__, 'savePost'], 10, 2);
         add_action('rrze_autoshare_mastodon_publish_post', [__CLASS__, 'publishPost']);
     }
 
-    public static function maybePublishOnService($newStatus, $oldStatus, $post)
+    public static function savePost($postId, $post)
     {
+        if (wp_is_post_revision($post) || wp_is_post_autosave($post)) {
+            return;
+        }
+
         $supportedPostTypes = settings()->getOption('mastodon_post_types');
         if (!in_array($post->post_type, $supportedPostTypes)) {
             return;
         }
 
         $metaValue = isset($_POST['rrze_autoshare_mastodon_enabled']);
-        update_post_meta($post->ID, 'rrze_autoshare_mastodon_enabled', $metaValue);
+        update_post_meta($postId, 'rrze_autoshare_mastodon_enabled', $metaValue);
+    }
 
+    public static function maybePublishOnService($newStatus, $oldStatus, $post)
+    {
         if ('publish' !== $newStatus || 'publish' === $oldStatus) {
+            return;
+        }
+
+        $supportedPostTypes = settings()->getOption('mastodon_post_types');
+        if (!in_array($post->post_type, $supportedPostTypes)) {
             return;
         }
 
@@ -42,14 +55,6 @@ class Post
 
     private static function publishOnService($postId)
     {
-        if (
-            !API::isConnected() ||
-            !self::isEnabled($postId) ||
-            self::isPublished($postId)
-        ) {
-            return;
-        }
-
         update_post_meta($postId, 'rrze_autoshare_mastodon_sent', gmdate('c'));
         delete_post_meta($postId, 'rrze_autoshare_mastodon_error');
 
@@ -59,7 +64,13 @@ class Post
     public static function publishPost($postId)
     {
         delete_post_meta($postId, 'rrze_autoshare_mastodon_sent');
-        API::publishPost($postId);
+        if (
+            API::isConnected() &&
+            self::isEnabled($postId) &&
+            !self::isPublished($postId)
+        ) {
+            API::publishPost($postId);
+        }
     }
 
     public static function isEnabled($postId)
