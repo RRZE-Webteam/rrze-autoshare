@@ -60,10 +60,11 @@ class Metabox
     {
         $metaKey = 'rrze_autoshare_bluesky_enabled';
         $blueskyEnableByDefault = (bool) settings()->getOption('bluesky_enable_default');
-        $isEnabled = Bluesky::isConnected();
-        $isPublished = Bluesky::isPublished($post->post_type, $post->ID);
-        $checked = $isEnabled && !$isPublished && $blueskyEnableByDefault;
-        $disabled = !$isEnabled || $isPublished ? ' disabled' : '';
+        $isEnabled = metadata_exists('post', $post->ID, $metaKey) ? Bluesky::isEnabled($post->ID) : $blueskyEnableByDefault;
+        $isPublished = Bluesky::isPublished($post->ID);
+        $isConnected = Bluesky::isConnected();
+        $checked = $isConnected && $isEnabled && !$isPublished;
+        $disabled = !$isConnected || $isPublished ? ' disabled' : '';
         $disabledClass = $disabled ? 'class = "rrze-autoshare-disabled_input__label" ' : '';
         $label = !$disabled ? __('Share on Bluesky', 'rrze-autoshare') : __('Share on Bluesky is disabled', 'rrze-autoshare');
         $label = $isPublished ? __('It is published on Bluesky', 'rrze-autoshare') : $label;
@@ -83,10 +84,11 @@ class Metabox
     {
         $metaKey = 'rrze_autoshare_mastodon_enabled';
         $mastodonEnableByDefault = (bool) settings()->getOption('mastodon_enable_default');
-        $isEnabled = Mastodon::isConnected();
-        $isPublished = Mastodon::isPublished($post->post_type, $post->ID);
-        $checked = $isEnabled && !$isPublished && $mastodonEnableByDefault;
-        $disabled = !$isEnabled || $isPublished ? ' disabled' : '';
+        $isEnabled = metadata_exists('post', $post->ID, $metaKey) ? Mastodon::isEnabled($post->ID) : $mastodonEnableByDefault;
+        $isPublished = Mastodon::isPublished($post->ID);
+        $isConnected = Mastodon::isConnected();
+        $checked = $isConnected && $isEnabled && !$isPublished;
+        $disabled = !$isConnected || $isPublished ? ' disabled' : '';
         $disabledClass = $disabled ? 'class = "rrze-autoshare-disabled_input__label" ' : '';
         $label = !$disabled ? __('Share on Mastodon', 'rrze-autoshare') : __('Share on Mastodon is disabled', 'rrze-autoshare');
         $label = $isPublished ? __('It is published on Mastodon', 'rrze-autoshare') : $label;
@@ -106,10 +108,11 @@ class Metabox
     {
         $metaKey = 'rrze_autoshare_twitter_enabled';
         $twitterEnableByDefault = (bool) settings()->getOption('bluesky_enable_default');
-        $isEnabled = Twitter::isConnected();
-        $isPublished = Twitter::isPublished($post->post_type, $post->ID);
-        $checked = $isEnabled && !$isPublished && $twitterEnableByDefault;
-        $disabled = !$isEnabled || $isPublished ? ' disabled' : '';
+        $isEnabled = metadata_exists('post', $post->ID, $metaKey) ? Twitter::isEnabled($post->ID) : $twitterEnableByDefault;
+        $isPublished = Twitter::isPublished($post->ID);
+        $isConnected = Twitter::isConnected();
+        $checked = $isConnected && $isEnabled && !$isPublished;
+        $disabled = !$isConnected || $isPublished ? ' disabled' : '';
         $disabledClass = $disabled ? 'class = "rrze-autoshare-disabled_input__label" ' : '';
         $label = !$disabled ? __('Share on X (Twitter)', 'rrze-autoshare') : __('Share on X is disabled', 'rrze-autoshare');
         $label = $isPublished ? __('It is published on X', 'rrze-autoshare') : $label;
