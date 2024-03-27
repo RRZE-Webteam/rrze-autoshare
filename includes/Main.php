@@ -101,16 +101,31 @@ class Main
             plugin()->getVersion()
         );
 
+        $blueskyEnableByDefault = (bool) settings()->getOption('bluesky_enable_default');
+        $blueskyIsEnabled = metadata_exists('post', $post->ID, 'rrze_autoshare_bluesky_enabled') ? Bluesky::isEnabled($post->ID) : $blueskyEnableByDefault;
+        $blueskyIsPublished = Bluesky::isPublished($post->ID);
+        $blueskyIsConnected = Bluesky::isConnected();
+
+        $mastodonEnableByDefault = (bool) settings()->getOption('mastodon_enable_default');
+        $mastodonIsEnabled = metadata_exists('post', $post->ID, 'rrze_autoshare_mastodon_enabled') ? Mastodon::isEnabled($post->ID) : $mastodonEnableByDefault;
+        $mastodonIsPublished = Mastodon::isPublished($post->ID);
+        $mastodonIsConnected = Mastodon::isConnected();
+
+        $twitterEnableByDefault = (bool) settings()->getOption('bluesky_enable_default');
+        $twitterIsEnabled = metadata_exists('post', $post->ID, 'rrze_autoshare_twitter_enabled') ? Twitter::isEnabled($post->ID) : $twitterEnableByDefault;
+        $twitterIsPublished = Twitter::isPublished($post->ID);
+        $twitterIsConnected = Twitter::isConnected();
+
         $localization = [
-            'blueskyEnableByDefault' => (bool) settings()->getOption('bluesky_enable_default'),
-            'blueskyEnabled' => Bluesky::isConnected(),
-            'blueskyPublished' => Bluesky::isPublished($post->post_type, $post->ID),
-            'mastodonEnableByDefault' => (bool) settings()->getOption('mastodon_enable_default'),
-            'mastodonEnabled' => Mastodon::isConnected(),
-            'mastodonPublished' => Mastodon::isPublished($post->post_type, $post->ID),
-            'twitterEnableByDefault' => (bool) settings()->getOption('twitter_enable_default'),
-            'twitterEnabled' => Twitter::isConnected(),
-            'twitterPublished' => Twitter::isPublished($post->post_type, $post->ID)
+            'blueskyConnected' => $blueskyIsConnected,
+            'blueskyEnabled' => $blueskyIsEnabled,
+            'blueskyPublished' => $blueskyIsPublished,
+            'mastodonConnected' => $mastodonIsConnected,
+            'mastodonEnabled' => $mastodonIsEnabled,
+            'mastodonPublished' => $mastodonIsPublished,
+            'twitterConnected' => $twitterIsConnected,
+            'twitterEnabled' => $twitterIsEnabled,
+            'twitterPublished' => $twitterIsPublished,
         ];
 
         wp_localize_script(
