@@ -16,7 +16,7 @@ class Post
             add_action("rest_after_insert_{$postType}", [__CLASS__, 'restAfterInsert']);
         }
 
-        add_action('rrze_autoshare_twitter_publish_post', [__CLASS__, 'publishPost'], 10, 2);
+        add_action('rrze_autoshare_twitter_publish_post', [__CLASS__, 'publishPost']);
     }
 
     public static function savePost($postId, $post)
@@ -35,7 +35,7 @@ class Post
         }
 
         $metaValue = isset($_POST['rrze_autoshare_twitter_enabled']) ? true : false;
-        update_metadata($post->post_type, $postId, 'rrze_autoshare_twitter_enabled', $metaValue);
+        update_post_meta($postId, 'rrze_autoshare_twitter_enabled', $metaValue);
 
         self::publishOnService($post);
     }
@@ -54,33 +54,33 @@ class Post
     {
         if (
             !API::isConnected() ||
-            !self::isEnabled($post->post_type, $post->ID) ||
-            self::isPublished($post->post_type, $post->ID)
+            !self::isEnabled($post->ID) ||
+            self::isPublished($post->ID)
         ) {
             return;
         }
 
-        update_metadata($post->post_type, $post->ID, 'rrze_autoshare_twitter_sent', gmdate('c'));
-        delete_metadata($post->post_type, $post->ID, 'rrze_autoshare_twitter_error');
+        update_post_meta($post->ID, 'rrze_autoshare_twitter_sent', gmdate('c'));
+        delete_post_meta($post->ID, 'rrze_autoshare_twitter_error');
 
-        wp_schedule_single_event(time(), 'rrze_autoshare_twitter_publish_post', [$post->post_type, $post->ID]);
+        wp_schedule_single_event(time(), 'rrze_autoshare_twitter_publish_post', [$post->ID]);
     }
 
-    public static function publishPost($postType, $postId)
+    public static function publishPost($postId)
     {
-        delete_metadata($postType, $postId, 'rrze_autoshare_twitter_sent');
+        delete_post_meta($postId, 'rrze_autoshare_twitter_sent');
         API::publishPost($postId);
     }
 
-    public static function isEnabled($postType, $postId)
+    public static function isEnabled($postId)
     {
-        return (bool) get_metadata($postType, $postId, 'rrze_autoshare_twitter_enabled', true);
+        return (bool) get_post_meta($postId, 'rrze_autoshare_twitter_enabled', true);
     }
 
-    public static function isPublished($postType, $postId)
+    public static function isPublished($postId)
     {
-        $sent = (bool) get_metadata($postType, $postId, 'rrze_autoshare_twitter_sent', true);
-        $published = (bool) get_metadata($postType, $postId, 'rrze_autoshare_twitter_published', true);
+        $sent = (bool) get_post_meta($postId, 'rrze_autoshare_twitter_sent', true);
+        $published = (bool) get_post_meta($postId, 'rrze_autoshare_twitter_published', true);
         return $sent || $published;
     }
 
