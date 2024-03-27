@@ -11,77 +11,48 @@ const AutoshareSettingsPanel = () => {
     );
     const { editPost } = useDispatch("core/editor");
 
-    const isBlueskyEnableByDefault = autoshareObject.blueskyEnableByDefault;
+    const isBlueskyConnected = autoshareObject.blueskyConnected;
     const isBlueskyEnabled = autoshareObject.blueskyEnabled;
     const isBlueskyPublished = autoshareObject.blueskyPublished;
-    const isMastodonEnableByDefault = autoshareObject.mastodonEnableByDefault;
+    const isMastodonConnected = autoshareObject.mastodonConnected;
     const isMastodonEnabled = autoshareObject.mastodonEnabled;
     const isMastodonPublished = autoshareObject.mastodonPublished;
-    const isTwitterEnableByDefault = autoshareObject.twitterEnableByDefault;
+    const isTwitterConnected = autoshareObject.twitterConnected;
     const isTwitterEnabled = autoshareObject.twitterEnabled;
     const isTwitterPublished = autoshareObject.twitterPublished;
 
     const [isBlueskyChecked, setBlueskyIsChecked] = useState(
-        isBlueskyEnabled && !isBlueskyPublished && isBlueskyEnableByDefault
+        isBlueskyConnected && isBlueskyEnabled && !isBlueskyPublished
     );
     const [isMastodonChecked, setMastodonIsChecked] = useState(
-        isMastodonEnabled && !isMastodonPublished && isMastodonEnableByDefault
+        isMastodonConnected && isMastodonEnabled && !isMastodonPublished
     );
     const [isTwitterChecked, setTwitterIsChecked] = useState(
-        isTwitterEnabled && !isTwitterPublished && isTwitterEnableByDefault
+        isTwitterConnected && isTwitterEnabled && !isTwitterPublished
     );
 
     useEffect(() => {
-        if (isBlueskyEnabled && !isBlueskyPublished) {
-            setBlueskyIsChecked(meta["rrze_autoshare_bluesky_enabled"]);
-        }
-        if (isMastodonEnabled && !isMastodonPublished) {
-            setMastodonIsChecked(meta["rrze_autoshare_mastodon_enabled"]);
-        }
-        if (isTwitterEnabled && !isTwitterPublished) {
-            setTwitterIsChecked(meta["rrze_autoshare_twitter_enabled"]);
-        }
-    }, [
-        meta,
-        isBlueskyEnabled,
-        isBlueskyPublished,
-        isMastodonEnabled,
-        isMastodonPublished,
-        isTwitterEnabled,
-        isTwitterPublished,
-    ]);
-
-    useEffect(() => {
-        if (isBlueskyChecked !== meta["rrze_autoshare_bluesky_enabled"]) {
+        if (isBlueskyChecked !== !!meta["rrze_autoshare_bluesky_enabled"]) {
             wp.data.dispatch("core/editor").editPost({
                 meta: { rrze_autoshare_bluesky_enabled: isBlueskyChecked },
             });
         }
-        if (isMastodonChecked !== meta["rrze_autoshare_mastodon_enabled"]) {
+        if (isMastodonChecked !== !!meta["rrze_autoshare_mastodon_enabled"]) {
             wp.data.dispatch("core/editor").editPost({
                 meta: {
                     rrze_autoshare_mastodon_enabled: isMastodonChecked,
                 },
             });
         }
-        if (isTwitterChecked !== meta["rrze_autoshare_twitter_enabled"]) {
+        if (isTwitterChecked !== !!meta["rrze_autoshare_twitter_enabled"]) {
             wp.data.dispatch("core/editor").editPost({
                 meta: { rrze_autoshare_twitter_enabled: isTwitterChecked },
             });
         }
     }, [isBlueskyChecked, isMastodonChecked, isTwitterChecked]);
 
-    const updateMeta = (metaKey, newValue) => {
-        editPost({
-            meta: {
-                ...meta,
-                [metaKey]: newValue,
-            },
-        });
-    };
-
     let blueskyCheckboxLabel = __("Share on Bluesky", "rrze-autoshare");
-    if (!isBlueskyEnabled) {
+    if (!isBlueskyConnected) {
         blueskyCheckboxLabel = __(
             "Share on Bluesky is disabled",
             "rrze-autoshare"
@@ -94,7 +65,7 @@ const AutoshareSettingsPanel = () => {
     }
 
     let mastodonCheckboxLabel = __("Share on Mastodon", "rrze-autoshare");
-    if (!isMastodonEnabled) {
+    if (!isMastodonConnected) {
         mastodonCheckboxLabel = __(
             "Share on Mastodon is disabled",
             "rrze-autoshare"
@@ -107,28 +78,28 @@ const AutoshareSettingsPanel = () => {
     }
 
     let twitterCheckboxLabel = __("Share on X (Twitter)", "rrze-autoshare");
-    if (!isTwitterEnabled) {
+    if (!isTwitterConnected) {
         twitterCheckboxLabel = __("Share on X is disabled", "rrze-autoshare");
     } else if (isTwitterPublished) {
         twitterCheckboxLabel = __("It is published on X", "rrze-autoshare");
     }
 
     const blueskyCheckboxClass =
-        isBlueskyEnabled && !isBlueskyPublished
+        isBlueskyConnected && !isBlueskyPublished
             ? ""
             : "checkbox-control-disabled";
     const mastodonCheckboxClass =
-        isMastodonEnabled && !isMastodonPublished
+        isMastodonConnected && !isMastodonPublished
             ? ""
             : "checkbox-control-disabled";
     const twitterCheckboxClass =
-        isTwitterEnabled && !isTwitterPublished
+        isTwitterConnected && !isTwitterPublished
             ? ""
             : "checkbox-control-disabled";
 
     return (
         <PluginDocumentSettingPanel
-            name="mi-panel-de-configuracion"
+            name="rrze-autoshare-panel"
             title={__("Autoshare", "rrze-autoshare")}
             className="rrze-autoshare-panel"
         >
@@ -136,30 +107,24 @@ const AutoshareSettingsPanel = () => {
                 <CheckboxControl
                     label={blueskyCheckboxLabel}
                     checked={isBlueskyChecked}
-                    onChange={(value) =>
-                        updateMeta("rrze_autoshare_bluesky_enabled", value)
-                    }
-                    disabled={!isBlueskyEnabled}
+                    disabled={!isBlueskyConnected || isBlueskyPublished}
+                    onChange={(checked) => setBlueskyIsChecked(checked)}
                 />
             </div>
             <div className={mastodonCheckboxClass}>
                 <CheckboxControl
                     label={mastodonCheckboxLabel}
                     checked={isMastodonChecked}
-                    onChange={(value) =>
-                        updateMeta("rrze_autoshare_mastodon_enabled", value)
-                    }
-                    disabled={!isMastodonEnabled}
+                    disabled={!isMastodonConnected || isMastodonPublished}
+                    onChange={(checked) => setMastodonIsChecked(checked)}
                 />
             </div>
             <div className={twitterCheckboxClass}>
                 <CheckboxControl
                     label={twitterCheckboxLabel}
                     checked={isTwitterChecked}
-                    onChange={(value) =>
-                        updateMeta("rrze_autoshare_twitter_enabled", value)
-                    }
-                    disabled={!isTwitterEnabled}
+                    disabled={!isTwitterConnected || isTwitterPublished}
+                    onChange={(checked) => setTwitterIsChecked(checked)}
                 />
             </div>
         </PluginDocumentSettingPanel>
