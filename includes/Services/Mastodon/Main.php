@@ -33,7 +33,7 @@ class Main
     {
         $supportedPostTypes = settings()->getOption('mastodon_post_types');
         foreach ($supportedPostTypes as $postType) {
-            register_meta(
+            register_post_meta(
                 $postType,
                 'rrze_autoshare_mastodon_enabled',
                 [
