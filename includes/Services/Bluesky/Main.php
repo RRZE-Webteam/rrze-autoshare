@@ -18,7 +18,7 @@ class Main
     {
         $supportedPostTypes = settings()->getOption('bluesky_post_types');
         foreach ($supportedPostTypes as $postType) {
-            register_meta(
+            register_post_meta(
                 $postType,
                 'rrze_autoshare_bluesky_enabled',
                 [
