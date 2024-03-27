@@ -24,7 +24,7 @@ class Media
 
         $imageIds = array_values(array_unique($imageIds));
 
-        $media = static::addAltText($post->get_post_type, $imageIds);
+        $media = static::addAltText($imageIds);
 
         return $media;
     }
@@ -85,12 +85,12 @@ class Media
         return json_decode(wp_remote_retrieve_body($response), true);
     }
 
-    private static function addAltText($postType, $imageIds)
+    private static function addAltText($imageIds)
     {
         $images = [];
 
         foreach ($imageIds as $postId) {
-            $alt = get_metadata($postType, $postId, '_wp_attachment_image_alt', true);
+            $alt = get_post_meta($postId, '_wp_attachment_image_alt', true);
 
             if ('' === $alt) {
                 $alt = wp_get_attachment_caption($postId);

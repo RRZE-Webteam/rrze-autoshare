@@ -22,9 +22,14 @@ class Main
         return API::isConnected();
     }
 
-    public static function isPublished($postType, $postId)
+    public static function isEnabled($postId)
     {
-        return Post::isPublished($postType, $postId);
+        return Post::isEnabled($postId);
+    }
+
+    public static function isPublished($postId)
+    {
+        return Post::isPublished($postId);
     }
 
     public static function registerPostMeta()
