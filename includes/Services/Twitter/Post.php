@@ -10,60 +10,50 @@ class Post
 {
     public static function init()
     {
-        $supportedPostTypes = settings()->getOption('twitter_post_types');
-        foreach ($supportedPostTypes as $postType) {
-            add_action("save_post_{$postType}", [__CLASS__, 'savePost'], 10, 2);
-            add_action("rest_after_insert_{$postType}", [__CLASS__, 'restAfterInsert']);
-        }
-
+        add_action('transition_post_status', [__CLASS__, 'maybePublishOnService'], 10, 3);
         add_action('rrze_autoshare_twitter_publish_post', [__CLASS__, 'publishPost']);
     }
 
-    public static function savePost($postId, $post)
+    public static function maybePublishOnService($newStatus, $oldStatus, $post)
     {
+        $supportedPostTypes = settings()->getOption('twitter_post_types');
+        if (!in_array($post->post_type, $supportedPostTypes)) {
+            return;
+        }
+
+        $metaValue = isset($_POST['rrze_autoshare_twitter_enabled']);
+        update_post_meta($post->ID, 'rrze_autoshare_twitter_enabled', $metaValue);
+
+        if ('publish' !== $newStatus || 'publish' === $oldStatus) {
+            return;
+        }
+
         if (defined('REST_REQUEST') && REST_REQUEST) {
-            return;
+            add_action(
+                sprintf('rest_after_insert_%s', $post->post_type),
+                function ($post) {
+                    self::publishOnService($post->ID);
+                }
+            );
+        } else {
+            self::publishOnService($post->ID);
         }
-
-        if (wp_is_post_revision($post) || wp_is_post_autosave($post)) {
-            return;
-        }
-
-        $supportedPostTypes = settings()->getOption('twitter_post_types');
-        if (!in_array($post->post_type, $supportedPostTypes)) {
-            return;
-        }
-
-        $metaValue = isset($_POST['rrze_autoshare_twitter_enabled']) ? true : false;
-        update_post_meta($postId, 'rrze_autoshare_twitter_enabled', $metaValue);
-
-        self::publishOnService($post);
     }
 
-    public static function restAfterInsert($post)
-    {
-        $supportedPostTypes = settings()->getOption('twitter_post_types');
-        if (!in_array($post->post_type, $supportedPostTypes)) {
-            return;
-        }
-
-        self::publishOnService($post);
-    }
-
-    private static function publishOnService($post)
+    private static function publishOnService($postId)
     {
         if (
             !API::isConnected() ||
-            !self::isEnabled($post->ID) ||
-            self::isPublished($post->ID)
+            !self::isEnabled($postId) ||
+            self::isPublished($postId)
         ) {
             return;
         }
 
-        update_post_meta($post->ID, 'rrze_autoshare_twitter_sent', gmdate('c'));
-        delete_post_meta($post->ID, 'rrze_autoshare_twitter_error');
+        update_post_meta($postId, 'rrze_autoshare_twitter_sent', gmdate('c'));
+        delete_post_meta($postId, 'rrze_autoshare_twitter_error');
 
-        wp_schedule_single_event(time(), 'rrze_autoshare_twitter_publish_post', [$post->ID]);
+        wp_schedule_single_event(time(), 'rrze_autoshare_twitter_publish_post', [$postId]);
     }
 
     public static function publishPost($postId)
