@@ -6,6 +6,10 @@ import { useSelect, useDispatch } from "@wordpress/data";
 import { __ } from "@wordpress/i18n";
 
 const AutoshareSettingsPanel = () => {
+    const postId = useSelect(
+        (select) => select("core/editor").getCurrentPostId(),
+        []
+    );
     const meta = useSelect((select) =>
         select("core/editor").getEditedPostAttribute("meta")
     );
@@ -34,23 +38,23 @@ const AutoshareSettingsPanel = () => {
     useEffect(() => {
         if (isBlueskyChecked !== !!meta["rrze_autoshare_bluesky_enabled"]) {
             wp.data.dispatch("core/editor").editPost({
-                meta: { rrze_autoshare_bluesky_enabled: isBlueskyChecked },
+                meta: { rrze_autoshare_bluesky_enabled: !!isBlueskyChecked },
             });
         }
         if (isMastodonChecked !== !!meta["rrze_autoshare_mastodon_enabled"]) {
             wp.data.dispatch("core/editor").editPost({
                 meta: {
-                    rrze_autoshare_mastodon_enabled: isMastodonChecked,
+                    rrze_autoshare_mastodon_enabled: !!isMastodonChecked,
                 },
             });
         }
         if (isTwitterChecked !== !!meta["rrze_autoshare_twitter_enabled"]) {
             wp.data.dispatch("core/editor").editPost({
-                meta: { rrze_autoshare_twitter_enabled: isTwitterChecked },
+                meta: { rrze_autoshare_twitter_enabled: !!isTwitterChecked },
             });
         }
     }, [isBlueskyChecked, isMastodonChecked, isTwitterChecked]);
-
+        
     let blueskyCheckboxLabel = __("Share on Bluesky", "rrze-autoshare");
     if (!isBlueskyConnected) {
         blueskyCheckboxLabel = __(
