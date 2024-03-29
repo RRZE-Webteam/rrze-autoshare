@@ -19,6 +19,7 @@ class API
     public static function connect()
     {
         $host = settings()->getOption('bluesky_domain');
+        $host = trailingslashit($host);
         $identifier = settings()->getOption('bluesky_identifier');
         $password = settings()->getOption('bluesky_password');
 
@@ -42,9 +43,6 @@ class API
             wp_verify_nonce(sanitize_key($_GET['_wpnonce']), 'rrze-autoshare-bluesky-revoke')
         ) {
             self::revokeAccess();
-        } else {
-            // Refresh token
-            self::authorizeAccess($host, $identifier, $password);
         }
     }
 
@@ -104,13 +102,60 @@ class API
         return;
     }
 
+    private static function refreshAccessToken()
+    {
+        $host = settings()->getOption('bluesky_domain');
+        $host = trailingslashit($host);
+
+        $wpVersion = get_bloginfo('version');
+        $pluginVersion = plugin()->getVersion();
+        $userAgent = 'WordPress/' . $wpVersion . '; ' . get_bloginfo('url');
+
+        if (!$accessToken = get_option(self::REFRESH_JWT)) {
+            return false;
+        }
+
+        $response = wp_safe_remote_post(
+            esc_url_raw($host . 'xrpc/com.atproto.server.refreshSession'),
+            [
+                'user-agent' => "$userAgent; RRZE-Autoshare/$pluginVersion",
+                'headers'    => [
+                    'Content-Type' => 'application/json',
+                    'Authorization' => 'Bearer ' . $accessToken,
+                ]
+            ]
+        );
+
+        if (
+            is_wp_error($response) ||
+            wp_remote_retrieve_response_code($response) >= 300
+        ) {
+            return false;
+        }
+
+        $data = json_decode(wp_remote_retrieve_body($response), true);
+
+        if (
+            empty($data['accessJwt'])
+            || empty($data['refreshJwt'])
+        ) {
+            return false;
+        }
+        update_option(self::ACCESS_JWT, sanitize_text_field($data['accessJwt']));
+        update_option(self::REFRESH_JWT, sanitize_text_field($data['refreshJwt']));
+
+        return true;
+    }
+
     public static function refreshToken()
     {
-        self::connect();
+        self::refreshAccessToken();
     }
 
     public static function publishPost($postId)
     {
+        self::refreshAccessToken();
+
         $post = get_post($postId);
 
         $locale = get_locale();

@@ -17,7 +17,11 @@ class Post
 
     public static function savePost($postId, $post)
     {
-        if (wp_is_post_revision($post) || wp_is_post_autosave($post)) {
+        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+            return;
+        }
+
+        if (!current_user_can('edit_post', $postId)) {
             return;
         }
 
@@ -26,8 +30,10 @@ class Post
             return;
         }
 
-        $metaValue = isset($_POST['rrze_autoshare_twitter_enabled']);
-        update_post_meta($postId, 'rrze_autoshare_twitter_enabled', $metaValue);
+        if (isset($_POST['meta'])) {
+            $metaValue = isset($_POST['rrze_autoshare_twitter_enabled']);
+            update_post_meta($postId, 'rrze_autoshare_twitter_enabled', $metaValue);
+        }
     }
 
     public static function maybePublishOnService($newStatus, $oldStatus, $post)
@@ -78,11 +84,14 @@ class Post
         return (bool) get_post_meta($postId, 'rrze_autoshare_twitter_enabled', true);
     }
 
+    public static function isSent($postId)
+    {
+        return (bool) get_post_meta($postId, 'rrze_autoshare_twitter_sent', true);
+    }
+
     public static function isPublished($postId)
     {
-        $sent = (bool) get_post_meta($postId, 'rrze_autoshare_twitter_sent', true);
-        $published = (bool) get_post_meta($postId, 'rrze_autoshare_twitter_published', true);
-        return $sent || $published;
+        return (bool) get_post_meta($postId, 'rrze_autoshare_twitter_published', true);
     }
 
     public static function getContent(\WP_Post $post)

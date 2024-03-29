@@ -27,6 +27,11 @@ class Main
         return Post::isEnabled($postId);
     }
 
+    public static function isSent($postId)
+    {
+        return Post::isSent($postId);
+    }
+
     public static function isPublished($postId)
     {
         return Post::isPublished($postId);
@@ -43,6 +48,10 @@ class Main
                     'show_in_rest' => true,
                     'type' => 'boolean',
                     'single' => true,
+                    'sanitize_callback' => 'rest_sanitize_boolean',
+                    'auth_callback' => function () {
+                        return current_user_can('edit_posts');
+                    },
                     'default' => 'false',
                 ]
             );

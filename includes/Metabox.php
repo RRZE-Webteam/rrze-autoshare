@@ -12,11 +12,11 @@ class Metabox
 {
     public static function init()
     {
-        add_action('add_meta_boxes', [__CLASS__, 'autoshareMetabox'], 10, 2);
+        add_action('add_meta_boxes', [__CLASS__, 'autoshareMetabox']);
         // add_action('wp_ajax_rrze_autoshare_update_metabox', [__CLASS__, 'updateMetabox'], 10, 2);
     }
 
-    public static function autoshareMetabox($postType, $post)
+    public static function autoshareMetabox($postType)
     {
         if (
             !in_array($postType, settings()->getOption('bluesky_post_types'))
@@ -61,10 +61,11 @@ class Metabox
         $metaKey = 'rrze_autoshare_bluesky_enabled';
         $blueskyEnableByDefault = (bool) settings()->getOption('bluesky_enable_default');
         $isEnabled = metadata_exists('post', $post->ID, $metaKey) ? Bluesky::isEnabled($post->ID) : $blueskyEnableByDefault;
+        $isSent = Bluesky::isSent($post->ID);
         $isPublished = Bluesky::isPublished($post->ID);
         $isConnected = Bluesky::isConnected();
         $checked = $isConnected && $isEnabled && !$isPublished;
-        $disabled = !$isConnected || $isPublished ? ' disabled' : '';
+        $disabled = !$isConnected || $isSent || $isPublished ? ' disabled' : '';
         $disabledClass = $disabled ? 'class = "rrze-autoshare-disabled_input__label" ' : '';
         $label = !$disabled ? __('Share on Bluesky', 'rrze-autoshare') : __('Share on Bluesky is disabled', 'rrze-autoshare');
         $label = $isPublished ? __('It is published on Bluesky', 'rrze-autoshare') : $label;
@@ -85,6 +86,7 @@ class Metabox
         $metaKey = 'rrze_autoshare_mastodon_enabled';
         $mastodonEnableByDefault = (bool) settings()->getOption('mastodon_enable_default');
         $isEnabled = metadata_exists('post', $post->ID, $metaKey) ? Mastodon::isEnabled($post->ID) : $mastodonEnableByDefault;
+        $isSent = Mastodon::isSent($post->ID);
         $isPublished = Mastodon::isPublished($post->ID);
         $isConnected = Mastodon::isConnected();
         $checked = $isConnected && $isEnabled && !$isPublished;
@@ -107,8 +109,9 @@ class Metabox
     private static function twitterMarkup($post)
     {
         $metaKey = 'rrze_autoshare_twitter_enabled';
-        $twitterEnableByDefault = (bool) settings()->getOption('bluesky_enable_default');
+        $twitterEnableByDefault = (bool) settings()->getOption('twitter_enable_default');
         $isEnabled = metadata_exists('post', $post->ID, $metaKey) ? Twitter::isEnabled($post->ID) : $twitterEnableByDefault;
+        $isSent = Twitter::isSent($post->ID);
         $isPublished = Twitter::isPublished($post->ID);
         $isConnected = Twitter::isConnected();
         $checked = $isConnected && $isEnabled && !$isPublished;
