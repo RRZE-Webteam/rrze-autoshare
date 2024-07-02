@@ -23,9 +23,11 @@ Der dynamische Teil des Hook-Namens, $service, bezieht sich auf den Dienstnamen.
 
 Mögliche Hook-Namen sind:
 
+```text
 rrze_autoshare_bluesky_publish_post_directly
 rrze_autoshare_mastodon_publish_post_directly
 rrze_autoshare_x_publish_post_directly
+```
 
 Parameter
 
@@ -48,9 +50,11 @@ Der dynamische Teil des Hook-Namens, $service, bezieht sich auf den Dienstnamen.
 
 Mögliche Hook-Namen sind:
 
+```text
 rrze_autoshare_bluesky_title
 rrze_autoshare_mastodon_title
 rrze_autoshare_x_title
+```
 
 Parameter
 
@@ -79,9 +83,11 @@ Der dynamische Teil des Hook-Namens, $service, bezieht sich auf den Dienstnamen.
 
 Mögliche Hook-Namen sind:
 
+```text
 rrze_autoshare_bluesky_excerpt
 rrze_autoshare_mastodon_excerpt
 rrze_autoshare_x_excerpt
+```
 
 Parameter
 
@@ -110,9 +116,11 @@ Der dynamische Teil des Hook-Namens, $service, bezieht sich auf den Dienstnamen.
 
 Mögliche Hook-Namen sind:
 
+```text
 rrze_autoshare_bluesky_hashtags
 rrze_autoshare_mastodon_hashtags
 rrze_autoshare_x_hashtags
+```
 
 Parameter
 
