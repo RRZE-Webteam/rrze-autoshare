@@ -4,6 +4,7 @@ namespace RRZE\Autoshare\Services\Twitter;
 
 defined('ABSPATH') || exit;
 
+use RRZE\Autoshare\Utils;
 use function RRZE\Autoshare\settings;
 
 class Post
@@ -13,6 +14,8 @@ class Post
         add_action('transition_post_status', [__CLASS__, 'maybePublishOnService'], 10, 3);
         add_action('save_post', [__CLASS__, 'savePost'], 10, 2);
         add_action('rrze_autoshare_twitter_publish_post', [__CLASS__, 'publishPost']);
+        add_action('rrze_autoshare_x_publish_post_directly', [__CLASS__, 'publishPostDirectly']);
+        self::maybePublishPostDirectly();
     }
 
     public static function savePost($postId, $post)
@@ -79,6 +82,36 @@ class Post
         }
     }
 
+    private static function maybePublishPostDirectly()
+    {
+        $postId = apply_filters('rrze_autoshare_x_publish_post_directly', 0);
+        $postId = absint($postId);
+        if (!$postId || !get_post($postId)) {
+            return;
+        }
+
+        update_post_meta($postId, 'rrze_autoshare_twitter_sent', gmdate('c'));
+        delete_post_meta($postId, 'rrze_autoshare_twitter_error');
+
+        wp_schedule_single_event(time(), 'rrze_autoshare_x_publish_post_directly', [$postId]);
+    }
+
+    public static function publishPostDirectly($postId)
+    {
+        $postId = absint($postId);
+        if (!$postId || !get_post($postId)) {
+            return;
+        }
+
+        delete_post_meta($postId, 'rrze_autoshare_x_sent');
+        if (
+            API::isConnected() &&
+            !self::isPublished($postId)
+        ) {
+            API::publishPost($postId);
+        }
+    }
+
     public static function isEnabled($postId)
     {
         return (bool) get_post_meta($postId, 'rrze_autoshare_twitter_enabled', true);
@@ -106,9 +139,16 @@ class Post
         $textMaxLength = 275 - $permalinkLength;
 
         // Don't use get_the_title() because may introduce texturized characters.
-        $title = sanitize_text_field($post->post_title);
-        $tags = self::getTags($post->ID);
-        $excerpt = self::getExcerpt($post);
+        $title = apply_filters('rrze_autoshare_x_title', $post->post_title);
+        $title = sanitize_text_field($title);
+
+        $excerpt = apply_filters('rrze_autoshare_x_excerpt', self::getExcerpt($post));
+        $excerpt = sanitize_textarea_field($excerpt);
+
+        $tags = apply_filters('rrze_autoshare_x_hashtags', self::getTags($post->ID));
+        $tags = array_filter(array_map('sanitize_text_field', $tags));
+        $tags = implode(' ', $tags);
+
         $text = $title;
         if ($tags) {
             $text .= PHP_EOL . $tags;
@@ -155,20 +195,21 @@ class Post
     protected static function getTags($postId)
     {
         $hashtags = '';
-        $tags = get_the_tags($postId);
+        $tags = Utils::getTheTags($postId);
+        if (!$tags) {
+            return $hashtags;
+        }
 
-        if ($tags && !is_wp_error($tags)) {
-            foreach ($tags as $tag) {
-                $tagName = $tag->name;
+        foreach ($tags as $tag) {
+            $tagName = $tag->name;
 
-                if (preg_match('/(\s|-)+/', $tagName)) {
-                    $tagName = preg_replace('~(\s|-)+~', ' ', $tagName);
-                    $tagName = explode(' ', $tagName);
-                    $tagName = implode('', array_map('ucfirst', $tagName));
-                }
-
-                $hashtags .= '#' . $tagName . ' ';
+            if (preg_match('/(\s|-)+/', $tagName)) {
+                $tagName = preg_replace('~(\s|-)+~', ' ', $tagName);
+                $tagName = explode(' ', $tagName);
+                $tagName = implode('', array_map('ucfirst', $tagName));
             }
+
+            $hashtags .= '#' . $tagName . ' ';
         }
 
         return trim($hashtags);
