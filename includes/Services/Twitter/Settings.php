@@ -4,6 +4,8 @@ namespace RRZE\Autoshare\Services\Twitter;
 
 defined('ABSPATH') || exit;
 
+use RRZE\Autoshare\Utils;
+
 class Settings
 {
     protected $settings;
@@ -34,10 +36,7 @@ class Settings
             'name' => 'twitter_post_types',
             'label' => __('Content Types', 'rrze-autoshare'),
             'description' => __('Select the type of content that Autoshare could use.', 'rrze-autoshare'),
-            'options' => [
-                'post' => __('Posts', 'rrze-autoshare'),
-                'page' => __('Pages', 'rrze-autoshare')
-            ],
+            'options' => Utils::getPostTypes(),
             'default' => ['post']
         ]);
         $sectionMain->addOption('checkbox', [
