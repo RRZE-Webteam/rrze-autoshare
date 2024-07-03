@@ -14,8 +14,6 @@ class Post
         add_action('transition_post_status', [__CLASS__, 'maybePublishOnService'], 10, 3);
         add_action('save_post', [__CLASS__, 'savePost'], 10, 2);
         add_action('rrze_autoshare_bluesky_publish_post', [__CLASS__, 'publishPost']);
-        add_action('rrze_autoshare_bluesky_publish_post_directly', [__CLASS__, 'publishPostDirectly']);
-        self::maybePublishPostDirectly();
     }
 
     public static function savePost($postId, $post)
@@ -81,36 +79,6 @@ class Post
         if (
             API::isConnected() &&
             self::isEnabled($postId) &&
-            !self::isPublished($postId)
-        ) {
-            API::publishPost($postId);
-        }
-    }
-
-    private static function maybePublishPostDirectly()
-    {
-        $postId = apply_filters('rrze_autoshare_bluesky_publish_post_directly', 0);
-        $postId = absint($postId);
-        if (!$postId || !get_post($postId)) {
-            return;
-        }
-
-        update_post_meta($postId, 'rrze_autoshare_bluesky_sent', gmdate('c'));
-        delete_post_meta($postId, 'rrze_autoshare_bluesky_error');
-
-        wp_schedule_single_event(time(), 'rrze_autoshare_bluesky_publish_post_directly', [$postId]);
-    }
-
-    public static function publishPostDirectly($postId)
-    {
-        $postId = absint($postId);
-        if (!$postId || !get_post($postId)) {
-            return;
-        }
-
-        delete_post_meta($postId, 'rrze_autoshare_bluesky_sent');
-        if (
-            API::isConnected() &&
             !self::isPublished($postId)
         ) {
             API::publishPost($postId);
