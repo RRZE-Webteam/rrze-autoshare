@@ -24,7 +24,7 @@ Parameter
 array $post_types
 ```
 
-Post ID.
+Post-Types.
 
 #### rrze_autoshare_{$service}_title
 
