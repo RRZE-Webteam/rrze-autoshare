@@ -10,34 +10,23 @@ Einstellungen › Autoshare
 
 ### Hooks
 
-#### rrze_autoshare_{$service}_publish_post_directly
+#### rrze_autoshare_supported_post_types
 
 ```php
-add_filter('rrze_autoshare_{$service}_publish_post_directly', int $post_id)
+add_filter('rrze_autoshare_supported_post_types', array $post_types)
 ```
 
-Direkt einen Beitrag auf einem Dienst veröffentlichen.
-
-Beschreibung
-Der dynamische Teil des Hook-Namens, $service, bezieht sich auf den Dienstnamen.
-
-Mögliche Hook-Namen sind:
-
-```text
-rrze_autoshare_bluesky_publish_post_directly
-rrze_autoshare_mastodon_publish_post_directly
-rrze_autoshare_x_publish_post_directly
-```
+Filtert die vom Plugin unterstützten Post-Types.
 
 Parameter
 
 ```php
-int $post_id
+array $post_types
 ```
 
 Post ID.
 
-#### rrze_autoshare_{$service}_title
+#### rrze*autoshare*{$service}\_title
 
 ```php
 add_filter('rrze_autoshare_{$service}_title', string $title, int $post_id)
@@ -70,7 +59,7 @@ int $post_id
 
 Post ID.
 
-#### rrze_autoshare_{$service}_excerpt
+#### rrze*autoshare*{$service}\_excerpt
 
 ```php
 add_filter('rrze_autoshare_{$service}_excerpt', string $excerpt, int $post_id)
@@ -103,13 +92,13 @@ int $post_id
 
 Post ID.
 
-#### rrze_autoshare_{$service}_hashtags
+#### rrze*autoshare*{$service}\_hashtags
 
 ```php
 add_filter('rrze_autoshare_{$service}_hashtags', array $hashtags, int $post_id)
 ```
 
-Die Hashtags eines Beitrags vor dem Teilen filtern.
+Die Hashtags eines Beitrags vor dem Teilen filtern. Standardmäßig werden nicht-hierarchische Taxonomien verwendet, indem # vorangestellt wird.
 
 Beschreibung
 Der dynamische Teil des Hook-Namens, $service, bezieht sich auf den Dienstnamen.
