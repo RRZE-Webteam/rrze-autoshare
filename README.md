@@ -26,7 +26,7 @@ array $post_types
 
 Post ID.
 
-#### rrze*autoshare*{$service}\_title
+#### rrze_autoshare_{$service}_title
 
 ```php
 add_filter('rrze_autoshare_{$service}_title', string $title, int $post_id)
@@ -59,7 +59,7 @@ int $post_id
 
 Post ID.
 
-#### rrze*autoshare*{$service}\_excerpt
+#### rrze_autoshare_{$service}_excerpt
 
 ```php
 add_filter('rrze_autoshare_{$service}_excerpt', string $excerpt, int $post_id)
@@ -92,7 +92,7 @@ int $post_id
 
 Post ID.
 
-#### rrze*autoshare*{$service}\_hashtags
+#### rrze_autoshare_{$service}_hashtags
 
 ```php
 add_filter('rrze_autoshare_{$service}_hashtags', array $hashtags, int $post_id)
