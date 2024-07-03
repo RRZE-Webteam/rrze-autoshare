@@ -6,22 +6,6 @@ defined('ABSPATH') || exit;
 
 class Utils
 {
-    public static function getPostTypes()
-    {
-        $supportedPostTypes = [];
-        $defaultPostTypes = apply_filters('rrze_autoshare_supported_post_types', ['post', 'page']);
-        $availablePostTypes = get_post_types(['public' => true], 'objects');
-        foreach ($availablePostTypes as $postType) {
-            if (in_array($postType->name, ['attachment', 'revision', 'nav_menu_item'])) {
-                continue;
-            }
-            if (in_array($postType->name, $defaultPostTypes)) {
-                $supportedPostTypes[$postType->name] = $postType->labels->name;
-            }
-        }
-        return $supportedPostTypes;
-    }
-
     public static function getTheTags($postId)
     {
         $tags = [];
