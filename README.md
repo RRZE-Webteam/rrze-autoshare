@@ -13,7 +13,7 @@ Einstellungen › Autoshare
 #### rrze_autoshare_supported_post_types
 
 ```php
-add_filter('rrze_autoshare_supported_post_types', array $post_types)
+apply_filters('rrze_autoshare_supported_post_types', array $post_types)
 ```
 
 Filtert die vom Plugin unterstützten Post-Types.
@@ -29,7 +29,7 @@ Post-Types.
 #### rrze_autoshare_{$service}_title
 
 ```php
-add_filter('rrze_autoshare_{$service}_title', string $title, int $post_id)
+apply_filters('rrze_autoshare_{$service}_title', string $title, int $post_id)
 ```
 
 Den Titel eines Beitrags vor dem Teilen filtern.
@@ -62,7 +62,7 @@ Post ID.
 #### rrze_autoshare_{$service}_excerpt
 
 ```php
-add_filter('rrze_autoshare_{$service}_excerpt', string $excerpt, int $post_id)
+apply_filters('rrze_autoshare_{$service}_excerpt', string $excerpt, int $post_id)
 ```
 
 Den Textauszug eines Beitrags vor dem Teilen filtern.
@@ -95,7 +95,7 @@ Post ID.
 #### rrze_autoshare_{$service}_hashtags
 
 ```php
-add_filter('rrze_autoshare_{$service}_hashtags', array $hashtags, int $post_id)
+apply_filters('rrze_autoshare_{$service}_hashtags', array $hashtags, int $post_id)
 ```
 
 Die Hashtags eines Beitrags vor dem Teilen filtern. Standardmäßig werden nicht-hierarchische Taxonomien verwendet, indem # vorangestellt wird.
