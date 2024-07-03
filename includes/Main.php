@@ -21,10 +21,9 @@ class Main
         add_action('admin_enqueue_scripts', [$this, 'adminEnqueueScripts']);
 
         /* Enqueue Block Editor Assets */
-        add_action('enqueue_block_editor_assets', [__CLASS__, 'enqueueBlockEditorAssets'], 10, 0);
+        add_action('enqueue_block_editor_assets', [$this, 'enqueueBlockEditorAssets'], 10, 0);
 
         settings()->loaded();
-
         Metabox::init();
 
         Bluesky::init();
@@ -74,7 +73,7 @@ class Main
         );
     }
 
-    public static function enqueueBlockEditorAssets()
+    public function enqueueBlockEditorAssets()
     {
         global $post;
         if (
