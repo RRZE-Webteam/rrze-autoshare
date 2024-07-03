@@ -16,7 +16,11 @@ class Settings
 {
     const OPTION_NAME = 'rrze_autoshare';
 
+    const DEFAULT_POST_TYPES = ['post', 'page'];
+
     protected $settings;
+
+    protected $supportedPostTypes = [];
 
     public function __construct()
     {
@@ -31,6 +35,13 @@ class Settings
 
     public function loaded()
     {
+        add_action('init', [$this, 'init']);
+    }
+
+    public function init()
+    {
+        $this->setPostTypes();
+
         $this->settings = new OptionsSettings(__('Autoshare Settings', 'rrze-autoshare'), 'rrze_autoshare');
 
         $this->settings->setCapability('manage_options')
@@ -79,5 +90,33 @@ class Settings
                 // TwitterAPI::connect();
                 break;
         }
+    }
+
+    public function setPostTypes()
+    {
+        $filteredPostTypes = apply_filters('rrze_autoshare_supported_post_types', self::DEFAULT_POST_TYPES);
+        if (empty($filteredPostTypes) || !is_array($filteredPostTypes)) {
+            $filteredPostTypes = self::DEFAULT_POST_TYPES;
+        }
+
+        $commonTypes = array_intersect($filteredPostTypes, self::DEFAULT_POST_TYPES);
+        if (count($commonTypes) !== count(self::DEFAULT_POST_TYPES)) {
+            $filteredPostTypes = self::DEFAULT_POST_TYPES;
+        }
+
+        $availablePostTypes = get_post_types(['public' => true], 'objects');
+        foreach ($availablePostTypes as $postType) {
+            if (in_array($postType->name, ['attachment', 'revision', 'nav_menu_item'])) {
+                continue;
+            }
+            if (in_array($postType->name, $filteredPostTypes)) {
+                $this->supportedPostTypes[$postType->name] = $postType->labels->name;
+            }
+        }
+    }
+
+    public function getPostTypes()
+    {
+        return $this->supportedPostTypes;
     }
 }

@@ -4,6 +4,7 @@ namespace RRZE\Autoshare\Services\Bluesky;
 
 defined('ABSPATH') || exit;
 
+use RRZE\Autoshare\Utils;
 use function RRZE\Autoshare\settings;
 
 class Post
@@ -69,6 +70,11 @@ class Post
 
     public static function publishPost($postId)
     {
+        $postId = absint($postId);
+        if (!$postId || !get_post($postId)) {
+            return;
+        }
+
         delete_post_meta($postId, 'rrze_autoshare_bluesky_sent');
         if (
             API::isConnected() &&
@@ -103,10 +109,25 @@ class Post
         $textMaxLength = 292 - strlen($permalink);
 
         // Don't use get_the_title() because may introduce texturized characters.
-        $title = $post->post_title;
-        $excerpt = self::getExcerpt($post);
-        $text = sanitize_text_field($title) . PHP_EOL . sanitize_textarea_field($excerpt);
+        $title = apply_filters('rrze_autoshare_bluesky_title', $post->post_title);
+        $title = sanitize_text_field($title);
+
+        $excerpt = apply_filters('rrze_autoshare_bluesky_excerpt', self::getExcerpt($post));
+        $excerpt = sanitize_textarea_field($excerpt);
+
+        $tags = apply_filters('rrze_autoshare_bluesky_hashtags', self::getTags($post->ID));
+        $tags = array_filter(array_map('sanitize_text_field', $tags));
+        $tags = implode(' ', $tags);
+
+        $text = $title;
+        if ($tags) {
+            $text .= PHP_EOL . $tags;
+        }
+        if ($excerpt) {
+            $text .= PHP_EOL . $excerpt;
+        }
         $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, get_bloginfo('charset'));
+
         $textLength = mb_strlen($text);
         $ellipsis = ''; // Initialize as empty. Will be set if the text is too long.
 
@@ -131,12 +152,37 @@ class Post
         return sprintf('%s%s %s', $text, $ellipsis, $permalink);
     }
 
-    private static function getExcerpt($post)
+    private static function getExcerpt(\WP_Post $post): string
     {
-        $excerpt = $post->post_excerpt;
-        $excerpt = preg_replace('~$excerptMore$~', '', $excerpt);
-        $excerpt = wp_strip_all_tags($excerpt);
-        $excerpt = html_entity_decode($excerpt, ENT_QUOTES | ENT_HTML5, get_bloginfo('charset'));
+        $excerpt = sanitize_textarea_field($post->post_excerpt);
+        if (!empty($excerpt)) {
+            $excerpt = preg_replace('~$excerptMore$~', '', $excerpt);
+            $excerpt = wp_strip_all_tags($excerpt);
+            $excerpt = html_entity_decode($excerpt, ENT_QUOTES | ENT_HTML5, get_bloginfo('charset'));
+        }
         return $excerpt;
+    }
+
+    protected static function getTags(int $postId): array
+    {
+        $hashtags = [];
+        $tags = Utils::getTheTags($postId);
+        if (!$tags) {
+            return $hashtags;
+        }
+
+        foreach ($tags as $tag) {
+            $tagName = $tag->name;
+
+            if (preg_match('/(\s|-)+/', $tagName)) {
+                $tagName = preg_replace('~(\s|-)+~', ' ', $tagName);
+                $tagName = explode(' ', $tagName);
+                $tagName = implode('', array_map('ucfirst', $tagName));
+            }
+
+            $hashtags[] = '#' . $tagName;
+        }
+
+        return $hashtags;
     }
 }

@@ -4,6 +4,7 @@ namespace RRZE\Autoshare\Services\Twitter;
 
 defined('ABSPATH') || exit;
 
+use RRZE\Autoshare\Utils;
 use function RRZE\Autoshare\settings;
 
 class Post
@@ -106,9 +107,16 @@ class Post
         $textMaxLength = 275 - $permalinkLength;
 
         // Don't use get_the_title() because may introduce texturized characters.
-        $title = sanitize_text_field($post->post_title);
-        $tags = self::getTags($post->ID);
-        $excerpt = self::getExcerpt($post);
+        $title = apply_filters('rrze_autoshare_x_title', $post->post_title);
+        $title = sanitize_text_field($title);
+
+        $excerpt = apply_filters('rrze_autoshare_x_excerpt', self::getExcerpt($post));
+        $excerpt = sanitize_textarea_field($excerpt);
+
+        $tags = apply_filters('rrze_autoshare_x_hashtags', self::getTags($post->ID));
+        $tags = array_filter(array_map('sanitize_text_field', $tags));
+        $tags = implode(' ', $tags);
+
         $text = $title;
         if ($tags) {
             $text .= PHP_EOL . $tags;
@@ -155,20 +163,21 @@ class Post
     protected static function getTags($postId)
     {
         $hashtags = '';
-        $tags = get_the_tags($postId);
+        $tags = Utils::getTheTags($postId);
+        if (!$tags) {
+            return $hashtags;
+        }
 
-        if ($tags && !is_wp_error($tags)) {
-            foreach ($tags as $tag) {
-                $tagName = $tag->name;
+        foreach ($tags as $tag) {
+            $tagName = $tag->name;
 
-                if (preg_match('/(\s|-)+/', $tagName)) {
-                    $tagName = preg_replace('~(\s|-)+~', ' ', $tagName);
-                    $tagName = explode(' ', $tagName);
-                    $tagName = implode('', array_map('ucfirst', $tagName));
-                }
-
-                $hashtags .= '#' . $tagName . ' ';
+            if (preg_match('/(\s|-)+/', $tagName)) {
+                $tagName = preg_replace('~(\s|-)+~', ' ', $tagName);
+                $tagName = explode(' ', $tagName);
+                $tagName = implode('', array_map('ucfirst', $tagName));
             }
+
+            $hashtags .= '#' . $tagName . ' ';
         }
 
         return trim($hashtags);
