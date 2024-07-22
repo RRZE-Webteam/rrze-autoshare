@@ -115,7 +115,7 @@ class Post
 
         $tags = apply_filters('rrze_autoshare_x_hashtags', self::getTags($post->ID));
         $tags = array_filter(array_map('sanitize_text_field', $tags));
-        $tags = implode(' ', $tags);
+        $tags = !empty($tags) ? implode(' ', $tags) : '';
 
         $text = $title;
         if ($tags) {
@@ -160,26 +160,27 @@ class Post
         return $excerpt;
     }
 
-    protected static function getTags($postId)
+    protected static function getTags(int $postId): array
     {
-        $hashtags = '';
-        $tags = Utils::getTheTags($postId);
-        if (!$tags) {
-            return $hashtags;
-        }
+        $hashtags = [];
 
-        foreach ($tags as $tag) {
-            $tagName = $tag->name;
+        // $tags = Utils::getTheTags($postId);
+        // if (!$tags) {
+        //     return $hashtags;
+        // }
 
-            if (preg_match('/(\s|-)+/', $tagName)) {
-                $tagName = preg_replace('~(\s|-)+~', ' ', $tagName);
-                $tagName = explode(' ', $tagName);
-                $tagName = implode('', array_map('ucfirst', $tagName));
-            }
+        // foreach ($tags as $tag) {
+        //     $tagName = $tag->name;
 
-            $hashtags .= '#' . $tagName . ' ';
-        }
+        //     if (preg_match('/(\s|-)+/', $tagName)) {
+        //         $tagName = preg_replace('~(\s|-)+~', ' ', $tagName);
+        //         $tagName = explode(' ', $tagName);
+        //         $tagName = implode('', array_map('ucfirst', $tagName));
+        //     }
 
-        return trim($hashtags);
+        //     $hashtags[] = '#' . $tagName;
+        // }
+
+        return $hashtags;
     }
 }
