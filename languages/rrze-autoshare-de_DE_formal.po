@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: RRZE Autoshare\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/rrze-autoshare\n"
 "POT-Creation-Date: 2024-07-03T12:31:54+00:00\n"
-"PO-Revision-Date: 2024-12-06 14:16+0100\n"
+"PO-Revision-Date: 2024-12-06 15:28+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: de_DE@formal\n"
@@ -450,6 +450,29 @@ msgstr "Die Einstellungen wurden gespeichert."
 #: includes/Settings/templates/settings-page.php:18
 msgid "Settings issues detected."
 msgstr "Einstellungsprobleme erkannt."
+
+#. translators: 1: Server WordPress version number, 2: Required WordPress version number.
+#: rrze-autoshare.php:108
+msgid ""
+"The server is running WordPress version %1$s. The plugin requires at least "
+"WordPress version %2$s."
+msgstr ""
+"Auf dem Server läuft WordPress Version %1$s. Das Plugin erfordert mindestens "
+"WordPress Version %2$s."
+
+#. translators: 1: Server PHP version number, 2: Required PHP version number.
+#: rrze-autoshare.php:116
+msgid ""
+"The server is running PHP version %1$s. The plugin requires at least PHP "
+"version %2$s."
+msgstr ""
+"Auf dem Server läuft PHP Version %1$s. Das Plugin erfordert mindestens PHP "
+"Version %2$s."
+
+#. translators: 1: The plugin name, 2: The error string.
+#: rrze-autoshare.php:154
+msgid "Plugins: %1$s: %2$s"
+msgstr "Plugins: %1$s: %2$s"
 
 #: src/blockeditor/script.js:107
 msgid "Autoshare"
