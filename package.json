@@ -1,40 +1,40 @@
 {
-    "name": "@rrze/rrze-autoshare",
-    "version": "1.0.0",
-    "description": "Automatically shares the post title, part of the text excerpt, the post image (if available) and a link to the post on Bluesky and Twitter.",
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/RRZE-Webteam/rrze-autoshare.git"
-    },
-    "license": "GPL-2.0-or-later",
-    "bugs": {
-        "url": "https://github.com/RRZE-Webteam/rrze-autoshare/issues"
-    },
-    "homepage": "https://github.com/RRZE-Webteam/rrze-autoshare#readme",
-    "engines": {
-        "node": ">=21.5.0",
-        "npm": ">=10.2.4"
-    },
-    "devDependencies": {
-        "@wordpress/components": "latest",
-        "@wordpress/plugins": "latest",
-        "@wordpress/data": "latest",
-        "@wordpress/env": "latest",
-        "@wordpress/icons": "latest",
-        "@wordpress/scripts": "latest",
-        "ts-loader": "latest",
-        "typescript": "latest"
-    },
-    "browserslist": [
-        "extends @wordpress/browserslist-config"
-    ],
-    "scripts": {
-        "start": "wp-scripts start",
-        "build": "wp-scripts build",
-        "format": "wp-scripts format src",
-        "lint:js": "wp-scripts lint-js src",
-        "check-engines": "wp-scripts check-engines",
-        "check-licenses": "wp-scripts check-licenses --prod --gpl2",
-        "packages-update": "wp-scripts packages-update"
-    }
+  "name": "@rrze/rrze-autoshare",
+  "version": "1.6.0",
+  "description": "Automatically shares the post title, part of the text excerpt, the post image (if available) and a link to the post on Bluesky and Twitter.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RRZE-Webteam/rrze-autoshare.git"
+  },
+  "license": "GPL-2.0-or-later",
+  "bugs": {
+    "url": "https://github.com/RRZE-Webteam/rrze-autoshare/issues"
+  },
+  "homepage": "https://github.com/RRZE-Webteam/rrze-autoshare#readme",
+  "engines": {
+    "node": ">=21.5.0",
+    "npm": ">=10.2.4"
+  },
+  "devDependencies": {
+    "@wordpress/components": "latest",
+    "@wordpress/plugins": "latest",
+    "@wordpress/data": "latest",
+    "@wordpress/env": "latest",
+    "@wordpress/icons": "latest",
+    "@wordpress/scripts": "latest",
+    "ts-loader": "latest",
+    "typescript": "latest"
+  },
+  "browserslist": [
+    "extends @wordpress/browserslist-config"
+  ],
+  "scripts": {
+    "start": "wp-scripts start",
+    "build": "wp-scripts build",
+    "format": "wp-scripts format src",
+    "lint:js": "wp-scripts lint-js src",
+    "check-engines": "wp-scripts check-engines",
+    "check-licenses": "wp-scripts check-licenses --prod --gpl2",
+    "packages-update": "wp-scripts packages-update"
+  }
 }

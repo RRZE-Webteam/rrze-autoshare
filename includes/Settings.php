@@ -4,7 +4,7 @@ namespace RRZE\Autoshare;
 
 defined('ABSPATH') || exit;
 
-use RRZE\WP\Settings\Settings as OptionsSettings;
+use RRZE\Autoshare\Settings\Settings as OptionsSettings;
 use RRZE\Autoshare\Services\Bluesky\API as BlueskyAPI;
 use RRZE\Autoshare\Services\Bluesky\Settings as BlueskySettings;
 use RRZE\Autoshare\Services\Mastodon\API as MastodonAPI;

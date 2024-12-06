@@ -4,8 +4,8 @@ namespace RRZE\Autoshare\Options;
 
 defined('ABSPATH') || exit;
 
-use RRZE\WP\Settings\Encryption;
-use RRZE\WP\Settings\Options\Type;
+use RRZE\Autoshare\Settings\Encryption;
+use RRZE\Autoshare\Settings\Options\Type;
 
 class TextSecure extends Type
 {

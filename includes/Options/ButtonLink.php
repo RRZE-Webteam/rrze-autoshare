@@ -4,7 +4,7 @@ namespace RRZE\Autoshare\Options;
 
 defined('ABSPATH') || exit;
 
-use RRZE\WP\Settings\Options\Type;
+use RRZE\Autoshare\Settings\Options\Type;
 
 class ButtonLink extends Type
 {

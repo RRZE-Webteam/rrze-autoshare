@@ -11,9 +11,9 @@ use RRZE\Autoshare\Services\Twitter\Main as Twitter;
 class Main
 {
     /**
-     * __construct
+     * Loaded
      */
-    public function __construct()
+    public function loaded()
     {
         add_filter('plugin_action_links_' . plugin()->getBaseName(), [$this, 'settingsLink']);
 
