@@ -1,6 +1,6 @@
 {
   "name": "@rrze/rrze-autoshare",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "Automatically shares the post title, part of the text excerpt, the post image (if available) and a link to the post on Bluesky and Twitter.",
   "repository": {
     "type": "git",
