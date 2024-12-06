@@ -10,7 +10,7 @@ class Settings
 {
     protected $settings;
 
-    public function __construct(\RRZE\WP\Settings\Settings $settings)
+    public function __construct(\RRZE\Autoshare\Settings\Settings $settings)
     {
         $this->settings = $settings;
 
@@ -25,8 +25,8 @@ class Settings
 
         $sectionMain->addOption('text', [
             'name' => 'mastodon_domain',
-            'label' => __('Domain', 'rrze-autoshare'),
-            'description' => __('The domain (URL) of the Mastodon service.', 'rrze-autoshare'),
+            'label' => __('Service URL', 'rrze-autoshare'),
+            'description' => __('The URL of the Mastodon service.', 'rrze-autoshare'),
             'css' => [
                 'input_class' => 'regular-text'
             ],
