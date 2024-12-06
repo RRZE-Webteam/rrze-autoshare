@@ -3,7 +3,7 @@
 /*
 Plugin Name:        RRZE Autoshare
 Plugin URI:         https://github.com/RRZE-Webteam/rrze-autoshare
-Version:            1.6.0
+Version:            1.6.1
 Description:        Automatically share the post title or custom message and a link to the post to Bluesky, Mastodon and X.
 Author:             RRZE Webteam
 Author URI:         https://blogs.fau.de/webworking/
@@ -23,7 +23,7 @@ defined('ABSPATH') || exit;
 require_once 'vendor/autoload.php';
 
 // Load the plugin's text domain for localization.
-add_action('init', fn() => load_plugin_textdomain('rrze-multilang', false, dirname(plugin_basename(__FILE__)) . '/languages'));
+add_action('init', fn() => load_plugin_textdomain('rrze-autoshare', false, dirname(plugin_basename(__FILE__)) . '/languages'));
 
 
 // Register activation hook for the plugin
@@ -105,7 +105,7 @@ function systemRequirements(): string
     if (!is_wp_version_compatible(plugin()->getRequiresWP())) {
         $error = sprintf(
             /* translators: 1: Server WordPress version number, 2: Required WordPress version number. */
-            __('The server is running WordPress version %1$s. The plugin requires at least WordPress version %2$s.', 'rrze-multilang'),
+            __('The server is running WordPress version %1$s. The plugin requires at least WordPress version %2$s.', 'rrze-autoshare'),
             $wp_version,
             plugin()->getRequiresWP()
         );
@@ -113,7 +113,7 @@ function systemRequirements(): string
         // Check if the PHP version is compatible with the plugin's requirement.
         $error = sprintf(
             /* translators: 1: Server PHP version number, 2: Required PHP version number. */
-            __('The server is running PHP version %1$s. The plugin requires at least PHP version %2$s.', 'rrze-multilang'),
+            __('The server is running PHP version %1$s. The plugin requires at least PHP version %2$s.', 'rrze-autoshare'),
             $phpVersion,
             plugin()->getRequiresPHP()
         );
@@ -151,7 +151,7 @@ function loaded()
                     printf(
                         '<div class="notice notice-error"><p>' .
                             /* translators: 1: The plugin name, 2: The error string. */
-                            esc_html__('Plugins: %1$s: %2$s', 'rrze-multilang') .
+                            esc_html__('Plugins: %1$s: %2$s', 'rrze-autoshare') .
                             '</p></div>',
                         $pluginName,
                         $error
