@@ -3,7 +3,7 @@
 /*
 Plugin Name:        RRZE Autoshare
 Plugin URI:         https://github.com/RRZE-Webteam/rrze-autoshare
-Version:            1.5.1
+Version:            1.6.0
 Description:        Automatically share the post title or custom message and a link to the post to Bluesky, Mastodon and X.
 Author:             RRZE Webteam
 Author URI:         https://blogs.fau.de/webworking/
