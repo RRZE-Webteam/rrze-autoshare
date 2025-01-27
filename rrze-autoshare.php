@@ -3,7 +3,7 @@
 /*
 Plugin Name:        RRZE Autoshare
 Plugin URI:         https://github.com/RRZE-Webteam/rrze-autoshare
-Version:            1.6.1
+Version:            1.6.2
 Description:        Automatically share the post title or custom message and a link to the post to Bluesky, Mastodon and X.
 Author:             RRZE Webteam
 Author URI:         https://blogs.fau.de/webworking/
@@ -134,10 +134,11 @@ function loaded()
     // Trigger the 'loaded' method of the main plugin instance.
     plugin()->loaded();
 
-    // Check system requirements and store any error messages.
-    if ($error = systemRequirements()) {
+    // Check system requirements.
+    if (systemRequirements()) {
         // If there is an error, add an action to display an admin notice with the error message.
-        add_action('admin_init', function () use ($error) {
+        add_action('admin_init', function () {
+            $error = systemRequirements();
             // Check if the current user has the capability to activate plugins.
             if (current_user_can('activate_plugins')) {
                 // Get plugin data to retrieve the plugin's name.
