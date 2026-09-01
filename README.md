@@ -1,8 +1,30 @@
+[![Aktuelle Version](https://img.shields.io/github/package-json/v/rrze-webteam/rrze-autoshare/main?label=Version)](https://github.com/RRZE-Webteam/rrze-autoshare) [![Release Version](https://img.shields.io/github/v/release/rrze-webteam/rrze-autoshare?label=Release+Version)](https://github.com/rrze-webteam/rrze-autoshare/releases/) [![GitHub License](https://img.shields.io/github/license/rrze-webteam/rrze-autoshare)](https://github.com/RRZE-Webteam/rrze-autoshare) [![GitHub issues](https://img.shields.io/github/issues/RRZE-Webteam/rrze-autoshare)](https://github.com/RRZE-Webteam/rrze-autoshare/issues)
+
 # RRZE Autoshare
 
-## Wordpress-Plugin
+Dieses Plugin teilt automatisch den Beitragstitel, einen Teil des Textauszugs, das Beitragsbild (falls verfügbar) und einen Link zum Beitrag auf Bluesky und Mastodon.
 
-Dieses Plugin teilt automatisch den Beitragstitel, einen Teil des Textauszugs, das Beitragsbild (falls verfügbar) und einen Link zum Beitrag auf Bluesky, Mastodon und X (Twitter).
+
+## Contributors
+
+* RRZE-Webteam, https://www.rrze.fau.de
+
+## Copyright
+
+GNU General Public License (GPL) Version 3
+
+## Documentation
+
+Die oeffentliche Dokumentation und Endanwender-Hinweise liegen unter:
+
+* https://www.wp.rrze.fau.de
+
+## Feedback
+
+* Issues und Feedback: https://github.com/RRZE-Webteam/rrze-autoshare/issues
+* Kontakt: webmaster@rrze.fau.de
+
+
 
 ### Einstellungsmenü
 
@@ -42,7 +64,6 @@ Mögliche Hook-Namen sind:
 ```text
 rrze_autoshare_bluesky_title
 rrze_autoshare_mastodon_title
-rrze_autoshare_x_title
 ```
 
 Parameter
@@ -75,7 +96,6 @@ Mögliche Hook-Namen sind:
 ```text
 rrze_autoshare_bluesky_excerpt
 rrze_autoshare_mastodon_excerpt
-rrze_autoshare_x_excerpt
 ```
 
 Parameter
@@ -108,7 +128,6 @@ Mögliche Hook-Namen sind:
 ```text
 rrze_autoshare_bluesky_hashtags
 rrze_autoshare_mastodon_hashtags
-rrze_autoshare_x_hashtags
 ```
 
 Parameter

@@ -1,29 +1,56 @@
 {
-  "name": "@rrze/rrze-autoshare",
-  "version": "1.6.2",
-  "description": "Automatically shares the post title, part of the text excerpt, the post image (if available) and a link to the post on Bluesky and Twitter.",
+  "name": "rrze-autoshare",
+  "title": "RRZE Autoshare",
+  "version": "1.6.2-6",
+  "description": "Automatically shares published WordPress content on Bluesky and Mastodon.",
+  "main": "rrze-autoshare.php",
+  "textdomain": "rrze-autoshare",
+  "private": true,
+  "compatibility": {
+    "wprequires": "6.7",
+    "wptestedup": "7.1",
+    "phprequires": "8.2"
+  },
+  "supports": {
+    "email": "webmaster@fau.de"
+  },
+  "author": {
+    "name": "RRZE-Webteam <webmaster@fau.de>",
+    "url": "https://www.wp.rrze.fau.de"
+  },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/RRZE-Webteam/rrze-autoshare.git"
+    "url": "https://github.com/RRZE-Webteam/rrze-autoshare",
+    "issues": "https://github.com/RRZE-Webteam/rrze-autoshare/issues",
+    "clone": "git+https://github.com/RRZE-Webteam/rrze-autoshare.git"
   },
-  "license": "GPL-2.0-or-later",
-  "bugs": {
-    "url": "https://github.com/RRZE-Webteam/rrze-autoshare/issues"
+  "license": "GNU General Public License v3",
+  "licenseurl": "https://www.gnu.org/licenses/gpl-3.0.html",
+  "tags": "Plugin, WordPress, Autoshare, Bluesky, Mastodon, Social Media, RRZE, FAU",
+  "source": {
+    "admin": "./src/admin/",
+    "blockeditor": "./src/blockeditor/"
   },
-  "homepage": "https://github.com/RRZE-Webteam/rrze-autoshare#readme",
+  "target": {
+    "build": "./build/",
+    "adminjs": "admin.js",
+    "admincss": "admin.style.css",
+    "blockeditorjs": "blockeditor.js",
+    "blockeditorcss": "blockeditor.style.css"
+  },
   "engines": {
     "node": ">=21.5.0",
     "npm": ">=10.2.4"
   },
   "devDependencies": {
     "@wordpress/components": "latest",
-    "@wordpress/plugins": "latest",
     "@wordpress/data": "latest",
-    "@wordpress/env": "latest",
-    "@wordpress/icons": "latest",
+    "@wordpress/edit-post": "latest",
+    "@wordpress/element": "latest",
+    "@wordpress/i18n": "latest",
+    "@wordpress/plugins": "latest",
     "@wordpress/scripts": "latest",
-    "ts-loader": "latest",
-    "typescript": "latest"
+    "webpack": "latest"
   },
   "browserslist": [
     "extends @wordpress/browserslist-config"
@@ -35,6 +62,13 @@
     "lint:js": "wp-scripts lint-js src",
     "check-engines": "wp-scripts check-engines",
     "check-licenses": "wp-scripts check-licenses --prod --gpl2",
-    "packages-update": "wp-scripts packages-update"
+    "packages-update": "wp-scripts packages-update",
+    "readme": "node scripts/build-readme.js",
+    "version:dev": "node scripts/build-version.js dev",
+    "version:prod": "node scripts/build-version.js prod",
+    "version:release": "node scripts/build-version.js release",
+    "dev": "npm run build && npm run version:dev && npm run readme",
+    "prod": "npm run build && npm run version:prod && npm run readme",
+    "release": "npm run build && npm run version:release && npm run readme"
   }
 }

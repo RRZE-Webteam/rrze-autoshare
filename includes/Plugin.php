@@ -140,7 +140,7 @@ class Plugin
      */
     public function getSlug(): string
     {
-        return sanitize_title(dirname($this->basename));
+        return sanitize_key(dirname($this->basename));
     }
 
     /**
@@ -149,7 +149,7 @@ class Plugin
      */
     public function setData(): object
     {
-        $this->data = get_plugin_data($this->pluginFile, false, false);
+        $this->data = get_plugin_data($this->pluginFile, false);
         return $this;
     }
 
@@ -168,7 +168,7 @@ class Plugin
      */
     public function getName(): string
     {
-        return $this->data['Name'];
+        return $this->data['Name'] ?? '';
     }
 
     /**
@@ -177,7 +177,7 @@ class Plugin
      */
     public function getVersion(): string
     {
-        return $this->data['Version'];
+        return $this->data['Version'] ?? '';
     }
 
     /**
@@ -186,7 +186,7 @@ class Plugin
      */
     public function getRequiresWP(): string
     {
-        return $this->data['RequiresWP'];
+        return $this->data['RequiresWP'] ?? '';
     }
 
     /**
@@ -195,20 +195,6 @@ class Plugin
      */
     public function getRequiresPHP(): string
     {
-        return $this->data['RequiresPHP'];
-    }
-
-    /**
-     * __call method
-     * Method overloading.
-     */
-    public function __call(string $name, array $arguments)
-    {
-        if (!method_exists($this, $name)) {
-            $message = sprintf('Call to undefined method %1$s::%2$s', __CLASS__, $name);
-            if (defined('WP_DEBUG') && WP_DEBUG) {
-                throw new \Exception($message);
-            }
-        }
+        return $this->data['RequiresPHP'] ?? '';
     }
 }

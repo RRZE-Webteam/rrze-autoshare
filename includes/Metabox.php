@@ -6,7 +6,6 @@ defined('ABSPATH') || exit;
 
 use RRZE\Autoshare\Services\Bluesky\Main as Bluesky;
 use RRZE\Autoshare\Services\Mastodon\Main as Mastodon;
-use RRZE\Autoshare\Services\Twitter\Main as Twitter;
 
 class Metabox
 {
@@ -21,7 +20,6 @@ class Metabox
         if (
             !in_array($postType, settings()->getOption('bluesky_post_types'))
             && !in_array($postType, settings()->getOption('mastodon_post_types'))
-            && !in_array($postType, settings()->getOption('twitter_post_types'))
         ) {
             return;
         }
@@ -52,7 +50,6 @@ class Metabox
         echo '<ul id="rrze_autoshare_metabox__ul">';
         echo self::blueskyMarkup($post);
         echo self::mastodonMarkup($post);
-        echo self::twitterMarkup($post);
         echo '</ul>';
     }
 
@@ -103,31 +100,6 @@ class Metabox
             </label>
         </li>
     <?php
-        return ob_get_clean();
-    }
-
-    private static function twitterMarkup($post)
-    {
-        $metaKey = 'rrze_autoshare_twitter_enabled';
-        $twitterEnableByDefault = (bool) settings()->getOption('twitter_enable_default');
-        $isEnabled = metadata_exists('post', $post->ID, $metaKey) ? Twitter::isEnabled($post->ID) : $twitterEnableByDefault;
-        $isSent = Twitter::isSent($post->ID);
-        $isPublished = Twitter::isPublished($post->ID);
-        $isConnected = Twitter::isConnected();
-        $checked = $isConnected && $isEnabled && !$isPublished;
-        $disabled = !$isConnected || $isPublished ? ' disabled' : '';
-        $disabledClass = $disabled ? 'class = "rrze-autoshare-disabled_input__label" ' : '';
-        $label = !$disabled ? __('Share on X (Twitter)', 'rrze-autoshare') : __('Share on X is disabled', 'rrze-autoshare');
-        $label = $isPublished ? __('It is published on X', 'rrze-autoshare') : $label;
-        ob_start();
-    ?>
-        <li>
-            <input type="checkbox" id="rrze-autoshare-twitter-enabled" name="<?php echo esc_attr($metaKey); ?>" value="1" <?php checked($checked); ?><?php echo $disabled; ?>>
-            <label <?php echo $disabledClass; ?>for="rrze-autoshare-twitter-enabled">
-                <?php echo esc_html($label); ?>
-            </label>
-        </li>
-<?php
         return ob_get_clean();
     }
 }

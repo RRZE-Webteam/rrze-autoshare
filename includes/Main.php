@@ -6,7 +6,6 @@ defined('ABSPATH') || exit;
 
 use RRZE\Autoshare\Services\Bluesky\Main as Bluesky;
 use RRZE\Autoshare\Services\Mastodon\Main as Mastodon;
-use RRZE\Autoshare\Services\Twitter\Main as Twitter;
 
 class Main
 {
@@ -28,7 +27,6 @@ class Main
 
         Bluesky::init();
         Mastodon::init();
-        Twitter::init();
 
         Cron::init();
     }
@@ -60,7 +58,6 @@ class Main
         if (
             !in_array(get_post_type($post), settings()->getOption('bluesky_post_types'))
             && !in_array(get_post_type($post), settings()->getOption('mastodon_post_types'))
-            && !in_array(get_post_type($post), settings()->getOption('twitter_post_types'))
         ) {
             return;
         }
@@ -79,7 +76,6 @@ class Main
         if (
             !in_array(get_post_type($post), settings()->getOption('bluesky_post_types'))
             && !in_array(get_post_type($post), settings()->getOption('mastodon_post_types'))
-            && !in_array(get_post_type($post), settings()->getOption('twitter_post_types'))
         ) {
             return;
         }
@@ -110,11 +106,6 @@ class Main
         $mastodonIsPublished = Mastodon::isPublished($post->ID);
         $mastodonIsConnected = Mastodon::isConnected();
 
-        $twitterEnableByDefault = (bool) settings()->getOption('bluesky_enable_default');
-        $twitterIsEnabled = metadata_exists('post', $post->ID, 'rrze_autoshare_twitter_enabled') ? Twitter::isEnabled($post->ID) : $twitterEnableByDefault;
-        $twitterIsPublished = Twitter::isPublished($post->ID);
-        $twitterIsConnected = Twitter::isConnected();
-
         $localization = [
             'blueskyConnected' => $blueskyIsConnected,
             'blueskyEnabled' => $blueskyIsEnabled,
@@ -122,9 +113,6 @@ class Main
             'mastodonConnected' => $mastodonIsConnected,
             'mastodonEnabled' => $mastodonIsEnabled,
             'mastodonPublished' => $mastodonIsPublished,
-            'twitterConnected' => $twitterIsConnected,
-            'twitterEnabled' => $twitterIsEnabled,
-            'twitterPublished' => $twitterIsPublished,
         ];
 
         wp_localize_script(

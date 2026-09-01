@@ -9,8 +9,6 @@ use RRZE\Autoshare\Services\Bluesky\API as BlueskyAPI;
 use RRZE\Autoshare\Services\Bluesky\Settings as BlueskySettings;
 use RRZE\Autoshare\Services\Mastodon\API as MastodonAPI;
 use RRZE\Autoshare\Services\Mastodon\Settings as MastodonSettings;
-use RRZE\Autoshare\Services\Twitter\API as TwitterAPI;
-use RRZE\Autoshare\Services\Twitter\Settings as TwitterSettings;
 
 class Settings
 {
@@ -56,9 +54,6 @@ class Settings
         // Mastodon settings
         new MastodonSettings(@$this->settings);
 
-        // Twitter settings
-        new TwitterSettings(@$this->settings);
-
         $this->settings->build();
     }
 
@@ -85,9 +80,6 @@ class Settings
                 break;
             case 'mastodon':
                 MastodonAPI::connect();
-                break;
-            case 'x-twitter':
-                // TwitterAPI::connect();
                 break;
         }
     }

@@ -21,18 +21,12 @@ const AutoshareSettingsPanel = () => {
     const isMastodonConnected = autoshareObject.mastodonConnected;
     const isMastodonEnabled = autoshareObject.mastodonEnabled;
     const isMastodonPublished = autoshareObject.mastodonPublished;
-    const isTwitterConnected = autoshareObject.twitterConnected;
-    const isTwitterEnabled = autoshareObject.twitterEnabled;
-    const isTwitterPublished = autoshareObject.twitterPublished;
 
     const [isBlueskyChecked, setBlueskyIsChecked] = useState(
         isBlueskyConnected && isBlueskyEnabled && !isBlueskyPublished
     );
     const [isMastodonChecked, setMastodonIsChecked] = useState(
         isMastodonConnected && isMastodonEnabled && !isMastodonPublished
-    );
-    const [isTwitterChecked, setTwitterIsChecked] = useState(
-        isTwitterConnected && isTwitterEnabled && !isTwitterPublished
     );
 
     useEffect(() => {
@@ -48,12 +42,7 @@ const AutoshareSettingsPanel = () => {
                 },
             });
         }
-        if (isTwitterChecked !== !!meta["rrze_autoshare_twitter_enabled"]) {
-            wp.data.dispatch("core/editor").editPost({
-                meta: { rrze_autoshare_twitter_enabled: !!isTwitterChecked },
-            });
-        }
-    }, [isBlueskyChecked, isMastodonChecked, isTwitterChecked]);
+    }, [isBlueskyChecked, isMastodonChecked]);
         
     let blueskyCheckboxLabel = __("Share on Bluesky", "rrze-autoshare");
     if (!isBlueskyConnected) {
@@ -81,23 +70,12 @@ const AutoshareSettingsPanel = () => {
         );
     }
 
-    let twitterCheckboxLabel = __("Share on X (Twitter)", "rrze-autoshare");
-    if (!isTwitterConnected) {
-        twitterCheckboxLabel = __("Share on X is disabled", "rrze-autoshare");
-    } else if (isTwitterPublished) {
-        twitterCheckboxLabel = __("It is published on X", "rrze-autoshare");
-    }
-
     const blueskyCheckboxClass =
         isBlueskyConnected && !isBlueskyPublished
             ? ""
             : "checkbox-control-disabled";
     const mastodonCheckboxClass =
         isMastodonConnected && !isMastodonPublished
-            ? ""
-            : "checkbox-control-disabled";
-    const twitterCheckboxClass =
-        isTwitterConnected && !isTwitterPublished
             ? ""
             : "checkbox-control-disabled";
 
@@ -121,14 +99,6 @@ const AutoshareSettingsPanel = () => {
                     checked={isMastodonChecked}
                     disabled={!isMastodonConnected || isMastodonPublished}
                     onChange={(checked) => setMastodonIsChecked(checked)}
-                />
-            </div>
-            <div className={twitterCheckboxClass}>
-                <CheckboxControl
-                    label={twitterCheckboxLabel}
-                    checked={isTwitterChecked}
-                    disabled={!isTwitterConnected || isTwitterPublished}
-                    onChange={(checked) => setTwitterIsChecked(checked)}
                 />
             </div>
         </PluginDocumentSettingPanel>
