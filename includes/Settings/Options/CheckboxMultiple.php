@@ -19,9 +19,9 @@ class CheckboxMultiple extends Type
     {
         $value = get_option($this->section->tab->settings->optionName)[$this->getArg('name')] ?? false;
         if ($value === false) {
-            $value = [$this->getArg('default')];
+            $value = $this->getArg('default', []);
         }
-        return $value;
+        return (array) $value;
     }
 
     public function sanitize($value)

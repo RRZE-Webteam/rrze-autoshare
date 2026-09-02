@@ -3,7 +3,7 @@
 /*
 Plugin Name:        RRZE Autoshare
 Plugin URI:         https://github.com/RRZE-Webteam/rrze-autoshare
-Version:            1.6.2-6
+Version:            2.0.0-1
 Description:        Automatically shares published WordPress content on Bluesky and Mastodon.
 Author:             RRZE-Webteam <webmaster@fau.de>
 Author URI:         https://www.wp.rrze.fau.de
@@ -25,8 +25,7 @@ defined('ABSPATH') || exit;
  * @param string $class The fully-qualified class name.
  * @return void
  */
-function autoload(string $class): void
-{
+function autoload(string $class): void {
     $namespaces = [
         __NAMESPACE__ . '\\' => __DIR__ . '/includes/',
     ];
@@ -49,7 +48,7 @@ function autoload(string $class): void
 spl_autoload_register(__NAMESPACE__ . '\autoload');
 
 // Load the plugin's text domain for localization.
-add_action('init', fn() => load_plugin_textdomain('rrze-autoshare', false, dirname(plugin_basename(__FILE__)) . '/languages'));
+add_action('init', __NAMESPACE__ . '\loadTextdomain');
 
 
 // Register activation hook for the plugin
@@ -69,25 +68,35 @@ add_action('plugins_loaded', __NAMESPACE__ . '\loaded');
 /**
  * Activation callback function.
  */
-function activation()
-{
+function activation() {
     //
 }
 
 /**
  * Deactivation callback function.
  */
-function deactivation()
-{
-    //
+function deactivation(bool $networkWide = false) {
+    if (!is_multisite() || !$networkWide) {
+        Cron::clearSchedule();
+        return;
+    }
+
+    $siteIds = get_sites([
+        'fields' => 'ids',
+    ]);
+
+    foreach ($siteIds as $siteId) {
+        switch_to_blog($siteId);
+        Cron::clearSchedule();
+        restore_current_blog();
+    }
 }
 
 /**
  * Instantiate Plugin class.
  * @return object Plugin
  */
-function plugin()
-{
+function plugin() {
     static $instance;
     if (null === $instance) {
         $instance = new Plugin(__FILE__);
@@ -96,11 +105,22 @@ function plugin()
 }
 
 /**
+ * Instantiate Config class.
+ * @return object Config
+ */
+function config() {
+    static $instance;
+    if (null === $instance) {
+        $instance = new Config();
+    }
+    return $instance;
+}
+
+/**
  * Instantiate Settings class.
  * @return object Settings
  */
-function settings()
-{
+function settings() {
     static $instance;
     if (null === $instance) {
         $instance = new Settings();
@@ -116,8 +136,7 @@ function settings()
  *
  * @return string An error message string if requirements are not met, or an empty string if requirements are satisfied.
  */
-function systemRequirements(): string
-{
+function systemRequirements(): string {
     if (!is_wp_version_compatible(plugin()->getRequiresWP())) {
         return sprintf(
             /* translators: 1: Server WordPress version number, 2: Required WordPress version number. */
@@ -145,8 +164,7 @@ function systemRequirements(): string
  * This function is responsible for initializing the plugin, loading text domains for localization,
  * checking system requirements, and displaying error notices if necessary.
  */
-function loaded()
-{
+function loaded() {
     // Trigger the 'loaded' method of the main plugin instance.
     plugin()->loaded();
 
@@ -201,4 +219,15 @@ function loaded()
 
     // If there are no errors, create an instance of the 'Main' class and trigger its 'loaded' method.
     (new Main)->loaded();
+}
+
+/**
+ * Load plugin text domain.
+ */
+function loadTextdomain(): void {
+    load_plugin_textdomain(
+        config()->get('text_domain'),
+        false,
+        dirname(plugin_basename(__FILE__)) . '/languages'
+    );
 }

@@ -4,7 +4,6 @@
 
 Dieses Plugin teilt automatisch den Beitragstitel, einen Teil des Textauszugs, das Beitragsbild (falls verfügbar) und einen Link zum Beitrag auf Bluesky und Mastodon.
 
-
 ## Contributors
 
 * RRZE-Webteam, https://www.rrze.fau.de
@@ -28,9 +27,12 @@ Die oeffentliche Dokumentation und Endanwender-Hinweise liegen unter:
 
 ### Einstellungsmenü
 
-Einstellungen › Autoshare
+Einstellungen › RRZE-Autoshare
 
 ### Hooks
+
+Die beiden Freigabe-Schalter sind als native Einstellungen in der Dokument-Seitenleiste des Block Editors integriert. Das Admin-Skript wird mit `esbuild` gebaut und verwendet die von WordPress bereitgestellten Editor-Module zur Laufzeit; es buendelt weder React noch WordPress-Pakete.
+
 
 #### rrze_autoshare_supported_post_types
 

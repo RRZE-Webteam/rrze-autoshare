@@ -1,7 +1,7 @@
 {
   "name": "rrze-autoshare",
   "title": "RRZE Autoshare",
-  "version": "1.6.2-6",
+  "version": "2.0.0-1",
   "description": "Automatically shares published WordPress content on Bluesky and Mastodon.",
   "main": "rrze-autoshare.php",
   "textdomain": "rrze-autoshare",
@@ -28,41 +28,27 @@
   "licenseurl": "https://www.gnu.org/licenses/gpl-3.0.html",
   "tags": "Plugin, WordPress, Autoshare, Bluesky, Mastodon, Social Media, RRZE, FAU",
   "source": {
-    "admin": "./src/admin/",
-    "blockeditor": "./src/blockeditor/"
+    "js": "./src/js/",
+    "css": "./src/sass/"
   },
   "target": {
-    "build": "./build/",
-    "adminjs": "admin.js",
-    "admincss": "admin.style.css",
-    "blockeditorjs": "blockeditor.js",
-    "blockeditorcss": "blockeditor.style.css"
+    "js": "./build/js/",
+    "css": "./build/css/"
   },
   "engines": {
     "node": ">=21.5.0",
     "npm": ">=10.2.4"
   },
   "devDependencies": {
-    "@wordpress/components": "latest",
-    "@wordpress/data": "latest",
-    "@wordpress/edit-post": "latest",
-    "@wordpress/element": "latest",
-    "@wordpress/i18n": "latest",
-    "@wordpress/plugins": "latest",
-    "@wordpress/scripts": "latest",
-    "webpack": "latest"
+    "esbuild": "^0.27.3",
+    "sass": "^1.94.2"
   },
-  "browserslist": [
-    "extends @wordpress/browserslist-config"
-  ],
   "scripts": {
-    "start": "wp-scripts start",
-    "build": "wp-scripts build",
-    "format": "wp-scripts format src",
-    "lint:js": "wp-scripts lint-js src",
-    "check-engines": "wp-scripts check-engines",
-    "check-licenses": "wp-scripts check-licenses --prod --gpl2",
-    "packages-update": "wp-scripts packages-update",
+    "start": "node scripts/build-assets.js dev --watch",
+    "watch": "node scripts/build-assets.js dev --watch",
+    "build": "node scripts/build-assets.js dev",
+    "build:assets:dev": "node scripts/build-assets.js dev",
+    "build:assets:prod": "node scripts/build-assets.js prod",
     "readme": "node scripts/build-readme.js",
     "version:dev": "node scripts/build-version.js dev",
     "version:prod": "node scripts/build-version.js prod",

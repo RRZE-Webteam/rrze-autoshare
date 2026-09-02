@@ -273,6 +273,10 @@ class Settings
 
         foreach ($this->getActiveTab()->getActiveSections() as $section) {
             foreach ($section->options as $option) {
+                if ($option->getArg('transient')) {
+                    continue;
+                }
+
                 $value = $submittedOptions[$option->implementation->getName()] ?? null;
 
                 $valid = $option->validate($value);
@@ -298,6 +302,10 @@ class Settings
         foreach ($this->tabs as $tab) {
             foreach ($tab->sections as $section) {
                 foreach ($section->options as $option) {
+                    if ($option->getArg('transient')) {
+                        continue;
+                    }
+
                     $options[$option->args['name']] = $option->args['default'] ?? null;
                 }
             }

@@ -4,14 +4,14 @@ namespace RRZE\Autoshare\Services\Mastodon;
 
 defined('ABSPATH') || exit;
 
+use RRZE\Autoshare\Utils;
+use function RRZE\Autoshare\config;
 use function RRZE\Autoshare\settings;
 
-class Media
-{
-    public static function getImages($post)
-    {
+class Media {
+    public static function getImages($post) {
         $enableFeaturedImage = has_post_thumbnail($post->ID) &&
-            settings()->getOption('mastodon_featured_image');
+            settings()->getOption(config()->get('services.mastodon.settings.featured_image'));
         if (!$enableFeaturedImage) {
             return [];
         }
@@ -28,8 +28,7 @@ class Media
         return $media;
     }
 
-    public static function uploadImage($postId, $alt = '')
-    {
+    public static function uploadImage($postId, $alt = '') {
         if (wp_attachment_is_image($postId)) {
             $image = wp_get_attachment_image_src($postId, 'large');
         }
@@ -45,6 +44,14 @@ class Media
         $filePath = str_replace($uploads['baseurl'], $uploads['basedir'], $url);
 
         if (!is_file($filePath)) {
+            Utils::logRemoteWarning(
+                'Mastodon',
+                'upload_image',
+                'Mastodon image upload skipped because the attachment file does not exist.',
+                [
+                    'attachment_id' => $postId,
+                ]
+            );
             return;
         }
 
@@ -65,22 +72,46 @@ class Media
         $body .= '--' . $boundary . '--';
 
         $host = settings()->getOption('mastodon_domain');
-        $accessToken = get_option(API::ACCESS_TOKEN);
+        $accessToken = get_option(config()->get('services.mastodon.options.access_token'));
 
+        $endpoint = config()->get('services.mastodon.endpoints.media');
         $response = wp_remote_post(
-            esc_url_raw($host . '/api/v1/media'),
+            esc_url_raw($host . $endpoint),
             array(
+                'user-agent' => config()->getUserAgent(),
                 'headers'     => array(
                     'Authorization' => 'Bearer ' . $accessToken,
                     'Content-Type'  => 'multipart/form-data; boundary=' . $boundary,
                 ),
                 'data_format' => 'body',
                 'body'        => $body,
-                'timeout'     => 15,
+                'timeout'     => config()->get('services.mastodon.limits.timeout'),
             )
         );
 
         if (is_wp_error($response)) {
+            Utils::logRemoteError(
+                'Mastodon',
+                'upload_image',
+                $response,
+                [
+                    'endpoint' => $endpoint,
+                    'attachment_id' => $postId,
+                ]
+            );
+            return;
+        }
+
+        if (wp_remote_retrieve_response_code($response) >= 300) {
+            Utils::logRemoteError(
+                'Mastodon',
+                'upload_image',
+                $response,
+                [
+                    'endpoint' => $endpoint,
+                    'attachment_id' => $postId,
+                ]
+            );
             return;
         }
 
@@ -89,10 +120,19 @@ class Media
         if (!empty($media->id)) {
             return $media->id;
         }
+
+        Utils::logRemoteWarning(
+            'Mastodon',
+            'upload_image',
+            'Mastodon media upload response did not contain a media ID.',
+            [
+                'endpoint' => $endpoint,
+                'attachment_id' => $postId,
+            ]
+        );
     }
 
-    private static function addAltText($imageIds)
-    {
+    private static function addAltText($imageIds) {
         $images = [];
 
         foreach ($imageIds as $postId) {

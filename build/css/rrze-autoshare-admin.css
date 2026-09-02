@@ -1,0 +1,8 @@
+#rrze_autoshare_metabox .rrze-autoshare-disabled_input__label {
+  opacity: 0.5;
+}
+
+.rrze-autoshare-panel .checkbox-control-disabled .components-checkbox-control__input-container,
+.rrze-autoshare-panel .checkbox-control-disabled .components-checkbox-control__label {
+  opacity: 0.5;
+}

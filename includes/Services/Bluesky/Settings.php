@@ -4,14 +4,13 @@ namespace RRZE\Autoshare\Services\Bluesky;
 
 defined('ABSPATH') || exit;
 
+use function RRZE\Autoshare\config;
 use function RRZE\Autoshare\settings;
 
-class Settings
-{
+class Settings {
     protected $settings;
 
-    public function __construct(\RRZE\Autoshare\Settings\Settings $settings)
-    {
+    public function __construct(\RRZE\Autoshare\Settings\Settings $settings) {
         $this->settings = $settings;
 
         $tab = $this->settings->addTab(__('Bluesky', 'rrze-autoshare'));
@@ -24,65 +23,70 @@ class Settings
         );
 
         $sectionMain->addOption('text', [
-            'name' => 'bluesky_domain',
+            'name' => config()->get('services.bluesky.settings.domain'),
             'label' => __('Service URL', 'rrze-autoshare'),
             'description' => __('The URL of the Bluesky service.', 'rrze-autoshare'),
             'css' => [
                 'input_class' => 'regular-text'
             ],
-            'default' => 'https://bsky.social',
+            'readonly' => true,
+            'default' => config()->get('services.bluesky.defaults.domain'),
             'validate' => [
                 [
                     'feedback' => __('The URL entered is not valid.', 'rrze-autoshare'),
-                    'callback' => fn ($value) => filter_var($value, FILTER_VALIDATE_URL)
+                    'callback' => ['RRZE\Autoshare\Config', 'validateUrl']
+                ],
+                [
+                    'feedback' => __('The Bluesky service URL cannot be changed.', 'rrze-autoshare'),
+                    'callback' => ['RRZE\Autoshare\Config', 'validateBlueskyServiceUrl']
                 ]
             ]
         ]);
-        $sectionMain->addOption('text', [
-            'name' => 'bluesky_identifier',
-            'label' => __('Username or email address', 'rrze-autoshare'),
-            'description' => __('The Bluesky account username or email address.', 'rrze-autoshare'),
-            'css' => [
-                'input_class' => 'regular-text'
-            ],
-            'default' => ''
-        ]);
-        $sectionMain->addOption('password', [
-            'name' => 'bluesky_password',
-            'label' => __('Password', 'rrze-autoshare'),
-            'description' => __('The Bluesky account password.', 'rrze-autoshare'),
-            'css' => [
-                'input_class' => 'regular-text'
-            ],
-        ]);
         $sectionMain->addOption('checkbox-multiple', [
-            'name' => 'bluesky_post_types',
+            'name' => config()->get('services.bluesky.settings.post_types'),
             'label' => __('Content Types', 'rrze-autoshare'),
             'description' => __('Select the type of content that Autoshare could use.', 'rrze-autoshare'),
             'options' => settings()->getPostTypes(),
-            'default' => ['post']
+            'default' => config()->get('services.bluesky.defaults.post_types')
         ]);
         $sectionMain->addOption('checkbox', [
-            'name' => 'bluesky_enable_default',
-            'label' => __('Enable by default', 'rrze-autoshare'),
-            'description' => __('Enable Autoshare by default when publishing content', 'rrze-autoshare'),
-            'default' => true
-        ]);
-        $sectionMain->addOption('checkbox', [
-            'name' => 'bluesky_featured_image',
+            'name' => config()->get('services.bluesky.settings.featured_image'),
             'label' => __('Featured Images', 'rrze-autoshare'),
             'description' => __('Include featured images', 'rrze-autoshare'),
-            'default' => true
+            'default' => config()->get('services.bluesky.defaults.featured_image')
         ]);
-        $sectionMain->addOption('button-link', [
-            'name' => 'bluesky_authorize_access_url',
-            'label' => __('Access', 'rrze-autoshare'),
-            'href' => [__NAMESPACE__ . '\API', 'authorizeAccessUrl'],
-            'text' => [__NAMESPACE__ . '\API', 'authorizeAccessText'],
-            'description' => [__NAMESPACE__ . '\API', 'authorizeAccessDescription'],
+
+        $content = config()->get('services.bluesky.content');
+        $contentDescription = sprintf(
+            __('Accepted content type: %1$s. Maximum post length: %2$d characters.', 'rrze-autoshare'),
+            __('Text', 'rrze-autoshare'),
+            $content['max_length']
+        );
+        $sectionFormat = $tab->addSection(
+            __('Post Format', 'rrze-autoshare'),
+            [
+                'description' => $contentDescription,
+            ]
+        );
+        $sectionFormat->addOption('textarea', [
+            'name' => config()->get('services.bluesky.settings.format'),
+            'label' => __('Format', 'rrze-autoshare'),
+            'description' => __('Use the placeholders {title}, {excerpt}, {url}, and {tags}. Empty lines are removed automatically.', 'rrze-autoshare'),
+            'default' => config()->get('services.bluesky.defaults.format'),
             'css' => [
-                'input_class' => 'button button-secondary'
+                'input_class' => 'large-text code',
             ],
+            'validate' => [
+                [
+                    'feedback' => __('The format must contain {title}, {excerpt}, {url}, and {tags}.', 'rrze-autoshare'),
+                    'callback' => ['RRZE\Autoshare\Config', 'validatePostFormat'],
+                ],
+            ],
+        ]);
+        $sectionMain->addOption('bluesky-authorize', [
+            'name' => 'bluesky_authorize',
+            'label' => __('Access', 'rrze-autoshare'),
+            'transient' => true,
         ]);
     }
 }

@@ -5,19 +5,21 @@ namespace RRZE\Autoshare\Services\Bluesky;
 defined('ABSPATH') || exit;
 
 use RRZE\Autoshare\Utils;
+use function RRZE\Autoshare\config;
 use function RRZE\Autoshare\settings;
 
-class Post
-{
-    public static function init()
-    {
+class Post {
+    public static function init() {
         add_action('transition_post_status', [__CLASS__, 'maybePublishOnService'], 10, 3);
         add_action('save_post', [__CLASS__, 'savePost'], 10, 2);
-        add_action('rrze_autoshare_bluesky_publish_post', [__CLASS__, 'publishPost']);
+        add_action(config()->get('services.bluesky.hooks.publish_post'), [__CLASS__, 'publishPost']);
     }
 
-    public static function savePost($postId, $post)
-    {
+    public static function savePost($postId, $post) {
+        if (!settings()->isServiceActive('bluesky')) {
+            return;
+        }
+
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
             return;
         }
@@ -32,13 +34,17 @@ class Post
         }
 
         if (isset($_POST['meta'])) {
-            $metaValue = isset($_POST['rrze_autoshare_bluesky_enabled']);
-            update_post_meta($postId, 'rrze_autoshare_bluesky_enabled', $metaValue);
+            $metaKey = config()->get('services.bluesky.meta.enabled');
+            $metaValue = isset($_POST[$metaKey]);
+            update_post_meta($postId, $metaKey, $metaValue);
         }
     }
 
-    public static function maybePublishOnService($newStatus, $oldStatus, $post)
-    {
+    public static function maybePublishOnService($newStatus, $oldStatus, $post) {
+        if (!settings()->isServiceActive('bluesky')) {
+            return;
+        }
+
         if ('publish' !== $newStatus || 'publish' === $oldStatus) {
             return;
         }
@@ -51,32 +57,33 @@ class Post
         if (defined('REST_REQUEST') && REST_REQUEST) {
             add_action(
                 sprintf('rest_after_insert_%s', $post->post_type),
-                function ($post) {
-                    self::publishOnService($post->ID);
-                }
+                [__CLASS__, 'publishRestInsertedPost']
             );
         } else {
             self::publishOnService($post->ID);
         }
     }
 
-    private static function publishOnService($postId)
-    {
-        update_post_meta($postId, 'rrze_autoshare_bluesky_sent', gmdate('c'));
-        delete_post_meta($postId, 'rrze_autoshare_bluesky_error');
-
-        wp_schedule_single_event(time(), 'rrze_autoshare_bluesky_publish_post', [$postId]);
+    public static function publishRestInsertedPost($post) {
+        self::publishOnService($post->ID);
     }
 
-    public static function publishPost($postId)
-    {
+    private static function publishOnService($postId) {
+        update_post_meta($postId, config()->get('services.bluesky.meta.sent'), gmdate('c'));
+        delete_post_meta($postId, config()->get('services.bluesky.meta.error'));
+
+        wp_schedule_single_event(time(), config()->get('services.bluesky.hooks.publish_post'), [$postId]);
+    }
+
+    public static function publishPost($postId) {
         $postId = absint($postId);
         if (!$postId || !get_post($postId)) {
             return;
         }
 
-        delete_post_meta($postId, 'rrze_autoshare_bluesky_sent');
+        delete_post_meta($postId, config()->get('services.bluesky.meta.sent'));
         if (
+            settings()->isServiceActive('bluesky') &&
             API::isConnected() &&
             self::isEnabled($postId) &&
             !self::isPublished($postId)
@@ -85,71 +92,40 @@ class Post
         }
     }
 
-    public static function isEnabled($postId)
-    {
-        return (bool) get_post_meta($postId, 'rrze_autoshare_bluesky_enabled', true);
+    public static function isEnabled($postId) {
+        return (bool) get_post_meta($postId, config()->get('services.bluesky.meta.enabled'), true);
     }
 
-    public static function isSent($postId)
-    {
-        return (bool) get_post_meta($postId, 'rrze_autoshare_bluesky_sent', true);
+    public static function isSent($postId) {
+        return (bool) get_post_meta($postId, config()->get('services.bluesky.meta.sent'), true);
     }
 
-    public static function isPublished($postId)
-    {
-        return (bool) get_post_meta($postId, 'rrze_autoshare_bluesky_published', true);
+    public static function isPublished($postId) {
+        return (bool) get_post_meta($postId, config()->get('services.bluesky.meta.published'), true);
     }
 
-    public static function getContent(\WP_Post $post)
-    {
-        // $permalink = esc_url_raw(wp_get_shortlink($post->ID));
+    public static function getContent(\WP_Post $post) {
         $permalink = esc_url_raw(get_the_permalink($post->ID));
-
-        // 292 instead of 300 because of the space between body and URL and the ellipsis.
-        $textMaxLength = 292 - strlen($permalink);
-
-        // Don't use get_the_title() because may introduce texturized characters.
-        $title = apply_filters('rrze_autoshare_bluesky_title', $post->post_title);
+        $title = apply_filters(config()->get('services.bluesky.filters.title'), $post->post_title);
         $title = sanitize_text_field($title);
-
-        $excerpt = apply_filters('rrze_autoshare_bluesky_excerpt', self::getExcerpt($post));
+        $excerpt = apply_filters(config()->get('services.bluesky.filters.excerpt'), self::getExcerpt($post));
         $excerpt = sanitize_textarea_field($excerpt);
-
-        $tags = apply_filters('rrze_autoshare_bluesky_hashtags', self::getTags($post->ID));
+        $tags = apply_filters(config()->get('services.bluesky.filters.hashtags'), self::getTags($post->ID));
         $tags = array_filter(array_map('sanitize_text_field', $tags));
         $tags = !empty($tags) ? implode(' ', $tags) : '';
 
-        $text = $title;
-        if ($tags) {
-            $text .= PHP_EOL . $tags;
-        }
-        if ($excerpt) {
-            $text .= PHP_EOL . $excerpt;
-        }
-        $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, get_bloginfo('charset'));
+        $format = settings()->getOption(config()->get('services.bluesky.settings.format'));
 
-        $textLength = mb_strlen($text);
-        $ellipsis = ''; // Initialize as empty. Will be set if the text is too long.
-
-        while ($textMaxLength < $textLength) {
-            // Don't use `&hellip;` because may display encoded.
-            $ellipsis = ' ...';
-
-            // If there are no spaces in the text for whatever reason, 
-            // truncate regardless of where spaces fall.
-            if (false === mb_strpos($text, ' ')) {
-                $text = mb_substr($text, 0, $textMaxLength);
-                break;
-            }
-
-            // Cut off the last word in the text until the text is short enough.
-            $words = explode(' ', $text);
-            array_pop($words);
-            $text = implode(' ', $words);
-            $textLength = strlen($text);
-        }
-
-        return sprintf('%s%s %s', $text, $ellipsis, $permalink);
+        return Utils::formatPostContent(
+            $format,
+            [
+                '{title}' => $title,
+                '{excerpt}' => $excerpt,
+                '{url}' => $permalink,
+                '{tags}' => $tags,
+            ],
+            config()->get('services.bluesky.content.max_length')
+        );
     }
 
     private static function getExcerpt(\WP_Post $post): string

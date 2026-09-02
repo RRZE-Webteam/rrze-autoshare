@@ -1,5 +1,5 @@
 === RRZE Autoshare ===
-Stable tag: 1.6.2-6
+Stable tag: 2.0.0-1
 Plugin URI: https://github.com/RRZE-Webteam/rrze-autoshare
 GitHub Issue URL: https://github.com/RRZE-Webteam/rrze-autoshare/issues
 Author: RRZE-Webteam <webmaster@fau.de>

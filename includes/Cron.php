@@ -6,45 +6,30 @@ defined('ABSPATH') || exit;
 
 use RRZE\Autoshare\Services\Bluesky\API as Bluesky;
 
-/**
- * Class Cron
- *
- * A class for managing scheduled events using WP cron functionality.
- */
-class Cron
-{
-    const BLUESKY_REFRESH_TOKEN = 'rrze_autoshare_bluesky_refresh_token';
-
-    // Initialize the class by setting up action hooks
-    public static function init()
-    {
-        // Add an action hook to run the 'blueskyRefreshToken' method when scheduled.
-        add_action(self::BLUESKY_REFRESH_TOKEN, [__CLASS__, 'blueskyRefreshToken']);
-
-        // Add an action hook to activate scheduled events during WP initialization.
+class Cron {
+    public static function init() {
+        add_action(config()->get('services.bluesky.hooks.refresh_token'), [__CLASS__, 'blueskyRefreshToken']);
         add_action('init', [__CLASS__, 'activateScheduledEvents']);
     }
 
-    // Activate the scheduled event if it's not already scheduled
-    public static function activateScheduledEvents()
-    {
-        // Check if the scheduled event is not already in the queue.
-        if (!wp_next_scheduled(self::BLUESKY_REFRESH_TOKEN)) {
-            // Schedule the event to run weekly starting from the current time.
-            wp_schedule_event(time(), 'weekly', self::BLUESKY_REFRESH_TOKEN);
+    public static function activateScheduledEvents() {
+        $hook = config()->get('services.bluesky.hooks.refresh_token');
+
+        if (!settings()->isServiceActive('bluesky') || !Bluesky::isConnected()) {
+            self::clearSchedule();
+            return;
+        }
+
+        if (!wp_next_scheduled($hook)) {
+            wp_schedule_event(time(), 'weekly', $hook);
         }
     }
 
-    // Method to be executed when the scheduled event is triggered
-    public static function blueskyRefreshToken()
-    {
+    public static function blueskyRefreshToken() {
         Bluesky::refreshToken();
     }
 
-    // Clear the scheduled event hook
-    public static function clearSchedule()
-    {
-        // Clear the scheduled event hook for the specified action hook.
-        wp_clear_scheduled_hook(self::BLUESKY_REFRESH_TOKEN);
+    public static function clearSchedule() {
+        wp_clear_scheduled_hook(config()->get('services.bluesky.hooks.refresh_token'));
     }
 }
