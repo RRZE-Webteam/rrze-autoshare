@@ -15,18 +15,18 @@ class Config {
         'general' => [
             'active_services' => [
                 'setting' => 'active_services',
-                'default' => ['bluesky', 'mastodon'],
+                'default' => [],
             ],
         ],
         'migrations' => [
             'bluesky_credentials' => 'rrze_autoshare_bluesky_credentials_migrated',
             'bluesky_tokens' => 'rrze_autoshare_bluesky_tokens_migrated',
+            'encrypted_service_options' => 'rrze_autoshare_encrypted_service_options_migrated',
             'bluesky_legacy_credential_settings' => [
                 'bluesky_identifier',
                 'bluesky_password',
             ],
         ],
-        'post_format_placeholders' => ['{title}', '{excerpt}', '{url}', '{tags}'],
         'default_post_types' => ['post', 'page'],
         'excluded_post_types' => ['attachment', 'revision', 'nav_menu_item'],
         'assets' => [
@@ -55,6 +55,18 @@ class Config {
             'warning' => 'rrze.log.warning',
             'notice' => 'rrze.log.notice',
             'info' => 'rrze.log.info',
+        ],
+        'publication_backoff' => [
+            'transient_prefix' => 'rrze_autoshare_publication_backoff_',
+            'retryable_status_codes' => [429, 500, 502, 503, 504],
+            'rate_limit_delay' => 900,
+            'server_error_delay' => 300,
+            'maximum_delay' => DAY_IN_SECONDS,
+        ],
+        'encryption' => [
+            'cipher_method' => 'aes-256-gcm',
+            'legacy_cipher_method' => 'aes-256-cbc',
+            'version_prefix' => 'v2:',
         ],
         'services' => [
             'bluesky' => [
@@ -98,7 +110,8 @@ class Config {
                     'pattern' => '/^[A-Za-z0-9]{4}(?:-[A-Za-z0-9]{4}){3}$/',
                 ],
                 'authorization' => [
-                    'action_field' => 'rrze_autoshare_bluesky_authorize',
+                    'authorize_action' => 'rrze_autoshare_bluesky_authorize',
+                    'revoke_action' => 'rrze_autoshare_bluesky_revoke',
                     'identifier_field' => 'rrze_autoshare_bluesky_identifier',
                     'password_field' => 'rrze_autoshare_bluesky_app_password',
                     'nonce_action' => 'rrze-autoshare-bluesky-authorize',
@@ -107,6 +120,8 @@ class Config {
                 ],
                 'authentication' => [
                     'direct_token_input' => false,
+                    'connection_callback' => ['RRZE\Autoshare\Services\Bluesky\API', 'isConnected'],
+                    'invalid_status_codes' => [401, 403],
                 ],
                 'defaults' => [
                     'domain' => 'https://bsky.social',
@@ -188,9 +203,13 @@ class Config {
                 'oauth' => [
                     'client_name' => 'RRZE-Autoshare',
                     'scope' => 'write:media write:statuses read:accounts read:statuses',
+                    'state_transient_prefix' => 'rrze_autoshare_mastodon_oauth_state_',
+                    'state_lifetime' => 600,
                 ],
                 'authentication' => [
                     'direct_token_input' => false,
+                    'connection_callback' => ['RRZE\Autoshare\Services\Mastodon\API', 'isConnected'],
+                    'invalid_status_codes' => [401, 403],
                 ],
             ],
         ],
@@ -254,16 +273,6 @@ class Config {
     }
 
     public static function validatePostFormat(mixed $value): bool {
-        if (!is_string($value) || $value === '') {
-            return false;
-        }
-
-        foreach (config()->get('post_format_placeholders') as $placeholder) {
-            if (!str_contains($value, $placeholder)) {
-                return false;
-            }
-        }
-
-        return true;
+        return is_string($value) && $value !== '';
     }
 }

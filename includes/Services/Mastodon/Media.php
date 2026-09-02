@@ -9,25 +9,6 @@ use function RRZE\Autoshare\config;
 use function RRZE\Autoshare\settings;
 
 class Media {
-    public static function getImages($post) {
-        $enableFeaturedImage = has_post_thumbnail($post->ID) &&
-            settings()->getOption(config()->get('services.mastodon.settings.featured_image'));
-        if (!$enableFeaturedImage) {
-            return [];
-        }
-
-        $imageIds = [];
-
-        $featuredImage = get_post_thumbnail_id($post->ID);
-        $imageIds[] = $featuredImage ? $featuredImage : '';
-
-        $imageIds = array_values(array_unique($imageIds));
-
-        $media = static::addAltText($imageIds);
-
-        return $media;
-    }
-
     public static function uploadImage($postId, $alt = '') {
         if (wp_attachment_is_image($postId)) {
             $image = wp_get_attachment_image_src($postId, 'large');
@@ -72,21 +53,21 @@ class Media {
         $body .= '--' . $boundary . '--';
 
         $host = settings()->getOption('mastodon_domain');
-        $accessToken = get_option(config()->get('services.mastodon.options.access_token'));
+        $accessToken = API::getAccessToken();
 
         $endpoint = config()->get('services.mastodon.endpoints.media');
-        $response = wp_remote_post(
-            esc_url_raw($host . $endpoint),
+        $response = Utils::remoteRequest(
+            'POST',
+            $host . $endpoint,
             array(
-                'user-agent' => config()->getUserAgent(),
                 'headers'     => array(
                     'Authorization' => 'Bearer ' . $accessToken,
                     'Content-Type'  => 'multipart/form-data; boundary=' . $boundary,
                 ),
                 'data_format' => 'body',
                 'body'        => $body,
-                'timeout'     => config()->get('services.mastodon.limits.timeout'),
-            )
+            ),
+            config()->get('services.mastodon.limits.timeout')
         );
 
         if (is_wp_error($response)) {
@@ -98,6 +79,12 @@ class Media {
                     'endpoint' => $endpoint,
                     'attachment_id' => $postId,
                 ]
+            );
+            Utils::deferPublication(
+                'mastodon',
+                $response,
+                'upload_image',
+                ['endpoint' => $endpoint, 'attachment_id' => $postId]
             );
             return;
         }
@@ -112,13 +99,28 @@ class Media {
                     'attachment_id' => $postId,
                 ]
             );
+            Utils::deferPublication(
+                'mastodon',
+                $response,
+                'upload_image',
+                ['endpoint' => $endpoint, 'attachment_id' => $postId]
+            );
+            API::deactivateOnAuthorizationFailure($response);
             return;
         }
 
-        $media = json_decode($response['body']);
+        $media = Utils::getJsonResponseBody(
+            $response,
+            'Mastodon',
+            'upload_image',
+            [
+                'endpoint' => $endpoint,
+                'attachment_id' => $postId,
+            ]
+        );
 
-        if (!empty($media->id)) {
-            return $media->id;
+        if (!empty($media['id'])) {
+            return $media['id'];
         }
 
         Utils::logRemoteWarning(
@@ -132,21 +134,4 @@ class Media {
         );
     }
 
-    private static function addAltText($imageIds) {
-        $images = [];
-
-        foreach ($imageIds as $postId) {
-            $alt = get_post_meta($postId, '_wp_attachment_image_alt', true);
-
-            if ('' === $alt) {
-                $alt = wp_get_attachment_caption($postId);
-            }
-
-            $images[$postId] = is_string($alt)
-                ? html_entity_decode($alt, ENT_QUOTES | ENT_HTML5, get_bloginfo('charset'))
-                : '';
-        }
-
-        return $images;
-    }
 }

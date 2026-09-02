@@ -9,7 +9,12 @@ use RRZE\Autoshare\Services\Bluesky\API as Bluesky;
 class Cron {
     public static function init() {
         add_action(config()->get('services.bluesky.hooks.refresh_token'), [__CLASS__, 'blueskyRefreshToken']);
-        add_action('init', [__CLASS__, 'activateScheduledEvents']);
+        add_action(
+            'update_option_' . config()->get('option_name'),
+            [__CLASS__, 'syncSchedule'],
+            10,
+            2
+        );
     }
 
     public static function activateScheduledEvents() {
@@ -25,7 +30,16 @@ class Cron {
         }
     }
 
+    public static function syncSchedule($oldOptions, $newOptions): void {
+        self::activateScheduledEvents();
+    }
+
     public static function blueskyRefreshToken() {
+        if (!settings()->isServiceActive('bluesky') || !Bluesky::isConnected()) {
+            self::clearSchedule();
+            return;
+        }
+
         Bluesky::refreshToken();
     }
 

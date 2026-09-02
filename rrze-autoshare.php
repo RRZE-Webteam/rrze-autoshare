@@ -3,7 +3,7 @@
 /*
 Plugin Name:        RRZE Autoshare
 Plugin URI:         https://github.com/RRZE-Webteam/rrze-autoshare
-Version:            2.0.0-1
+Version:            2.0.0-23
 Description:        Automatically shares published WordPress content on Bluesky and Mastodon.
 Author:             RRZE-Webteam <webmaster@fau.de>
 Author URI:         https://www.wp.rrze.fau.de
@@ -68,8 +68,8 @@ add_action('plugins_loaded', __NAMESPACE__ . '\loaded');
 /**
  * Activation callback function.
  */
-function activation() {
-    //
+function activation(bool $networkWide = false) {
+    return;
 }
 
 /**
@@ -172,53 +172,39 @@ function loaded() {
     $phpCompatible = is_php_version_compatible(plugin()->getRequiresPHP());
 
     if (!$wpCompatible || !$phpCompatible) {
-        // If there is an error, add an action to display an admin notice with the error message.
-        add_action('admin_init', function () use ($wpCompatible, $phpCompatible) {
-            // Check if the current user has the capability to activate plugins.
-            if (current_user_can('activate_plugins')) {
-                // Get plugin data to retrieve the plugin's name.
-                $pluginName = plugin()->getName();
-                $error = '';
-
-                if (!$wpCompatible) {
-                    $error = sprintf(
-                        /* translators: 1: Server WordPress version number, 2: Required WordPress version number. */
-                        __('The server is running WordPress version %1$s. The plugin requires at least WordPress version %2$s.', 'rrze-autoshare'),
-                        wp_get_wp_version(),
-                        plugin()->getRequiresWP()
-                    );
-                } elseif (!$phpCompatible) {
-                    $error = sprintf(
-                        /* translators: 1: Server PHP version number, 2: Required PHP version number. */
-                        __('The server is running PHP version %1$s. The plugin requires at least PHP version %2$s.', 'rrze-autoshare'),
-                        PHP_VERSION,
-                        plugin()->getRequiresPHP()
-                    );
-                }
-
-                // Determine the admin notice tag based on network-wide activation.
-                $tag = is_plugin_active_for_network(plugin()->getBaseName()) ? 'network_admin_notices' : 'admin_notices';
-
-                // Add an action to display the admin notice.
-                add_action($tag, function () use ($pluginName, $error) {
-                    printf(
-                        '<div class="notice notice-error"><p>' .
-                            /* translators: 1: The plugin name, 2: The error string. */
-                            esc_html__('Plugins: %1$s: %2$s', 'rrze-autoshare') .
-                            '</p></div>',
-                        esc_html($pluginName),
-                        esc_html($error)
-                    );
-                });
-            }
-        });
-
-        // Return to prevent further initialization if there is an error.
+        add_action('admin_init', __NAMESPACE__ . '\\addRequirementsNotice');
         return;
     }
 
     // If there are no errors, create an instance of the 'Main' class and trigger its 'loaded' method.
     (new Main)->loaded();
+}
+
+function addRequirementsNotice(): void {
+    if (!current_user_can('activate_plugins')) {
+        return;
+    }
+
+    $hook = is_plugin_active_for_network(plugin()->getBaseName())
+        ? 'network_admin_notices'
+        : 'admin_notices';
+    add_action($hook, __NAMESPACE__ . '\\renderRequirementsNotice');
+}
+
+function renderRequirementsNotice(): void {
+    $error = systemRequirements();
+    if ($error === '') {
+        return;
+    }
+
+    printf(
+        '<div class="notice notice-error"><p>' .
+            /* translators: 1: The plugin name, 2: The error string. */
+            esc_html__('Plugins: %1$s: %2$s', 'rrze-autoshare') .
+            '</p></div>',
+        esc_html(plugin()->getName()),
+        esc_html($error)
+    );
 }
 
 /**

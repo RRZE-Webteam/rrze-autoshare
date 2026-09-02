@@ -14,14 +14,10 @@ class Main {
     public function loaded() {
         add_filter('plugin_action_links_' . plugin()->getBaseName(), [$this, 'settingsLink']);
 
-        /* Enqueue Admin Assets */
-        add_action('admin_enqueue_scripts', [$this, 'adminEnqueueScripts']);
-
-        /* Enqueue Block Editor Assets */
         add_action('enqueue_block_editor_assets', [$this, 'enqueueBlockEditorAssets'], 10, 0);
 
         settings()->loaded();
-        Metabox::init();
+        add_action('init', [Encryption::class, 'migrateStoredOptions'], 1);
 
         Bluesky::init();
         Mastodon::init();
@@ -45,11 +41,7 @@ class Main {
         return $links;
     }
 
-    public function adminEnqueueScripts($hook) {
-        if ($hook != 'post.php' && $hook != 'post-new.php') {
-            return;
-        }
-
+    public function enqueueBlockEditorAssets() {
         global $post;
         if (
             !$this->isServiceAvailableForPostType('bluesky', get_post_type($post))
@@ -64,16 +56,6 @@ class Main {
             [],
             plugin()->getVersion()
         );
-    }
-
-    public function enqueueBlockEditorAssets() {
-        global $post;
-        if (
-            !$this->isServiceAvailableForPostType('bluesky', get_post_type($post))
-            && !$this->isServiceAvailableForPostType('mastodon', get_post_type($post))
-        ) {
-            return;
-        }
 
         wp_enqueue_script(
             config()->get('assets.admin_script_handle'),
@@ -82,13 +64,13 @@ class Main {
             plugin()->getVersion()
         );
 
-        $blueskyActive = settings()->isServiceActive('bluesky');
+        $blueskyActive = $this->isServiceAvailableForPostType('bluesky', get_post_type($post));
         $blueskyMetaEnabled = config()->get('services.bluesky.meta.enabled');
         $blueskyIsEnabled = $blueskyActive && (metadata_exists('post', $post->ID, $blueskyMetaEnabled) ? Bluesky::isEnabled($post->ID) : true);
         $blueskyIsPublished = Bluesky::isPublished($post->ID);
         $blueskyIsConnected = Bluesky::isConnected();
 
-        $mastodonActive = settings()->isServiceActive('mastodon');
+        $mastodonActive = $this->isServiceAvailableForPostType('mastodon', get_post_type($post));
         $mastodonMetaEnabled = config()->get('services.mastodon.meta.enabled');
         $mastodonIsEnabled = $mastodonActive && (metadata_exists('post', $post->ID, $mastodonMetaEnabled) ? Mastodon::isEnabled($post->ID) : true);
         $mastodonIsPublished = Mastodon::isPublished($post->ID);

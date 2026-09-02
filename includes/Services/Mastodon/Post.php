@@ -4,7 +4,6 @@ namespace RRZE\Autoshare\Services\Mastodon;
 
 defined('ABSPATH') || exit;
 
-use RRZE\Autoshare\Utils;
 use function RRZE\Autoshare\config;
 use function RRZE\Autoshare\settings;
 
@@ -99,62 +98,4 @@ class Post {
         return (bool) get_post_meta($postId, config()->get('services.mastodon.meta.published'), true);
     }
 
-    public static function getContent(\WP_Post $post) {
-        $permalink = esc_url_raw(get_the_permalink($post->ID));
-        $title = apply_filters(config()->get('services.mastodon.filters.title'), $post->post_title);
-        $title = sanitize_text_field($title);
-        $excerpt = apply_filters(config()->get('services.mastodon.filters.excerpt'), self::getExcerpt($post));
-        $excerpt = sanitize_textarea_field($excerpt);
-        $tags = apply_filters(config()->get('services.mastodon.filters.hashtags'), self::getTags($post->ID));
-        $tags = array_filter(array_map('sanitize_text_field', $tags));
-        $tags = !empty($tags) ? implode(' ', $tags) : '';
-
-        $format = settings()->getOption(config()->get('services.mastodon.settings.format'));
-
-        return Utils::formatPostContent(
-            $format,
-            [
-                '{title}' => $title,
-                '{excerpt}' => $excerpt,
-                '{url}' => $permalink,
-                '{tags}' => $tags,
-            ],
-            config()->get('services.mastodon.content.max_length')
-        );
-    }
-
-    protected static function getExcerpt($post)
-    {
-        $excerpt = sanitize_textarea_field($post->post_excerpt);
-        if (!empty($excerpt)) {
-            $excerpt = preg_replace('~$excerptMore$~', '', $excerpt);
-            $excerpt = wp_strip_all_tags($excerpt);
-            $excerpt = html_entity_decode($excerpt, ENT_QUOTES | ENT_HTML5, get_bloginfo('charset'));
-        }
-        return $excerpt;
-    }
-
-    protected static function getTags(int $postId): array
-    {
-        $hashtags = [];
-
-        // $tags = Utils::getTheTags($postId);
-        // if (!$tags) {
-        //     return $hashtags;
-        // }
-
-        // foreach ($tags as $tag) {
-        //     $tagName = $tag->name;
-
-        //     if (preg_match('/(\s|-)+/', $tagName)) {
-        //         $tagName = preg_replace('~(\s|-)+~', ' ', $tagName);
-        //         $tagName = explode(' ', $tagName);
-        //         $tagName = implode('', array_map('ucfirst', $tagName));
-        //     }
-
-        //     $hashtags[] = '#' . $tagName;
-        // }
-
-        return $hashtags;
-    }
 }

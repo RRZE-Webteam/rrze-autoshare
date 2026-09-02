@@ -48,14 +48,19 @@ class Main {
                     'type' => 'boolean',
                     'single' => true,
                     'sanitize_callback' => 'rest_sanitize_boolean',
-                    'auth_callback' => [__CLASS__, 'canEditPosts'],
+                    'auth_callback' => [__CLASS__, 'canEditPostMeta'],
                     'default' => 'false',
                 ]
             );
         }
     }
 
-    public static function canEditPosts() {
-        return current_user_can('edit_posts');
+    public static function canEditPostMeta(
+        bool $allowed,
+        string $metaKey,
+        int $postId,
+        int $userId
+    ): bool {
+        return user_can($userId, 'edit_post', $postId);
     }
 }

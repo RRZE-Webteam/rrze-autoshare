@@ -1,302 +1,298 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the RRZE Autoshare package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
-#, fuzzy
+# Copyright (C) 2026 RRZE-Webteam <webmaster@fau.de>
+# This file is distributed under the GNU General Public License v3.
 msgid ""
 msgstr ""
-"Project-Id-Version: RRZE Autoshare\n"
-"Report-Msgid-Bugs-To: https://github.com/RRZE-Webteam/rrze-autoshare/issues\n"
-"POT-Creation-Date: 2026-09-02 10:19+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Project-Id-Version: RRZE Autoshare 2.0.0-13\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/rrze-autoshare\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-09-02T15:23:25+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.11.0\n"
+"X-Domain: rrze-autoshare\n"
 
-#: rrze-autoshare.php:143 rrze-autoshare.php:186
-#, php-format
-msgid ""
-"The server is running WordPress version %1$s. The plugin requires at least "
-"WordPress version %2$s."
+#. Plugin Name of the plugin
+#: rrze-autoshare.php
+msgid "RRZE Autoshare"
 msgstr ""
 
-#: rrze-autoshare.php:152 rrze-autoshare.php:193
-#, php-format
-msgid ""
-"The server is running PHP version %1$s. The plugin requires at least PHP "
-"version %2$s."
+#. Plugin URI of the plugin
+#: rrze-autoshare.php
+msgid "https://github.com/RRZE-Webteam/rrze-autoshare"
 msgstr ""
 
-#: rrze-autoshare.php:207
-#, php-format
-msgid "Plugins: %1$s: %2$s"
+#. Description of the plugin
+#: rrze-autoshare.php
+msgid "Automatically shares published WordPress content on Bluesky and Mastodon."
 msgstr ""
 
-#: includes/Metabox.php:26 includes/Main.php:109
-msgid "Autoshare"
+#. Author of the plugin
+#: rrze-autoshare.php
+msgid "RRZE-Webteam <webmaster@fau.de>"
 msgstr ""
 
-#: includes/Metabox.php:61 includes/Main.php:110
-msgid "Share on Bluesky"
-msgstr ""
-
-#: includes/Metabox.php:61 includes/Main.php:111
-msgid "Share on Bluesky is disabled"
-msgstr ""
-
-#: includes/Metabox.php:62 includes/Main.php:112
-msgid "It is published on Bluesky"
-msgstr ""
-
-#: includes/Metabox.php:85 includes/Main.php:113
-msgid "Share on Mastodon"
-msgstr ""
-
-#: includes/Metabox.php:85 includes/Main.php:114
-msgid "Share on Mastodon is disabled"
-msgstr ""
-
-#: includes/Metabox.php:86 includes/Main.php:115
-msgid "It is published on Mastodon"
+#. Author URI of the plugin
+#: rrze-autoshare.php
+msgid "https://www.wp.rrze.fau.de"
 msgstr ""
 
 #: includes/Main.php:42
 msgid "Settings"
 msgstr ""
 
-#: includes/Settings.php:32
-msgid "Autoshare Settings"
+#: includes/Main.php:111
+#: includes/Metabox.php:25
+msgid "Autoshare"
 msgstr ""
 
-#: includes/Settings.php:36
-msgid "RRZE-Autoshare"
+#: includes/Main.php:112
+#: includes/Metabox.php:60
+msgid "Share on Bluesky"
 msgstr ""
 
-#: includes/Options/BlueskyAuthorize.php:28
-msgid "Username or email address"
+#: includes/Main.php:113
+#: includes/Metabox.php:60
+msgid "Share on Bluesky is disabled"
 msgstr ""
 
-#: includes/Options/BlueskyAuthorize.php:34
-msgid "Bluesky App Password"
+#: includes/Main.php:114
+#: includes/Metabox.php:61
+msgid "It is published on Bluesky"
 msgstr ""
 
-#: includes/Options/BlueskyAuthorize.php:42
-#, php-format
-msgid ""
-"Create a separate <a href=\"%1$s\" target=\"_blank\" rel=\"noopener "
-"noreferrer\">Bluesky App Password</a>. Do not enter the Bluesky account "
-"password. <a href=\"%2$s\" target=\"_blank\" rel=\"noopener "
-"noreferrer\">Learn more about App Passwords</a>. The entered data is used "
-"only once for authorization and is not saved."
+#: includes/Main.php:115
+#: includes/Metabox.php:83
+msgid "Share on Mastodon"
 msgstr ""
 
-#: includes/Options/BlueskyAuthorize.php:59
-#: includes/Services/Bluesky/API.php:395 includes/Services/Mastodon/API.php:365
-msgid "Authorize Access"
+#: includes/Main.php:116
+#: includes/Metabox.php:83
+msgid "Share on Mastodon is disabled"
 msgstr ""
 
-#: includes/Options/BlueskyAuthorize.php:74
-msgid "Bluesky access was authorized."
+#: includes/Main.php:117
+#: includes/Metabox.php:84
+msgid "It is published on Mastodon"
 msgstr ""
 
-#: includes/Options/BlueskyAuthorize.php:76
-msgid ""
-"Bluesky access could not be authorized. Check the account identifier and App "
-"Password."
-msgstr ""
-
-#: includes/Services/Bluesky/API.php:27 includes/Services/Bluesky/API.php:47
-#: includes/Settings/Settings.php:267
-msgid "You do not have enough permissions to do that."
-msgstr ""
-
-#: includes/Services/Bluesky/API.php:52
-msgid "The link you followed has expired. Please try again."
-msgstr ""
-
-#: includes/Services/Bluesky/API.php:352 includes/Services/Mastodon/API.php:322
+#: includes/Services/Bluesky/API.php:335
+#: includes/Services/Mastodon/API.php:347
 msgid "An error occurred while trying to publish."
 msgstr ""
 
-#: includes/Services/Bluesky/API.php:371 includes/Services/Mastodon/API.php:341
-#, php-format
+#. translators: %d is the error code.
+#: includes/Services/Bluesky/API.php:354
+#: includes/Services/Mastodon/API.php:366
 msgid "Error: %d. "
 msgstr ""
 
-#: includes/Services/Bluesky/API.php:381
+#: includes/Services/Bluesky/API.php:364
 msgid "This post was not published on Bluesky."
 msgstr ""
 
-#: includes/Services/Bluesky/API.php:394 includes/Services/Mastodon/API.php:364
-msgid "Revoke Access"
-msgstr ""
-
-#: includes/Services/Bluesky/API.php:400
-msgid "You’ve authorized Autoshare to read and write to the Bluesky timeline."
-msgstr ""
-
-#: includes/Services/Bluesky/API.php:401
-msgid "Authorize Autoshare to read and write to the Bluesky timeline."
-msgstr ""
-
-#: includes/Services/Bluesky/Settings.php:16
-msgid "Bluesky"
-msgstr ""
-
-#: includes/Services/Bluesky/Settings.php:19
-msgid "Bluesky Settings"
-msgstr ""
-
-#: includes/Services/Bluesky/Settings.php:21
-msgid ""
-"Bluesky, also known as Bluesky Social, is a social microblogging platform."
-"<br>Please complete the settings fields so that Autoshare can read and write "
-"to the Bluesky timeline."
-msgstr ""
-
-#: includes/Services/Bluesky/Settings.php:27
-#: includes/Services/Mastodon/Settings.php:27
-msgid "Service URL"
-msgstr ""
-
-#: includes/Services/Bluesky/Settings.php:28
-msgid "The URL of the Bluesky service."
-msgstr ""
-
-#: includes/Services/Bluesky/Settings.php:36
-#: includes/Services/Mastodon/Settings.php:35
-msgid "The URL entered is not valid."
-msgstr ""
-
-#: includes/Services/Bluesky/Settings.php:40
-msgid "The Bluesky service URL cannot be changed."
-msgstr ""
-
-#: includes/Services/Bluesky/Settings.php:47
-#: includes/Services/Mastodon/Settings.php:51
-msgid "Content Types"
-msgstr ""
-
-#: includes/Services/Bluesky/Settings.php:48
-#: includes/Services/Mastodon/Settings.php:52
-msgid "Select the type of content that Autoshare could use."
-msgstr ""
-
-#: includes/Services/Bluesky/Settings.php:54
-#: includes/Services/Mastodon/Settings.php:58
-msgid "Enable by default"
-msgstr ""
-
-#: includes/Services/Bluesky/Settings.php:55
-#: includes/Services/Mastodon/Settings.php:59
-msgid "Enable Autoshare by default when publishing content"
-msgstr ""
-
-#: includes/Services/Bluesky/Settings.php:60
-#: includes/Services/Mastodon/Settings.php:64
-msgid "Featured Images"
-msgstr ""
-
-#: includes/Services/Bluesky/Settings.php:61
-#: includes/Services/Mastodon/Settings.php:65
-msgid "Include featured images"
-msgstr ""
-
-#: includes/Services/Bluesky/Settings.php:67
-#, php-format
-msgid "Accepted content type: %1$s. Maximum post length: %2$d characters."
-msgstr ""
-
-#: includes/Services/Bluesky/Settings.php:68
-#: includes/Services/Mastodon/Settings.php:72
-msgid "Text"
-msgstr ""
-
-#: includes/Services/Bluesky/Settings.php:72
-#: includes/Services/Mastodon/Settings.php:76
-msgid "Post Format"
-msgstr ""
-
-#: includes/Services/Bluesky/Settings.php:79
-#: includes/Services/Mastodon/Settings.php:83
-msgid "Format"
-msgstr ""
-
-#: includes/Services/Bluesky/Settings.php:80
-#: includes/Services/Mastodon/Settings.php:84
-msgid ""
-"Use the placeholders {title}, {excerpt}, {url}, and {tags}. All placeholders "
-"are required. Empty lines are removed automatically."
-msgstr ""
-
-#: includes/Services/Bluesky/Settings.php:87
-#: includes/Services/Mastodon/Settings.php:91
-msgid "The format must contain {title}, {excerpt}, {url}, and {tags}."
-msgstr ""
-
-#: includes/Services/Bluesky/Settings.php:94
-#: includes/Services/Mastodon/Settings.php:98
-msgid "Access"
-msgstr ""
-
-#: includes/Services/Mastodon/API.php:351
+#: includes/Services/Mastodon/API.php:376
 msgid "This post was not published on Mastodon."
 msgstr ""
 
-#: includes/Services/Mastodon/API.php:370
+#: includes/Services/Mastodon/API.php:403
+#: includes/Settings.php:541
+msgid "Revoke Access"
+msgstr ""
+
+#: includes/Services/Mastodon/API.php:404
+#: includes/Settings.php:575
+msgid "Authorize Access"
+msgstr ""
+
+#: includes/Services/Mastodon/API.php:409
 msgid "You’ve authorized Autoshare to read and write to the Mastodon timeline."
 msgstr ""
 
-#: includes/Services/Mastodon/API.php:371
+#: includes/Services/Mastodon/API.php:410
 msgid "Authorize Autoshare to read and write to the Mastodon timeline."
 msgstr ""
 
-#: includes/Services/Mastodon/Settings.php:16
-msgid "Mastodon"
+#: includes/Settings.php:34
+#: includes/Settings.php:230
+msgid "Autoshare Settings"
 msgstr ""
 
-#: includes/Services/Mastodon/Settings.php:19
+#: includes/Settings.php:35
+msgid "RRZE-Autoshare"
+msgstr ""
+
+#: includes/Settings.php:117
+msgid "The format cannot be empty."
+msgstr ""
+
+#: includes/Settings.php:264
+msgid "Disabled because no authorization is available."
+msgstr ""
+
+#: includes/Settings.php:356
+msgid "Active Services"
+msgstr ""
+
+#: includes/Settings.php:359
+msgid "Services"
+msgstr ""
+
+#: includes/Settings.php:367
+msgid "Select the services that Autoshare should use when publishing content."
+msgstr ""
+
+#: includes/Settings.php:377
+msgid "Bluesky Settings"
+msgstr ""
+
+#: includes/Settings.php:380
+#: includes/Settings.php:403
+msgid "Service URL"
+msgstr ""
+
+#: includes/Settings.php:386
+msgid "The URL of the Bluesky service."
+msgstr ""
+
+#: includes/Settings.php:400
 msgid "Mastodon Settings"
 msgstr ""
 
-#: includes/Services/Mastodon/Settings.php:21
-msgid ""
-"Mastodon is a free social networking service with microblogging features."
-"<br>Please complete the settings fields so that Autoshare can read and write "
-"to the Mastodon timeline."
-msgstr ""
-
-#: includes/Services/Mastodon/Settings.php:28
+#: includes/Settings.php:409
 msgid "The URL of the Mastodon service."
 msgstr ""
 
-#: includes/Services/Mastodon/Settings.php:42
+#: includes/Settings.php:414
 msgid "Username"
 msgstr ""
 
-#: includes/Services/Mastodon/Settings.php:43
+#: includes/Settings.php:420
 msgid "The Mastodon account username."
 msgstr ""
 
-#: includes/Services/Mastodon/Settings.php:71
-#, php-format
-msgid ""
-"Accepted content type: %1$s. Maximum post length: %2$d characters. The "
-"actual limit can differ depending on the Mastodon instance."
+#: includes/Settings.php:433
+msgid "Content Types"
 msgstr ""
 
-#: includes/Settings/templates/settings-page.php:18
-msgid "Settings issues detected."
+#: includes/Settings.php:440
+msgid "Select the type of content that Autoshare could use."
 msgstr ""
 
-#: includes/Settings/Settings.php:177
-msgid "Unnamed tab"
+#: includes/Settings.php:450
+msgid "Featured Images"
 msgstr ""
 
-#: includes/Settings/Settings.php:296
-msgid "Settings saved."
+#: includes/Settings.php:456
+msgid "Include featured images"
+msgstr ""
+
+#. translators: 1: Accepted content type, 2: Maximum number of characters.
+#: includes/Settings.php:466
+msgid "Accepted content type: %1$s. Maximum post length: %2$d characters."
+msgstr ""
+
+#: includes/Settings.php:467
+msgid "Text"
+msgstr ""
+
+#: includes/Settings.php:471
+msgid "The actual limit can differ depending on the Mastodon instance."
+msgstr ""
+
+#: includes/Settings.php:476
+msgid "Post Format"
+msgstr ""
+
+#: includes/Settings.php:485
+msgid "Format"
+msgstr ""
+
+#: includes/Settings.php:491
+msgid "Use the placeholders {title}, {excerpt}, {url}, and {tags}. Empty lines are removed automatically."
+msgstr ""
+
+#: includes/Settings.php:509
+msgid "Bluesky, also known as Bluesky Social, is a social microblogging platform.<br>Please complete the settings fields so that Autoshare can read and write to the Bluesky timeline."
+msgstr ""
+
+#: includes/Settings.php:513
+msgid "Mastodon is a free social networking service with microblogging features.<br>Please complete the settings fields so that Autoshare can read and write to the Mastodon timeline."
+msgstr ""
+
+#: includes/Settings.php:534
+#: includes/Settings.php:584
+msgid "Access"
+msgstr ""
+
+#: includes/Settings.php:537
+msgid "You’ve authorized Autoshare to read and write to the Bluesky timeline."
+msgstr ""
+
+#: includes/Settings.php:544
+msgid "Authorize Autoshare to read and write to the Bluesky timeline."
+msgstr ""
+
+#: includes/Settings.php:548
+msgid "Username or email address"
+msgstr ""
+
+#: includes/Settings.php:552
+msgid "Bluesky App Password"
+msgstr ""
+
+#. translators: 1: Bluesky App Password settings URL, 2: Bluesky App Password information URL.
+#: includes/Settings.php:560
+msgid "Create a separate <a href=\"%1$s\" target=\"_blank\" rel=\"noopener noreferrer\">Bluesky App Password</a>. Do not enter the Bluesky account password. <a href=\"%2$s\" target=\"_blank\" rel=\"noopener noreferrer\">Learn more about App Passwords</a>. The entered data is used only once for authorization and is not saved."
+msgstr ""
+
+#: includes/Settings.php:598
+msgid "Bluesky access was authorized."
+msgstr ""
+
+#: includes/Settings.php:600
+msgid "Bluesky access could not be authorized. Check the account identifier and App Password."
+msgstr ""
+
+#: includes/Settings.php:602
+msgid "Bluesky access was revoked."
+msgstr ""
+
+#: includes/Settings.php:608
+msgid "You do not have enough permissions to do that."
+msgstr ""
+
+#: includes/Settings.php:613
+msgid "The link you followed has expired. Please try again."
+msgstr ""
+
+#: includes/Settings.php:630
+msgid "General"
+msgstr ""
+
+#: includes/Settings.php:631
+msgid "Bluesky"
+msgstr ""
+
+#: includes/Settings.php:632
+msgid "Mastodon"
+msgstr ""
+
+#. translators: 1: Server WordPress version number, 2: Required WordPress version number.
+#: rrze-autoshare.php:156
+#: rrze-autoshare.php:199
+msgid "The server is running WordPress version %1$s. The plugin requires at least WordPress version %2$s."
+msgstr ""
+
+#. translators: 1: Server PHP version number, 2: Required PHP version number.
+#: rrze-autoshare.php:165
+#: rrze-autoshare.php:206
+msgid "The server is running PHP version %1$s. The plugin requires at least PHP version %2$s."
+msgstr ""
+
+#. translators: 1: The plugin name, 2: The error string.
+#: rrze-autoshare.php:220
+msgid "Plugins: %1$s: %2$s"
 msgstr ""

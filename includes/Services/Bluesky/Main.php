@@ -5,14 +5,12 @@ namespace RRZE\Autoshare\Services\Bluesky;
 defined('ABSPATH') || exit;
 
 use RRZE\Autoshare\Utils;
-use RRZE\Autoshare\Settings\Encryption;
 use function RRZE\Autoshare\config;
 use function RRZE\Autoshare\settings;
 
 class Main {
     public static function init() {
         add_action('init', [__CLASS__, 'migrateStoredCredentials'], 5);
-        add_action('init', [__CLASS__, 'migrateStoredTokens'], 5);
         add_action('init', [__CLASS__, 'registerPostMeta']);
         add_action('init', [__CLASS__, 'initPost']);
     }
@@ -53,24 +51,6 @@ class Main {
         Post::init();
     }
 
-    public static function migrateStoredTokens() {
-        $migrationOption = config()->get('migrations.bluesky_tokens');
-
-        if (get_option($migrationOption)) {
-            return;
-        }
-
-        foreach (config()->get('services.bluesky.options', []) as $option) {
-            $value = get_option($option);
-
-            if (is_string($value) && $value !== '') {
-                update_option($option, Encryption::encrypt($value));
-            }
-        }
-
-        update_option($migrationOption, '1', false);
-    }
-
     public static function registerPostMeta() {
         if (!settings()->isServiceActive('bluesky')) {
             return;
@@ -86,15 +66,20 @@ class Main {
                     'type' => 'boolean',
                     'single' => true,
                     'sanitize_callback' => 'rest_sanitize_boolean',
-                    'auth_callback' => [__CLASS__, 'canEditPosts'],
+                    'auth_callback' => [__CLASS__, 'canEditPostMeta'],
                     'default' => 'false',
                 ]
             );
         }
     }
 
-    public static function canEditPosts() {
-        return current_user_can('edit_posts');
+    public static function canEditPostMeta(
+        bool $allowed,
+        string $metaKey,
+        int $postId,
+        int $userId
+    ): bool {
+        return user_can($userId, 'edit_post', $postId);
     }
 
     public static function isConnected() {

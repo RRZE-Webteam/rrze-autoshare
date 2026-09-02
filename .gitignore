@@ -9,8 +9,6 @@
 ### Node ###
 node_modules/
 ### WordPress ###
-*.pot
-!languages/rrze-autoshare.pot
 *.po~
 *.pot~
 ### Tmp ###

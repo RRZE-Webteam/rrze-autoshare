@@ -4,6 +4,7 @@ namespace RRZE\Autoshare\Services\Mastodon;
 
 defined('ABSPATH') || exit;
 
+use RRZE\Autoshare\Encryption;
 use RRZE\Autoshare\Utils;
 use function RRZE\Autoshare\config;
 use function RRZE\Autoshare\settings;
@@ -13,10 +14,10 @@ class API {
         $domain = settings()->getOption(config()->get('services.mastodon.settings.domain'));
 
         $endpoint = config()->get('services.mastodon.endpoints.apps');
-        $response = wp_safe_remote_post(
-            esc_url_raw($domain) . $endpoint,
+        $response = Utils::remoteRequest(
+            'POST',
+            $domain . $endpoint,
             [
-                'user-agent' => config()->getUserAgent(),
                 'body' => [
                     'client_name'   => config()->get('services.mastodon.oauth.client_name'),
                     'redirect_uris' => add_query_arg(
@@ -31,7 +32,8 @@ class API {
                     'scopes' => config()->get('services.mastodon.oauth.scope'),
                     'website' => home_url(),
                 ],
-            ]
+            ],
+            config()->get('services.mastodon.limits.timeout')
         );
 
         if (
@@ -39,16 +41,18 @@ class API {
             wp_remote_retrieve_response_code($response) >= 300
         ) {
             Utils::logRemoteError('Mastodon', 'register_app', $response, ['endpoint' => $endpoint]);
-            delete_option(config()->get('services.mastodon.options.client_id'));
-            delete_option(config()->get('services.mastodon.options.client_secret'));
-            delete_option(config()->get('services.mastodon.options.access_token'));
+            self::deleteCredentials();
             return;
         }
 
-        $data = json_decode($response['body']);
-        if (isset($data->client_id) && isset($data->client_secret)) {
-            update_option(config()->get('services.mastodon.options.client_id'), $data->client_id);
-            update_option(config()->get('services.mastodon.options.client_secret'), $data->client_secret);
+        $data = Utils::getJsonResponseBody($response, 'Mastodon', 'register_app', ['endpoint' => $endpoint]);
+        if (!empty($data['client_id']) && !empty($data['client_secret'])) {
+            if (
+                !self::storeOption('client_id', $data['client_id']) ||
+                !self::storeOption('client_secret', $data['client_secret'])
+            ) {
+                self::deleteCredentials();
+            }
         } else {
             Utils::logRemoteWarning(
                 'Mastodon',
@@ -61,14 +65,14 @@ class API {
 
     public static function requestAccessToken($code) {
         $host = settings()->getOption(config()->get('services.mastodon.settings.domain'));
-        $clientId = get_option(config()->get('services.mastodon.options.client_id'));
-        $clientSecret = get_option(config()->get('services.mastodon.options.client_secret'));
+        $clientId = self::getOption('client_id');
+        $clientSecret = self::getOption('client_secret');
 
         $endpoint = config()->get('services.mastodon.endpoints.token');
-        $response = wp_safe_remote_post(
-            esc_url_raw($host) . $endpoint,
+        $response = Utils::remoteRequest(
+            'POST',
+            $host . $endpoint,
             [
-                'user-agent' => config()->getUserAgent(),
                 'body' => [
                     'client_id'     => $clientId,
                     'client_secret' => $clientSecret,
@@ -82,7 +86,8 @@ class API {
                         admin_url(config()->get('admin_parent_slug'))
                     ),
                 ],
-            ]
+            ],
+            config()->get('services.mastodon.limits.timeout')
         );
 
         if (
@@ -93,10 +98,17 @@ class API {
             return false;
         }
 
-        $data = json_decode($response['body']);
+        $data = Utils::getJsonResponseBody(
+            $response,
+            'Mastodon',
+            'request_access_token',
+            ['endpoint' => $endpoint]
+        );
 
-        if (isset($data->access_token)) {
-            update_option(config()->get('services.mastodon.options.access_token'), $data->access_token);
+        if (!empty($data['access_token'])) {
+            if (!self::storeOption('access_token', $data['access_token'])) {
+                return false;
+            }
             if (!self::verifyAccessToken()) {
                 return false;
             }
@@ -115,25 +127,26 @@ class API {
 
     public static function revokeAccess() {
         $host = settings()->getOption(config()->get('services.mastodon.settings.domain'));
-        $clientId = get_option(config()->get('services.mastodon.options.client_id'));
-        $clientSecret = get_option(config()->get('services.mastodon.options.client_secret'));
-        $accessToken = get_option(config()->get('services.mastodon.options.access_token'));
+        $clientId = self::getOption('client_id');
+        $clientSecret = self::getOption('client_secret');
+        $accessToken = self::getOption('access_token');
 
         if (!$host || !$accessToken || !$clientId || !$clientSecret) {
             return false;
         }
 
         $endpoint = config()->get('services.mastodon.endpoints.revoke');
-        $response = wp_safe_remote_post(
-            esc_url_raw($host) . $endpoint,
+        $response = Utils::remoteRequest(
+            'POST',
+            $host . $endpoint,
             [
-                'user-agent' => config()->getUserAgent(),
                 'body' => [
                     'client_id'     => $clientId,
                     'client_secret' => $clientSecret,
                     'token'         => $accessToken,
                 ],
-            ]
+            ],
+            config()->get('services.mastodon.limits.timeout')
         );
 
         if (
@@ -144,9 +157,7 @@ class API {
             return false;
         }
 
-        delete_option(config()->get('services.mastodon.options.client_id'));
-        delete_option(config()->get('services.mastodon.options.client_secret'));
-        delete_option(config()->get('services.mastodon.options.access_token'));
+        self::deleteCredentials();
         return true;
     }
 
@@ -155,19 +166,20 @@ class API {
             return false;
         }
 
-        if (!$accessToken = get_option(config()->get('services.mastodon.options.access_token'))) {
+        if (!$accessToken = self::getOption('access_token')) {
             return false;
         }
 
         $endpoint = config()->get('services.mastodon.endpoints.verify_credentials');
-        $response = wp_remote_get(
-            esc_url_raw($host) . $endpoint,
+        $response = Utils::remoteRequest(
+            'GET',
+            $host . $endpoint,
             [
-                'user-agent' => config()->getUserAgent(),
                 'headers' => [
                     'Authorization' => 'Bearer ' . $accessToken,
                 ],
-            ]
+            ],
+            config()->get('services.mastodon.limits.timeout')
         );
 
         if (
@@ -175,25 +187,31 @@ class API {
             wp_remote_retrieve_response_code($response) >= 300
         ) {
             Utils::logRemoteError('Mastodon', 'verify_access_token', $response, ['endpoint' => $endpoint]);
-            delete_option(config()->get('services.mastodon.options.access_token'));
+            self::deactivateOnAuthorizationFailure($response);
+            self::deleteOption('access_token');
             return false;
         }
 
         $username = settings()->getOption(config()->get('services.mastodon.settings.username'));
-        $account = json_decode($response['body']);
+        $account = Utils::getJsonResponseBody(
+            $response,
+            'Mastodon',
+            'verify_access_token',
+            ['endpoint' => $endpoint]
+        );
 
-        if (isset($account->username)) {
-            if ($account->username !== $username) {
+        if (!empty($account['username'])) {
+            if ($account['username'] !== $username) {
                 Utils::logRemoteWarning(
                     'Mastodon',
                     'verify_access_token',
                     'Mastodon account verification returned a different username.',
                     [
                         'configured_username' => sanitize_text_field($username),
-                        'received_username' => sanitize_text_field($account->username),
+                        'received_username' => sanitize_text_field($account['username']),
                     ]
                 );
-                delete_option(config()->get('services.mastodon.options.access_token'));
+                self::deleteOption('access_token');
                 return false;
             }
         } else {
@@ -203,7 +221,7 @@ class API {
                 'Mastodon account verification response did not contain a username.',
                 ['endpoint' => $endpoint]
             );
-            delete_option(config()->get('services.mastodon.options.access_token'));
+            self::deleteOption('access_token');
             return false;
         }
 
@@ -211,37 +229,60 @@ class API {
     }
 
     public static function connect() {
+        if (!current_user_can('manage_options')) {
+            return false;
+        }
+
         if (
             !settings()->getOption(config()->get('services.mastodon.settings.domain')) ||
             !settings()->getOption(config()->get('services.mastodon.settings.username'))
         ) {
-            return;
+            return false;
         }
 
-        $clientId = get_option(config()->get('services.mastodon.options.client_id'));
-        $clientSecret = get_option(config()->get('services.mastodon.options.client_secret'));
+        $clientId = self::getOption('client_id');
+        $clientSecret = self::getOption('client_secret');
 
         if (!$clientId || !$clientSecret) {
             self::register();
         } else {
-            $accessToken = (bool) get_option(config()->get('services.mastodon.options.access_token'));
-            if (!empty($_GET['code']) && !$accessToken) {
-                self::requestAccessToken(wp_unslash($_GET['code']));
+            $accessToken = false !== self::getOption('access_token');
+            $code = isset($_GET['code']) ? sanitize_text_field(wp_unslash($_GET['code'])) : '';
+            $state = isset($_GET['state']) ? sanitize_text_field(wp_unslash($_GET['state'])) : '';
+
+            if ($code !== '' && !$accessToken) {
+                if (!self::verifyAuthorizationState($state)) {
+                    Utils::logRemoteWarning(
+                        'Mastodon',
+                        'request_access_token',
+                        'Mastodon OAuth callback was rejected because its state is invalid.',
+                        ['user_id' => get_current_user_id()]
+                    );
+                    return false;
+                }
+
+                return self::requestAccessToken($code);
             } elseif (
                 isset($_GET['action']) &&
-                'revoke' === $_GET['action'] &&
+                'revoke' === sanitize_key(wp_unslash($_GET['action'])) &&
                 isset($_GET['_wpnonce']) &&
-                wp_verify_nonce(sanitize_key($_GET['_wpnonce']), 'rrze-autoshare-mastodon-revoke')
+                wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'rrze-autoshare-mastodon-revoke')
             ) {
-                self::revokeAccess();
+                return self::revokeAccess();
             }
         }
+
+        return true;
     }
 
     public static function publishPost($postId) {
+        if (Utils::isPublicationDeferred('mastodon')) {
+            return;
+        }
+
         $post = get_post($postId);
 
-        $text = Post::getContent($post);
+        $text = Utils::getPostContent($post, 'mastodon');
         if (empty($text)) {
             return;
         }
@@ -250,7 +291,7 @@ class API {
 
         $queryString = http_build_query($args);
 
-        $media = Media::getImages($post);
+        $media = Utils::getImages($post, 'mastodon');
 
         if (!empty($media)) {
             $count = config()->get('services.mastodon.limits.media_count');
@@ -265,21 +306,29 @@ class API {
             }
         }
 
+        if (Utils::isPublicationDeferred('mastodon')) {
+            return;
+        }
+
+        if (!self::isConnected()) {
+            return;
+        }
+
         $host = settings()->getOption(config()->get('services.mastodon.settings.domain'));
-        $accessToken = get_option(config()->get('services.mastodon.options.access_token'));
+        $accessToken = self::getOption('access_token');
 
         $endpoint = config()->get('services.mastodon.endpoints.statuses');
-        $response = wp_remote_post(
-            esc_url_raw($host . $endpoint),
+        $response = Utils::remoteRequest(
+            'POST',
+            $host . $endpoint,
             [
-                'user-agent' => config()->getUserAgent(),
                 'headers'     => [
                     'Authorization' => 'Bearer ' . $accessToken,
                 ],
                 'data_format' => 'body',
                 'body'        => $queryString,
-                'timeout'     => config()->get('services.mastodon.limits.timeout'),
-            ]
+            ],
+            config()->get('services.mastodon.limits.timeout')
         );
 
         $response = self::validateResponse($response, $postId, $endpoint);
@@ -288,18 +337,23 @@ class API {
     }
 
     private static function validateResponse($response, int $postId, string $endpoint) {
-        if (!is_wp_error($response)) {
-            $body = json_decode($response['body']);
-        }
+        $body = Utils::getJsonResponseBody(
+            $response,
+            'Mastodon',
+            'publish_post',
+            ['endpoint' => $endpoint, 'post_id' => $postId]
+        );
 
-        if (!empty($body->id)) {
+        if (!empty($body['id'])) {
             $validatedResponse = [
-                'id' => $body->id,
-                'created_at' => $body->created_at ?? gmdate('c'),
+                'id' => $body['id'],
+                'created_at' => $body['created_at'] ?? gmdate('c'),
             ];
         } else {
             $code = is_wp_error($response) ? '500' : wp_remote_retrieve_response_code($response);
-            $message = is_wp_error($response) ? $response->get_error_message() : $body->error;
+            $message = is_wp_error($response)
+                ? $response->get_error_message()
+                : ($body['error'] ?? wp_remote_retrieve_response_message($response));
             Utils::logRemoteError(
                 'Mastodon',
                 'publish_post',
@@ -311,6 +365,13 @@ class API {
                     'error_message' => sanitize_text_field($message),
                 ]
             );
+            Utils::deferPublication(
+                'mastodon',
+                $response,
+                'publish_post',
+                ['endpoint' => $endpoint, 'post_id' => $postId]
+            );
+            self::deactivateOnAuthorizationFailure($response);
             $errors = [
                 (object) [
                     'code' => sanitize_text_field($code),
@@ -356,7 +417,21 @@ class API {
     }
 
     public static function isConnected() {
-        return (bool) get_option(config()->get('services.mastodon.options.access_token'));
+        return false !== self::getOption('access_token');
+    }
+
+    public static function deactivateOnAuthorizationFailure($response): bool {
+        if (!Utils::isAuthorizationFailure(
+            $response,
+            config()->get('services.mastodon.authentication.invalid_status_codes', [])
+        )) {
+            return false;
+        }
+
+        self::deleteOption('access_token');
+        settings()->deactivateService('mastodon');
+
+        return true;
     }
 
     public static function authorizeAccessText() {
@@ -381,14 +456,12 @@ class API {
 
     private static function authorizeUrl() {
         $host = settings()->getOption(config()->get('services.mastodon.settings.domain'));
-        $clientId = get_option(config()->get('services.mastodon.options.client_id'));
-        $clientSecret = get_option(config()->get('services.mastodon.options.client_secret'));
+        $clientId = self::getOption('client_id');
 
         return $host . config()->get('services.mastodon.endpoints.authorize') . '?' . http_build_query(
             [
                 'response_type' => 'code',
                 'client_id'     => $clientId,
-                'client_secret' => $clientSecret,
                 'redirect_uri'  => esc_url_raw(
                     add_query_arg(
                         [
@@ -399,8 +472,54 @@ class API {
                     )
                 ),
                 'scope' => config()->get('services.mastodon.oauth.scope'),
+                'state' => self::createAuthorizationState(),
             ]
         );
+    }
+
+    private static function createAuthorizationState(): string {
+        $state = wp_generate_password(64, false, false);
+        set_transient(
+            self::getAuthorizationStateKey(),
+            wp_hash($state),
+            config()->get('services.mastodon.oauth.state_lifetime')
+        );
+
+        return $state;
+    }
+
+    private static function verifyAuthorizationState(string $state): bool {
+        $key = self::getAuthorizationStateKey();
+        $storedState = get_transient($key);
+        delete_transient($key);
+
+        return is_string($storedState) && $state !== '' && hash_equals($storedState, wp_hash($state));
+    }
+
+    private static function getAuthorizationStateKey(): string {
+        return config()->get('services.mastodon.oauth.state_transient_prefix') . get_current_user_id();
+    }
+
+    public static function getAccessToken(): string|false {
+        return self::getOption('access_token');
+    }
+
+    private static function getOption(string $name): string|false {
+        return Encryption::getOption(config()->get('services.mastodon.options.' . $name));
+    }
+
+    private static function storeOption(string $name, string $value): bool {
+        return Encryption::updateOption(config()->get('services.mastodon.options.' . $name), $value);
+    }
+
+    private static function deleteOption(string $name): bool {
+        return delete_option(config()->get('services.mastodon.options.' . $name));
+    }
+
+    private static function deleteCredentials(): void {
+        foreach (array_keys(config()->get('services.mastodon.options')) as $name) {
+            self::deleteOption($name);
+        }
     }
 
     private static function revokeUrl() {
