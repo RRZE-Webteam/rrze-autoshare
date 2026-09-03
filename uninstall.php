@@ -35,6 +35,7 @@ function rrze_autoshare_uninstall_site(): void {
     $userIds = get_users(['fields' => 'ids']);
     foreach ($userIds as $userId) {
         delete_transient('rrze_autoshare_mastodon_oauth_state_' . $userId);
+        delete_transient('rrze_autoshare_transmission_test_result_' . $userId);
     }
 }
 

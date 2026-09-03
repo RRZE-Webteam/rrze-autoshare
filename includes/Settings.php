@@ -8,12 +8,10 @@ use RRZE\Autoshare\Services\Bluesky\API as BlueskyAPI;
 use RRZE\Autoshare\Services\Mastodon\API as MastodonAPI;
 
 class Settings {
-    protected array $supportedPostTypes = [];
-
     public function __construct() {
         add_action('admin_menu', [$this, 'addAdminMenu']);
         add_action('admin_init', [$this, 'registerSettings']);
-        add_action('admin_init', [$this, 'connectMastodonAPI']);
+        add_action('admin_enqueue_scripts', [$this, 'enqueueSettingsAssets']);
         add_action(
             'admin_post_' . config()->get('services.bluesky.authorization.authorize_action'),
             [$this, 'authorizeBlueskyAccess']
@@ -22,10 +20,18 @@ class Settings {
             'admin_post_' . config()->get('services.bluesky.authorization.revoke_action'),
             [$this, 'revokeBlueskyAccess']
         );
-    }
-
-    public function loaded() {
-        add_action('init', [$this, 'setPostTypes']);
+        add_action(
+            'admin_post_' . config()->get('services.mastodon.authorization.authorize_action'),
+            [$this, 'authorizeMastodonAccess']
+        );
+        add_action(
+            'admin_post_' . config()->get('services.mastodon.authorization.revoke_action'),
+            [$this, 'revokeMastodonAccess']
+        );
+        add_action(
+            'admin_post_' . config()->get('transmission_test.action'),
+            [$this, 'testTransmission']
+        );
     }
 
     public function addAdminMenu() {
@@ -40,9 +46,48 @@ class Settings {
         );
     }
 
-    public function registerSettings() {
-        $this->setPostTypes();
+    public function enqueueSettingsAssets(string $hook): void {
+        if ('settings_page_' . config()->get('admin_page_slug') !== $hook) {
+            return;
+        }
 
+        $assets = config()->get('assets');
+        $test = config()->get('transmission_test');
+
+        wp_enqueue_style(
+            $assets['admin_style_handle'],
+            plugins_url($assets['admin_style_file'], plugin()->getBasename()),
+            [],
+            plugin()->getVersion()
+        );
+        wp_enqueue_script(
+            $assets['settings_script_handle'],
+            plugins_url($assets['settings_script_file'], plugin()->getBasename()),
+            $assets['settings_script_dependencies'],
+            plugin()->getVersion(),
+            true
+        );
+        wp_localize_script(
+            $assets['settings_script_handle'],
+            $assets['settings_script_object_name'],
+            [
+                'searchEndpoint' => '/wp/v2/search',
+                'searchMinimumLength' => 2,
+                'searchLimit' => 10,
+                'searchType' => 'post',
+                'searchSubtype' => 'post',
+                'searchInputId' => $test['post_search_id'],
+                'postIdInputId' => $test['post_id_input_id'],
+                'resultsId' => $test['post_search_results_id'],
+                'statusId' => $test['post_search_status_id'],
+                'noResults' => __('No posts found.', 'rrze-autoshare'),
+                'searchFailed' => __('Posts could not be loaded.', 'rrze-autoshare'),
+                'selectedPost' => __('Selected post:', 'rrze-autoshare'),
+            ]
+        );
+    }
+
+    public function registerSettings() {
         register_setting(
             config()->get('slug') . '_settings',
             config()->get('option_name'),
@@ -87,21 +132,6 @@ class Settings {
                     $domain = $defaults['domain'];
                 }
                 $options[$settings['domain']] = $domain ?: $defaults['domain'];
-            }
-
-            if (isset($settings['username']) && array_key_exists($settings['username'], $submittedOptions)) {
-                $options[$settings['username']] = sanitize_text_field(
-                    $submittedOptions[$settings['username']] ?? ''
-                );
-            }
-
-            if (array_key_exists($settings['post_types'], $submittedOptions)) {
-                $options[$settings['post_types']] = array_values(
-                    array_intersect(
-                        array_keys($this->getPostTypes()),
-                        array_map('sanitize_key', (array) $submittedOptions[$settings['post_types']])
-                    )
-                );
             }
 
             if (array_key_exists($settings['featured_image'], $submittedOptions)) {
@@ -156,10 +186,6 @@ class Settings {
         return $services;
     }
 
-    public function getPostTypes() {
-        return $this->supportedPostTypes;
-    }
-
     public function isServiceActive(string $service): bool {
         return $this->isServiceAuthorized($service)
             && in_array(
@@ -198,31 +224,6 @@ class Settings {
         }
     }
 
-    public function setPostTypes() {
-        $defaultPostTypes = config()->get('default_post_types');
-        $filteredPostTypes = apply_filters('rrze_autoshare_supported_post_types', $defaultPostTypes);
-        if (empty($filteredPostTypes) || !is_array($filteredPostTypes)) {
-            $filteredPostTypes = $defaultPostTypes;
-        }
-
-        $commonTypes = array_intersect($filteredPostTypes, $defaultPostTypes);
-        if (count($commonTypes) !== count($defaultPostTypes)) {
-            $filteredPostTypes = $defaultPostTypes;
-        }
-
-        $this->supportedPostTypes = [];
-        $availablePostTypes = get_post_types(['public' => true], 'objects');
-        foreach ($availablePostTypes as $postType) {
-            if (in_array($postType->name, config()->get('excluded_post_types'), true)) {
-                continue;
-            }
-
-            if (in_array($postType->name, $filteredPostTypes, true)) {
-                $this->supportedPostTypes[$postType->name] = $postType->labels->name;
-            }
-        }
-    }
-
     public function renderSettingsPage() {
         $tab = $this->getCurrentTab();
         ?>
@@ -234,8 +235,11 @@ class Settings {
                 <?php settings_fields(config()->get('slug') . '_settings'); ?>
                 <input type="hidden" name="_wp_http_referer" value="<?php echo esc_url($this->getSettingsUrl($tab)); ?>">
                 <?php do_settings_sections($this->getSettingsPage($tab)); ?>
-                <?php submit_button(); ?>
+            <?php submit_button(); ?>
             </form>
+            <?php if ('general' === $tab) { ?>
+                <?php $this->renderTransmissionTest(); ?>
+            <?php } ?>
             <?php $this->renderServiceAccess($tab); ?>
         </div>
         <?php
@@ -322,11 +326,20 @@ class Settings {
         $authorization = config()->get('services.bluesky.authorization');
         $this->verifyServiceRequest($authorization['nonce_action'], $authorization['nonce_field']);
 
-        $identifier = sanitize_text_field(wp_unslash($_POST[$authorization['identifier_field']] ?? ''));
-        $password = sanitize_text_field(wp_unslash($_POST[$authorization['password_field']] ?? ''));
-        $authorized = $identifier !== '' && $password !== '' && BlueskyAPI::authorize($identifier, $password);
+        $submittedIdentifier = $_POST[$authorization['identifier_field']] ?? '';
+        $submittedPassword = $_POST[$authorization['password_field']] ?? '';
+        $identifier = is_scalar($submittedIdentifier)
+            ? sanitize_text_field(wp_unslash($submittedIdentifier))
+            : '';
+        $password = is_scalar($submittedPassword)
+            ? trim(wp_unslash($submittedPassword))
+            : '';
+        $authorized = $identifier !== '' && $password !== ''
+            ? BlueskyAPI::authorize($identifier, $password)
+            : new \WP_Error('missing_credentials');
+        $status = true === $authorized ? 'success' : $authorized->get_error_code();
 
-        $this->redirectToServiceTab('bluesky', $authorized ? 'success' : 'failed');
+        $this->redirectToServiceTab('bluesky', $status, $authorization['notice_field']);
     }
 
     public function revokeBlueskyAccess() {
@@ -334,15 +347,81 @@ class Settings {
         $this->verifyServiceRequest($authorization['nonce_action'], $authorization['nonce_field']);
         BlueskyAPI::revoke();
 
-        $this->redirectToServiceTab('bluesky', 'revoked');
+        $this->redirectToServiceTab('bluesky', 'revoked', $authorization['notice_field']);
     }
 
-    public function connectMastodonAPI() {
-        if ('mastodon' !== $this->getCurrentTab() || !current_user_can('manage_options')) {
-            return;
+    public function authorizeMastodonAccess(): void {
+        $authorization = config()->get('services.mastodon.authorization');
+        $this->verifyServiceRequest($authorization['nonce_action'], $authorization['nonce_field']);
+
+        $submittedToken = $_POST[$authorization['token_field']] ?? '';
+        $accessToken = is_scalar($submittedToken) ? trim(wp_unslash($submittedToken)) : '';
+        $authorized = $accessToken !== '' && MastodonAPI::authorize($accessToken);
+
+        $this->redirectToServiceTab(
+            'mastodon',
+            $authorized ? 'success' : 'failed',
+            $authorization['notice_field']
+        );
+    }
+
+    public function revokeMastodonAccess(): void {
+        $authorization = config()->get('services.mastodon.authorization');
+        $this->verifyServiceRequest($authorization['nonce_action'], $authorization['nonce_field']);
+        MastodonAPI::revoke();
+
+        $this->redirectToServiceTab('mastodon', 'revoked', $authorization['notice_field']);
+    }
+
+    public function testTransmission(): void {
+        $test = config()->get('transmission_test');
+        $this->verifyServiceRequest($test['nonce_action'], $test['nonce_field']);
+
+        $submittedPostId = $_POST[$test['post_id_field']] ?? 0;
+        $postId = is_scalar($submittedPostId) ? absint(wp_unslash($submittedPostId)) : 0;
+        $submittedServices = $_POST[$test['services_field']] ?? [];
+        $selectedServices = array_values(
+            array_intersect(
+                array_keys($this->getServices()),
+                array_map(
+                    'sanitize_key',
+                    array_filter((array) $submittedServices, 'is_scalar')
+                )
+            )
+        );
+        $post = get_post($postId);
+        $results = [];
+
+        if (!$post instanceof \WP_Post || !current_user_can('edit_post', $postId)) {
+            $results['invalid_post'] = false;
+        } elseif (empty($selectedServices)) {
+            $results['no_service'] = false;
+        } else {
+            foreach ($selectedServices as $service) {
+                $result = $this->isServiceAuthorized($service)
+                    ? $this->sendTransmissionTest($service, $postId)
+                    : false;
+                $success = is_array($result);
+                $results[$service] = $result;
+                Utils::log(
+                    $success ? 'info' : 'warning',
+                    'Transmission test completed.',
+                    [
+                        'service' => $service,
+                        'post_id' => $postId,
+                        'success' => $success,
+                    ]
+                );
+            }
         }
 
-        MastodonAPI::connect();
+        set_transient(
+            $test['result_transient_prefix'] . get_current_user_id(),
+            $results,
+            MINUTE_IN_SECONDS
+        );
+        wp_safe_redirect($this->getSettingsUrl('general'));
+        exit;
     }
 
     private function registerGeneralSettings() {
@@ -365,6 +444,18 @@ class Settings {
         );
     }
 
+    private function sendTransmissionTest(string $service, int $postId): array|false {
+        if ('bluesky' === $service) {
+            return BlueskyAPI::testPost($postId);
+        }
+
+        if ('mastodon' === $service) {
+            return MastodonAPI::testPost($postId);
+        }
+
+        return false;
+    }
+
     private function registerBlueskySettings() {
         $service = config()->get('services.bluesky');
         $settings = $service['settings'];
@@ -383,7 +474,6 @@ class Settings {
                 'readonly' => true,
             ]
         );
-        $this->registerServicePostTypeField('bluesky', $page, 'rrze_autoshare_bluesky');
         $this->registerServiceFeaturedImageField('bluesky', $page, 'rrze_autoshare_bluesky');
         $this->registerServiceFormatField('bluesky', $page);
     }
@@ -405,37 +495,8 @@ class Settings {
                 'description' => __('The URL of the Mastodon service.', 'rrze-autoshare'),
             ]
         );
-        add_settings_field(
-            $settings['username'],
-            __('Username', 'rrze-autoshare'),
-            [$this, 'renderTextField'],
-            $page,
-            'rrze_autoshare_mastodon',
-            [
-                'name' => $settings['username'],
-                'description' => __('The Mastodon account username.', 'rrze-autoshare'),
-            ]
-        );
-        $this->registerServicePostTypeField('mastodon', $page, 'rrze_autoshare_mastodon');
         $this->registerServiceFeaturedImageField('mastodon', $page, 'rrze_autoshare_mastodon');
         $this->registerServiceFormatField('mastodon', $page);
-    }
-
-    private function registerServicePostTypeField(string $service, string $page, string $section) {
-        $setting = config()->get('services.' . $service . '.settings.post_types');
-
-        add_settings_field(
-            $setting,
-            __('Content Types', 'rrze-autoshare'),
-            [$this, 'renderCheckboxMultipleField'],
-            $page,
-            $section,
-            [
-                'name' => $setting,
-                'options' => $this->getPostTypes(),
-                'description' => __('Select the type of content that Autoshare could use.', 'rrze-autoshare'),
-            ]
-        );
     }
 
     private function registerServiceFeaturedImageField(string $service, string $page, string $section) {
@@ -523,6 +584,102 @@ class Settings {
         }
     }
 
+    private function renderTransmissionTest(): void {
+        $test = config()->get('transmission_test');
+        $results = get_transient($test['result_transient_prefix'] . get_current_user_id());
+        delete_transient($test['result_transient_prefix'] . get_current_user_id());
+        ?>
+        <hr>
+        <h2><?php esc_html_e('Transmission Test', 'rrze-autoshare'); ?></h2>
+        <?php $this->renderTransmissionTestResult($results); ?>
+        <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="post">
+            <input type="hidden" name="action" value="<?php echo esc_attr($test['action']); ?>">
+            <p>
+                <label for="<?php echo esc_attr($test['post_search_id']); ?>"><?php esc_html_e('Post', 'rrze-autoshare'); ?></label><br>
+                <input
+                    id="<?php echo esc_attr($test['post_search_id']); ?>"
+                    type="search"
+                    class="regular-text"
+                    autocomplete="off"
+                    aria-describedby="<?php echo esc_attr($test['post_search_status_id']); ?>"
+                >
+                <input
+                    id="<?php echo esc_attr($test['post_id_input_id']); ?>"
+                    name="<?php echo esc_attr($test['post_id_field']); ?>"
+                    type="hidden"
+                    required
+                >
+                <span id="<?php echo esc_attr($test['post_search_status_id']); ?>" class="rrze-autoshare-post-search-status" role="status"></span>
+                <div id="<?php echo esc_attr($test['post_search_results_id']); ?>" class="rrze-autoshare-post-search-results" role="listbox"></div>
+            </p>
+            <fieldset>
+                <legend><?php esc_html_e('Services', 'rrze-autoshare'); ?></legend>
+                <?php foreach ($this->getServices() as $service => $label) { ?>
+                    <?php $authorized = $this->isServiceAuthorized($service); ?>
+                    <label for="rrze-autoshare-transmission-test-<?php echo esc_attr($service); ?>">
+                        <input
+                            id="rrze-autoshare-transmission-test-<?php echo esc_attr($service); ?>"
+                            name="<?php echo esc_attr($test['services_field']); ?>[]"
+                            type="checkbox"
+                            value="<?php echo esc_attr($service); ?>"
+                            <?php disabled(!$authorized); ?>
+                        >
+                        <?php echo esc_html($label); ?>
+                    </label><br>
+                <?php } ?>
+            </fieldset>
+            <?php wp_nonce_field($test['nonce_action'], $test['nonce_field']); ?>
+            <?php submit_button(__('Run Transmission Test', 'rrze-autoshare'), 'secondary', 'submit', false); ?>
+        </form>
+        <?php
+    }
+
+    private function renderTransmissionTestResult($results): void {
+        if (!is_array($results) || empty($results)) {
+            return;
+        }
+
+        foreach ($results as $service => $result) {
+            if ('invalid_post' === $service) {
+                echo '<div class="notice notice-error inline"><p>' . esc_html__('The post does not exist or you cannot edit it.', 'rrze-autoshare') . '</p></div>';
+            } elseif ('no_service' === $service) {
+                echo '<div class="notice notice-error inline"><p>' . esc_html__('Select at least one service for the transmission test.', 'rrze-autoshare') . '</p></div>';
+            } else {
+                $label = $this->getServices()[$service] ?? $service;
+                $success = is_array($result);
+                $imageNotTransferred = $success && !empty($result['image_not_transferred']);
+                if ($imageNotTransferred) {
+                    $message = sprintf(
+                        /* translators: %s: Service name. */
+                        __('The text was sent to %s successfully, but the featured image could not be transmitted.', 'rrze-autoshare'),
+                        $label
+                    );
+                    $class = 'notice-warning';
+                } elseif ($success) {
+                    $message = sprintf(
+                        /* translators: %s: Service name. */
+                        __('%s received the transmission test successfully.', 'rrze-autoshare'),
+                        $label
+                    );
+                    $class = 'notice-success';
+                } else {
+                    $message = sprintf(
+                        /* translators: %s: Service name. */
+                        __('%s could not receive the transmission test. Check the log for details.', 'rrze-autoshare'),
+                        $label
+                    );
+                    $class = 'notice-error';
+                }
+                $url = $success && !empty($result['url']) ? esc_url($result['url']) : '';
+                echo '<div class="notice ' . esc_attr($class) . ' inline"><p>' . esc_html($message);
+                if ($url !== '') {
+                    echo ' <a href="' . esc_url($url) . '" target="_blank" rel="noopener noreferrer">' . esc_html__('View post', 'rrze-autoshare') . '</a>';
+                }
+                echo '</p></div>';
+            }
+        }
+    }
+
     private function renderBlueskyAccess() {
         $authorization = config()->get('services.bluesky.authorization');
         ?>
@@ -541,8 +698,9 @@ class Settings {
             <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="post">
                 <input type="hidden" name="action" value="<?php echo esc_attr($authorization['authorize_action']); ?>">
                 <p>
-                    <label for="rrze-autoshare-bluesky-identifier"><?php esc_html_e('Username or email address', 'rrze-autoshare'); ?></label><br>
+                    <label for="rrze-autoshare-bluesky-identifier"><?php esc_html_e('Bluesky handle or email address', 'rrze-autoshare'); ?></label><br>
                     <input id="rrze-autoshare-bluesky-identifier" name="<?php echo esc_attr($authorization['identifier_field']); ?>" type="text" class="regular-text" autocomplete="username" required>
+                    <p class="description"><?php esc_html_e('Use the complete handle without @, for example name.bsky.social. An email address is also accepted.', 'rrze-autoshare'); ?></p>
                 </p>
                 <p>
                     <label for="rrze-autoshare-bluesky-app-password"><?php esc_html_e('Bluesky App Password', 'rrze-autoshare'); ?></label><br>
@@ -575,15 +733,51 @@ class Settings {
     }
 
     private function renderMastodonAccess() {
+        $authorization = config()->get('services.mastodon.authorization');
         ?>
         <hr>
         <h2><?php esc_html_e('Access', 'rrze-autoshare'); ?></h2>
-        <p>
-            <a href="<?php echo esc_url(MastodonAPI::authorizeAccessUrl()); ?>" class="button button-secondary">
-                <?php echo esc_html(MastodonAPI::authorizeAccessText()); ?>
-            </a>
-        </p>
-        <p class="description"><?php echo esc_html(MastodonAPI::authorizeAccessDescription()); ?></p>
+        <?php $this->renderMastodonAuthorizationNotice(); ?>
+        <?php if (MastodonAPI::isConnected()) { ?>
+            <p><?php esc_html_e('You’ve authorized Autoshare to read and write to the Mastodon timeline.', 'rrze-autoshare'); ?></p>
+            <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="post">
+                <input type="hidden" name="action" value="<?php echo esc_attr($authorization['revoke_action']); ?>">
+                <?php wp_nonce_field($authorization['nonce_action'], $authorization['nonce_field']); ?>
+                <?php submit_button(__('Revoke Access', 'rrze-autoshare'), 'secondary', 'submit', false); ?>
+            </form>
+        <?php } else { ?>
+            <form action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="post">
+                <input type="hidden" name="action" value="<?php echo esc_attr($authorization['authorize_action']); ?>">
+                <p>
+                    <label for="rrze-autoshare-mastodon-access-token"><?php esc_html_e('Access Token', 'rrze-autoshare'); ?></label><br>
+                    <input id="rrze-autoshare-mastodon-access-token" name="<?php echo esc_attr($authorization['token_field']); ?>" type="password" class="regular-text" autocomplete="off" required>
+                </p>
+                <p class="description">
+                    <?php esc_html_e('Grant the permissions write:statuses, write:media, and read:accounts to Autoshare.', 'rrze-autoshare'); ?>
+                </p>
+                <p class="description">
+                    <?php
+                    echo wp_kses(
+                        sprintf(
+                            /* translators: 1: Mastodon application settings URL, 2: Mastodon token documentation URL. */
+                            __('Create an application and an access token with the permissions write:statuses, write:media, and read:accounts in <a href="%1$s" target="_blank" rel="noopener noreferrer">Mastodon application settings</a>. <a href="%2$s" target="_blank" rel="noopener noreferrer">Learn more about Mastodon access tokens</a>. The token is stored encrypted.', 'rrze-autoshare'),
+                            esc_url(MastodonAPI::applicationSettingsUrl()),
+                            esc_url($authorization['info_url'])
+                        ),
+                        [
+                            'a' => [
+                                'href' => true,
+                                'rel' => true,
+                                'target' => true,
+                            ],
+                        ]
+                    );
+                    ?>
+                </p>
+                <?php wp_nonce_field($authorization['nonce_action'], $authorization['nonce_field']); ?>
+                <?php submit_button(__('Authorize Access', 'rrze-autoshare'), 'secondary', 'submit', false); ?>
+            </form>
+        <?php } ?>
         <?php
     }
 
@@ -592,8 +786,24 @@ class Settings {
 
         if ('success' === $status) {
             echo '<div class="notice notice-success inline"><p>' . esc_html__('Bluesky access was authorized.', 'rrze-autoshare') . '</p></div>';
-        } elseif ('failed' === $status) {
-            echo '<div class="notice notice-error inline"><p>' . esc_html__('Bluesky access could not be authorized. Check the account identifier and App Password.', 'rrze-autoshare') . '</p></div>';
+        } elseif ('missing_credentials' === $status) {
+            echo '<div class="notice notice-error inline"><p>' . esc_html__('Enter both a Bluesky handle or email address and an App Password.', 'rrze-autoshare') . '</p></div>';
+        } elseif ('invalid_app_password_format' === $status) {
+            echo '<div class="notice notice-error inline"><p>' . esc_html__('The App Password format is invalid. Create a new Bluesky App Password and enter it exactly as shown, including hyphens.', 'rrze-autoshare') . '</p></div>';
+        } elseif ('credentials_rejected' === $status) {
+            echo '<div class="notice notice-error inline"><p>' . esc_html__('Bluesky rejected the credentials. Use the complete handle without @, for example name.bsky.social, or the account email address. Do not use the normal account password; create a new App Password instead.', 'rrze-autoshare') . '</p></div>';
+        } elseif ('authorization_rate_limited' === $status) {
+            echo '<div class="notice notice-warning inline"><p>' . esc_html__('Bluesky temporarily limited authorization attempts. Wait before trying again.', 'rrze-autoshare') . '</p></div>';
+        } elseif ('service_unavailable' === $status) {
+            echo '<div class="notice notice-error inline"><p>' . esc_html__('Bluesky is temporarily unavailable. Try again later.', 'rrze-autoshare') . '</p></div>';
+        } elseif ('connection_failed' === $status) {
+            echo '<div class="notice notice-error inline"><p>' . esc_html__('Bluesky could not be reached. Check the server connection.', 'rrze-autoshare') . '</p></div>';
+        } elseif ('unexpected_authorization_response' === $status) {
+            echo '<div class="notice notice-error inline"><p>' . esc_html__('Bluesky returned an incomplete authorization response. No access tokens were saved.', 'rrze-autoshare') . '</p></div>';
+        } elseif ('token_storage_failed' === $status) {
+            echo '<div class="notice notice-error inline"><p>' . esc_html__('The Bluesky access tokens could not be stored securely. Check the server encryption configuration and the log.', 'rrze-autoshare') . '</p></div>';
+        } elseif ('authorization_failed' === $status) {
+            echo '<div class="notice notice-error inline"><p>' . esc_html__('Bluesky could not authorize access.', 'rrze-autoshare') . '</p></div>';
         } elseif ('revoked' === $status) {
             echo '<div class="notice notice-success inline"><p>' . esc_html__('Bluesky access was revoked.', 'rrze-autoshare') . '</p></div>';
         }
@@ -610,10 +820,23 @@ class Settings {
         }
     }
 
-    private function redirectToServiceTab(string $tab, string $status) {
+    private function renderMastodonAuthorizationNotice(): void {
+        $noticeField = config()->get('services.mastodon.authorization.notice_field');
+        $status = filter_input(INPUT_GET, $noticeField, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+
+        if ('success' === $status) {
+            echo '<div class="notice notice-success inline"><p>' . esc_html__('Mastodon access was authorized.', 'rrze-autoshare') . '</p></div>';
+        } elseif ('failed' === $status) {
+            echo '<div class="notice notice-error inline"><p>' . esc_html__('The Mastodon access token could not be verified. Check the token and service URL.', 'rrze-autoshare') . '</p></div>';
+        } elseif ('revoked' === $status) {
+            echo '<div class="notice notice-success inline"><p>' . esc_html__('Mastodon access was revoked.', 'rrze-autoshare') . '</p></div>';
+        }
+    }
+
+    private function redirectToServiceTab(string $tab, string $status, string $noticeField) {
         wp_safe_redirect(
             add_query_arg(
-                config()->get('services.bluesky.authorization.notice_field'),
+                $noticeField,
                 $status,
                 $this->getSettingsUrl($tab)
             )

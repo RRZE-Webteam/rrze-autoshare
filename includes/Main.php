@@ -16,7 +16,6 @@ class Main {
 
         add_action('enqueue_block_editor_assets', [$this, 'enqueueBlockEditorAssets'], 10, 0);
 
-        settings()->loaded();
         add_action('init', [Encryption::class, 'migrateStoredOptions'], 1);
 
         Bluesky::init();
@@ -112,7 +111,7 @@ class Main {
             settings()->isServiceActive($service)
             && in_array(
                 $postType,
-                settings()->getOption(config()->get('services.' . $service . '.settings.post_types')),
+                config()->get('default_post_types'),
                 true
             )
         );

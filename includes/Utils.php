@@ -49,7 +49,14 @@ class Utils {
             return;
         }
 
-        do_action($logHook, $message, $context);
+        do_action(
+            $logHook,
+            $message,
+            array_merge(
+                $context,
+                ['plugin' => 'rrze-autoshare']
+            )
+        );
     }
 
     public static function logRemoteError(string $service, string $operation, $response, array $context = []): void {
@@ -258,6 +265,96 @@ class Utils {
         }
 
         return $images;
+    }
+
+    public static function getServiceMetadata(\WP_Post $post, string $service): array {
+        $metadata = [];
+
+        foreach (config()->get('services.' . $service . '.metadata', []) as $mapping) {
+            $callback = $mapping['callback'] ?? null;
+            $field = $mapping['field'] ?? '';
+            if (!is_callable($callback) || !is_string($field) || $field === '') {
+                continue;
+            }
+
+            $value = call_user_func($callback, $post);
+            if ($value !== '' && $value !== [] && $value !== null) {
+                $metadata[$field] = $value;
+            }
+        }
+
+        return $metadata;
+    }
+
+    public static function getServiceExternalEmbed(\WP_Post $post, string $service): array {
+        $embed = config()->get('services.' . $service . '.external_embed', []);
+        $field = $embed['field'] ?? '';
+        $wrapperField = $embed['wrapper_field'] ?? '';
+        $type = $embed['type'] ?? '';
+        if (!is_string($field) || !is_string($wrapperField) || !is_string($type)) {
+            return [];
+        }
+
+        $external = [];
+        foreach ($embed['mappings'] ?? [] as $name => $mapping) {
+            $callback = $mapping['callback'] ?? null;
+            if (!is_callable($callback)) {
+                continue;
+            }
+
+            $value = call_user_func($callback, $post);
+            if ($value !== '' && $value !== null) {
+                $external[$name] = $value;
+            }
+        }
+
+        if (empty($external['uri']) || empty($external['title'])) {
+            return [];
+        }
+
+        return [
+            $field => [
+                '$type' => $type,
+                $wrapperField => $external,
+            ],
+        ];
+    }
+
+    public static function getPostLanguage(\WP_Post $post): string {
+        return strtolower(substr(get_locale(), 0, 2));
+    }
+
+    public static function getPostLanguages(\WP_Post $post): array {
+        $language = self::getPostLanguage($post);
+
+        return $language === '' ? [] : [$language];
+    }
+
+    public static function getPostTagNames(\WP_Post $post): array {
+        return array_slice(
+            array_map(
+                [__CLASS__, 'removeHashtagPrefix'],
+                self::getPostHashtags($post->ID)
+            ),
+            0,
+            8
+        );
+    }
+
+    public static function removeHashtagPrefix(string $tag): string {
+        return ltrim($tag, '#');
+    }
+
+    public static function getPublicationTimestamp(\WP_Post $post): string {
+        return gmdate('c');
+    }
+
+    public static function getPostPermalink(\WP_Post $post): string {
+        return esc_url_raw(get_permalink($post));
+    }
+
+    public static function getPostTitle(\WP_Post $post): string {
+        return sanitize_text_field($post->post_title);
     }
 
     public static function getPostContent(\WP_Post $post, string $service): string {

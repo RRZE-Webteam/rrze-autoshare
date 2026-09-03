@@ -27,8 +27,7 @@ class Post {
             return;
         }
 
-        $supportedPostTypes = settings()->getOption('bluesky_post_types');
-        if (!in_array($post->post_type, $supportedPostTypes)) {
+        if (!in_array($post->post_type, config()->get('default_post_types'), true)) {
             return;
         }
 
@@ -48,8 +47,7 @@ class Post {
             return;
         }
 
-        $supportedPostTypes = settings()->getOption('bluesky_post_types');
-        if (!in_array($post->post_type, $supportedPostTypes)) {
+        if (!in_array($post->post_type, config()->get('default_post_types'), true)) {
             return;
         }
 

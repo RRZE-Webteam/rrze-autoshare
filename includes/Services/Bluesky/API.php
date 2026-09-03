@@ -12,11 +12,11 @@ use function RRZE\Autoshare\config;
 use function RRZE\Autoshare\settings;
 
 class API {
-    public static function authorize(string $identifier, string $password): bool {
+    public static function authorize(string $identifier, string $password): true|\WP_Error {
         $host = trailingslashit(config()->get('services.bluesky.defaults.domain'));
         $authorized = self::authorizeAccess($host, $identifier, $password);
 
-        if (!$authorized) {
+        if (true !== $authorized) {
             self::revokeAccess();
         }
 
@@ -27,16 +27,11 @@ class API {
         self::revokeAccess();
     }
 
-    private static function authorizeAccess($host, $identifier, $password) {
+    private static function authorizeAccess(string $host, string $identifier, string $password): true|\WP_Error {
         $host = trailingslashit($host);
 
         if (!Config::validateBlueskyAppPassword($password)) {
-            Utils::logRemoteWarning(
-                'Bluesky',
-                'authorize_access',
-                'The configured Bluesky App Password has an invalid format.'
-            );
-            return false;
+            return new \WP_Error('invalid_app_password_format');
         }
 
         $endpoint = config()->get('services.bluesky.endpoints.create_session');
@@ -57,33 +52,38 @@ class API {
             config()->get('services.bluesky.limits.timeout')
         );
 
-        if (
-            is_wp_error($response) ||
-            wp_remote_retrieve_response_code($response) >= 300
-        ) {
-            Utils::logRemoteError('Bluesky', 'authorize_access', $response, ['endpoint' => $endpoint]);
-            return false;
+        if (is_wp_error($response)) {
+            return new \WP_Error('connection_failed');
         }
 
-        $data = Utils::getJsonResponseBody(
-            $response,
-            'Bluesky',
-            'authorize_access',
-            ['endpoint' => $endpoint]
-        );
+        if (wp_remote_retrieve_response_code($response) >= 300) {
+            $responseCode = wp_remote_retrieve_response_code($response);
+
+            if (429 === $responseCode) {
+                return new \WP_Error('authorization_rate_limited');
+            }
+
+            if ($responseCode >= 500) {
+                return new \WP_Error('service_unavailable');
+            }
+
+            if (in_array($responseCode, [400, 401, 403], true)) {
+                return new \WP_Error('credentials_rejected');
+            }
+
+            return new \WP_Error('authorization_failed');
+        }
+
+        $data = json_decode(wp_remote_retrieve_body($response), true);
+        $data = JSON_ERROR_NONE === json_last_error() && is_array($data) ? $data : [];
 
         if (
             empty($data['accessJwt']) ||
             empty($data['refreshJwt']) ||
             empty($data['did'])
         ) {
-            Utils::logRemoteWarning(
-                'Bluesky',
-                'authorize_access',
-                'Bluesky authorization response did not contain the expected token data.'
-            );
             self::revokeAccess();
-            return false;
+            return new \WP_Error('unexpected_authorization_response');
         }
 
         if (
@@ -92,7 +92,7 @@ class API {
             !self::storeToken('did', $data['did'])
         ) {
             self::revokeAccess();
-            return false;
+            return new \WP_Error('token_storage_failed');
         }
 
         return true;
@@ -167,31 +167,27 @@ class API {
         self::refreshAccessToken();
     }
 
-    public static function publishPost($postId) {
+    public static function publishPost($postId, bool $updateStatus = true): bool|array {
         if (Utils::isPublicationDeferred('bluesky')) {
-            return;
+            return false;
         }
 
         if (!self::refreshAccessToken()) {
-            return;
+            return false;
         }
 
         $post = get_post($postId);
 
-        $locale = get_locale();
-        $langCode = substr($locale, 0, config()->get('services.bluesky.limits.lang_code_length'));
         $title = sanitize_text_field($post->post_title);
         $text = Utils::getPostContent($post, 'bluesky');
         if (empty($text)) {
-            return;
+            return false;
         }
 
-        $record = [
+        $record = array_merge([
             '$type'     => config()->get('services.bluesky.record.type'),
             'text'      => $text,
-            'langs'     => [$langCode],
-            'createdAt' => gmdate('c', strtotime($post->post_date_gmt))
-        ];
+        ], Utils::getServiceMetadata($post, 'bluesky'));
 
         $links = self::getLinks($text);
         if (!empty($links)) {
@@ -209,7 +205,7 @@ class API {
         }
 
         if (Utils::isPublicationDeferred('bluesky')) {
-            return;
+            return false;
         }
         if (!empty($image['blob'])) {
             $embed = [
@@ -224,10 +220,12 @@ class API {
                 ]
             ];
             $record = array_merge($record, $embed);
+        } else {
+            $record = array_merge($record, Utils::getServiceExternalEmbed($post, 'bluesky'));
         }
 
         if (!self::isConnected()) {
-            return;
+            return false;
         }
 
         $accessToken = self::getAccessToken();
@@ -259,7 +257,19 @@ class API {
 
         $response = self::validateResponse($response, $postId, $endpoint);
 
-        self::updateStatusMeta($postId, $response);
+        if ($updateStatus) {
+            self::updateStatusMeta($postId, $response);
+
+            return !is_wp_error($response);
+        }
+
+        return self::getTransmissionTestResult($response);
+    }
+
+    public static function testPost(int $postId): array|false {
+        $result = self::publishPost($postId, false);
+
+        return is_array($result) ? $result : false;
     }
 
     private static function getLinks($text) {
@@ -325,6 +335,15 @@ class API {
                 'id' => $body['uri'],
                 'created_at' => $body['created_at'] ?? gmdate('c'),
             ];
+            Utils::log(
+                'info',
+                'Post published on Bluesky.',
+                [
+                    'service' => 'bluesky',
+                    'post_id' => $postId,
+                    'record_uri' => sanitize_text_field($body['uri']),
+                ]
+            );
         } else {
             $code = is_wp_error($response) ? '500' : wp_remote_retrieve_response_code($response);
             $message = is_wp_error($response)
@@ -362,6 +381,36 @@ class API {
         }
 
         return $validatedResponse;
+    }
+
+    private static function getTransmissionTestResult($response): array|false {
+        if (!is_array($response) || empty($response['id'])) {
+            return false;
+        }
+
+        return [
+            'url' => self::getPostUrl((string) $response['id']),
+        ];
+    }
+
+    private static function getPostUrl(string $recordUri): string {
+        if (
+            !preg_match(
+                '#^at://([^/]+)/app\\.bsky\\.feed\\.post/([^/]+)$#',
+                $recordUri,
+                $matches
+            )
+        ) {
+            return '';
+        }
+
+        return esc_url_raw(
+            sprintf(
+                config()->get('services.bluesky.urls.post'),
+                rawurlencode($matches[1]),
+                rawurlencode($matches[2])
+            )
+        );
     }
 
     private static function updateStatusMeta($postId, $data) {

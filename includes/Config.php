@@ -18,17 +18,32 @@ class Config {
                 'default' => [],
             ],
         ],
+        'transmission_test' => [
+            'action' => 'rrze_autoshare_transmission_test',
+            'nonce_action' => 'rrze-autoshare-transmission-test',
+            'nonce_field' => 'rrze_autoshare_transmission_test_nonce',
+            'post_id_field' => 'rrze_autoshare_transmission_test_post_id',
+            'post_search_id' => 'rrze-autoshare-transmission-test-post-search',
+            'post_id_input_id' => 'rrze-autoshare-transmission-test-post-id',
+            'post_search_results_id' => 'rrze-autoshare-transmission-test-post-results',
+            'post_search_status_id' => 'rrze-autoshare-transmission-test-post-status',
+            'services_field' => 'rrze_autoshare_transmission_test_services',
+            'result_transient_prefix' => 'rrze_autoshare_transmission_test_result_',
+        ],
         'migrations' => [
             'bluesky_credentials' => 'rrze_autoshare_bluesky_credentials_migrated',
             'bluesky_tokens' => 'rrze_autoshare_bluesky_tokens_migrated',
             'encrypted_service_options' => 'rrze_autoshare_encrypted_service_options_migrated',
+            'mastodon_legacy_service_options' => [
+                'rrze_autoshare_mastodon_client_id',
+                'rrze_autoshare_mastodon_client_secret',
+            ],
             'bluesky_legacy_credential_settings' => [
                 'bluesky_identifier',
                 'bluesky_password',
             ],
         ],
-        'default_post_types' => ['post', 'page'],
-        'excluded_post_types' => ['attachment', 'revision', 'nav_menu_item'],
+        'default_post_types' => ['post'],
         'assets' => [
             'admin_style_handle' => 'rrze-autoshare-admin',
             'admin_style_file' => 'build/css/rrze-autoshare-admin.css',
@@ -42,6 +57,10 @@ class Config {
                 'wp-plugins',
             ],
             'admin_script_object_name' => 'autoshareObject',
+            'settings_script_handle' => 'rrze-autoshare-settings',
+            'settings_script_file' => 'build/js/rrze-autoshare-settings.js',
+            'settings_script_dependencies' => ['wp-api-fetch'],
+            'settings_script_object_name' => 'autoshareSettingsObject',
         ],
         'user_agent' => [
             'org' => 'RRZE',
@@ -73,7 +92,6 @@ class Config {
                 'label' => 'Bluesky',
                 'settings' => [
                     'domain' => 'bluesky_domain',
-                    'post_types' => 'bluesky_post_types',
                     'featured_image' => 'bluesky_featured_image',
                     'format' => 'bluesky_format',
                 ],
@@ -125,9 +143,8 @@ class Config {
                 ],
                 'defaults' => [
                     'domain' => 'https://bsky.social',
-                    'post_types' => ['post'],
                     'featured_image' => true,
-                    'format' => "{title}\n{tags}\n{excerpt}\n{url}",
+                    'format' => "{title}\n{excerpt}\n{url}",
                 ],
                 'content' => [
                     'max_length' => 300,
@@ -136,29 +153,51 @@ class Config {
                 ],
                 'limits' => [
                     'media_count' => 1,
-                    'lang_code_length' => 2,
                     'timeout' => 15,
                 ],
                 'record' => [
                     'type' => 'app.bsky.feed.post',
                     'collection' => 'app.bsky.feed.post',
                     'embed_images_type' => 'app.bsky.embed.images',
+                    'embed_external_type' => 'app.bsky.embed.external',
                     'facet_link_type' => 'app.bsky.richtext.facet#link',
+                ],
+                'urls' => [
+                    'post' => 'https://bsky.app/profile/%1$s/post/%2$s',
+                ],
+                'metadata' => [
+                    'languages' => [
+                        'field' => 'langs',
+                        'callback' => ['RRZE\Autoshare\Utils', 'getPostLanguages'],
+                    ],
+                    'tags' => [
+                        'field' => 'tags',
+                        'callback' => ['RRZE\Autoshare\Utils', 'getPostTagNames'],
+                    ],
+                    'created_at' => [
+                        'field' => 'createdAt',
+                        'callback' => ['RRZE\Autoshare\Utils', 'getPublicationTimestamp'],
+                    ],
+                ],
+                'external_embed' => [
+                    'field' => 'embed',
+                    'wrapper_field' => 'external',
+                    'type' => 'app.bsky.embed.external',
+                    'mappings' => [
+                        'uri' => ['callback' => ['RRZE\Autoshare\Utils', 'getPostPermalink']],
+                        'title' => ['callback' => ['RRZE\Autoshare\Utils', 'getPostTitle']],
+                        'description' => ['callback' => ['RRZE\Autoshare\Utils', 'getPostExcerpt']],
+                    ],
                 ],
             ],
             'mastodon' => [
                 'label' => 'Mastodon',
                 'settings' => [
                     'domain' => 'mastodon_domain',
-                    'username' => 'mastodon_username',
-                    'post_types' => 'mastodon_post_types',
                     'featured_image' => 'mastodon_featured_image',
                     'format' => 'mastodon_format',
-                    'authorize_access_url' => 'mastodon_authorize_access_url',
                 ],
                 'options' => [
-                    'client_id' => 'rrze_autoshare_mastodon_client_id',
-                    'client_secret' => 'rrze_autoshare_mastodon_client_secret',
                     'access_token' => 'rrze_autoshare_mastodon_access_token',
                 ],
                 'meta' => [
@@ -177,17 +216,12 @@ class Config {
                     'publish_post' => 'rrze_autoshare_mastodon_publish_post',
                 ],
                 'endpoints' => [
-                    'apps' => '/api/v1/apps',
-                    'token' => '/oauth/token',
-                    'revoke' => '/oauth/revoke',
                     'verify_credentials' => '/api/v1/accounts/verify_credentials',
                     'statuses' => '/api/v1/statuses',
                     'media' => '/api/v1/media',
-                    'authorize' => '/oauth/authorize',
                 ],
                 'defaults' => [
                     'domain' => 'https://mastodon.social',
-                    'post_types' => ['post'],
                     'featured_image' => true,
                     'format' => "{title}\n{tags}\n{excerpt}\n{url}",
                 ],
@@ -196,18 +230,28 @@ class Config {
                     'type' => 'text',
                     'length_is_instance_specific' => true,
                 ],
+                'metadata' => [
+                    'language' => [
+                        'field' => 'language',
+                        'callback' => ['RRZE\Autoshare\Utils', 'getPostLanguage'],
+                    ],
+                ],
                 'limits' => [
                     'media_count' => 1,
                     'timeout' => 15,
                 ],
-                'oauth' => [
-                    'client_name' => 'RRZE-Autoshare',
-                    'scope' => 'write:media write:statuses read:accounts read:statuses',
-                    'state_transient_prefix' => 'rrze_autoshare_mastodon_oauth_state_',
-                    'state_lifetime' => 600,
+                'authorization' => [
+                    'authorize_action' => 'rrze_autoshare_mastodon_authorize',
+                    'revoke_action' => 'rrze_autoshare_mastodon_revoke',
+                    'token_field' => 'rrze_autoshare_mastodon_access_token',
+                    'nonce_action' => 'rrze-autoshare-mastodon-authorize',
+                    'nonce_field' => 'rrze_autoshare_mastodon_authorize_nonce',
+                    'notice_field' => 'mastodon_authorization',
+                    'application_settings_path' => '/settings/applications',
+                    'info_url' => 'https://docs.joinmastodon.org/client/authorized/',
                 ],
                 'authentication' => [
-                    'direct_token_input' => false,
+                    'direct_token_input' => true,
                     'connection_callback' => ['RRZE\Autoshare\Services\Mastodon\API', 'isConnected'],
                     'invalid_status_codes' => [401, 403],
                 ],

@@ -2,3 +2,18 @@
 .rrze-autoshare-panel .checkbox-control-disabled .components-checkbox-control__label {
   opacity: 0.5;
 }
+
+.rrze-autoshare-settings .rrze-autoshare-post-search-status {
+  display: block;
+  margin-top: 4px;
+}
+.rrze-autoshare-settings .rrze-autoshare-post-search-results {
+  margin-top: 4px;
+  max-width: 25em;
+}
+.rrze-autoshare-settings .rrze-autoshare-post-search-result {
+  display: block;
+  width: 100%;
+  margin: 0 0 2px;
+  text-align: left;
+}

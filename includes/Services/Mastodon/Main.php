@@ -38,8 +38,7 @@ class Main {
             return;
         }
 
-        $supportedPostTypes = settings()->getOption('mastodon_post_types');
-        foreach ($supportedPostTypes as $postType) {
+        foreach (config()->get('default_post_types') as $postType) {
             register_post_meta(
                 $postType,
                 config()->get('services.mastodon.meta.enabled'),
