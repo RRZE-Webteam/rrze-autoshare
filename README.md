@@ -2,7 +2,7 @@
 
 # RRZE Autoshare
 
-Dieses Plugin teilt automatisch den Beitragstitel, einen Teil des Textauszugs, das Beitragsbild (falls verfügbar) und einen Link zum Beitrag auf Bluesky und Mastodon.
+Dieses Plugin sendet neu veröffentlichte WordPress-Beiträge gemäß konfigurierter Regeln an externe Dienste wie Bluesky, Mastodon und Matrix.
 
 ## Contributors
 
@@ -12,7 +12,7 @@ Dieses Plugin teilt automatisch den Beitragstitel, einen Teil des Textauszugs, d
 
 GNU General Public License (GPL) Version 3
 
-## Documentation
+## Dokumentation
 
 Die oeffentliche Dokumentation und Endanwender-Hinweise liegen unter:
 
@@ -25,123 +25,18 @@ Die oeffentliche Dokumentation und Endanwender-Hinweise liegen unter:
 
 
 
-### Einstellungsmenü
+## Administration
 
-Einstellungen › RRZE-Autoshare
+Die Einstellungen befinden sich unter **Einstellungen -> RRZE-Autoshare**. Zuerst werden die Zugangsdaten eines Dienstes autorisiert und anschließend der Dienst unter **Allgemeines** aktiviert. Nicht autorisierte Dienste können nicht aktiviert werden.
 
-### Hooks
+Unter **Senderegeln** gilt entweder die Standardregel (alle neu publizierten Beiträge an alle aktiven Dienste) oder es werden dienstspezifische Regeln für Beitragsstatus, Kategorien und Schlagwörter festgelegt. Für Matrix können mehrere Regeln mit unterschiedlichen Zielräumen angelegt werden. Treffen mehrere Matrix-Regeln zu, wird jeder ausgewählte Raum einmal beliefert.
 
-Die beiden Freigabe-Schalter sind als native Einstellungen in der Dokument-Seitenleiste des Block Editors integriert. Das Admin-Skript wird mit `esbuild` gebaut und verwendet die von WordPress bereitgestellten Editor-Module zur Laufzeit; es buendelt weder React noch WordPress-Pakete.
+Im Block Editor schaltet **Autoshare aktiviert** die automatische Übertragung für den einzelnen Beitrag ein oder aus. Der Tab **Manuell senden** ermöglicht es Administratoren, einen vorhandenen Beitrag gemäß den aktuell gültigen Regeln erneut zu senden.
 
+Die ausführliche Anleitung für Redaktionen und Anwender steht unter [wp.rrze.fau.de](https://www.wp.rrze.fau.de).
 
-#### rrze_autoshare_supported_post_types
+## Entwicklung
 
-```php
-apply_filters('rrze_autoshare_supported_post_types', array $post_types)
-```
+`package.json` ist die verbindliche Quelle für Version und Kompatibilitätsdaten. Änderungen an PHP, JavaScript, SCSS oder Übersetzungen werden nicht in `build/` gepflegt. Für die Entwicklung wird `npm run dev` verwendet; `npm run prod` erzeugt minifizierte Produktionsdateien ohne Source-Maps.
 
-Filtert die vom Plugin unterstützten Post-Types.
-
-Parameter
-
-```php
-array $post_types
-```
-
-Post-Types.
-
-#### rrze_autoshare_{$service}_title
-
-```php
-apply_filters('rrze_autoshare_{$service}_title', string $title, int $post_id)
-```
-
-Den Titel eines Beitrags vor dem Teilen filtern.
-
-Beschreibung
-Der dynamische Teil des Hook-Namens, $service, bezieht sich auf den Dienstnamen.
-
-Mögliche Hook-Namen sind:
-
-```text
-rrze_autoshare_bluesky_title
-rrze_autoshare_mastodon_title
-```
-
-Parameter
-
-```php
-string $title
-```
-
-Post title.
-
-```php
-int $post_id
-```
-
-Post ID.
-
-#### rrze_autoshare_{$service}_excerpt
-
-```php
-apply_filters('rrze_autoshare_{$service}_excerpt', string $excerpt, int $post_id)
-```
-
-Den Textauszug eines Beitrags vor dem Teilen filtern.
-
-Beschreibung
-Der dynamische Teil des Hook-Namens, $service, bezieht sich auf den Dienstnamen.
-
-Mögliche Hook-Namen sind:
-
-```text
-rrze_autoshare_bluesky_excerpt
-rrze_autoshare_mastodon_excerpt
-```
-
-Parameter
-
-```php
-string $excerpt
-```
-
-Post excerpt.
-
-```php
-int $post_id
-```
-
-Post ID.
-
-#### rrze_autoshare_{$service}_hashtags
-
-```php
-apply_filters('rrze_autoshare_{$service}_hashtags', array $hashtags, int $post_id)
-```
-
-Die Hashtags eines Beitrags vor dem Teilen filtern. Standardmäßig werden nicht-hierarchische Taxonomien verwendet, indem # vorangestellt wird.
-
-Beschreibung
-Der dynamische Teil des Hook-Namens, $service, bezieht sich auf den Dienstnamen.
-
-Mögliche Hook-Namen sind:
-
-```text
-rrze_autoshare_bluesky_hashtags
-rrze_autoshare_mastodon_hashtags
-```
-
-Parameter
-
-```php
-array $hashtags
-```
-
-An array of hashtags e.g., ['#hashtag1', '#hashtag2'].
-
-```php
-int $post_id
-```
-
-Post ID.
+Das Plugin verwendet einen lokalen PSR-4-Autoloader. Externe Dienste liegen unter `includes/Services/`. Filter für Titel, Auszug und Schlagwörter sind je Dienst in `includes/Config.php` definiert, derzeit für Bluesky, Mastodon und Matrix. Fehler und Warnungen werden über die Actions `rrze.log.error` und `rrze.log.warning` protokolliert; Info-Meldungen über `rrze.log.info` sind in den Einstellungen optional aktivierbar.
