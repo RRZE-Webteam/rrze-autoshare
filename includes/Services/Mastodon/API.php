@@ -141,7 +141,7 @@ class API {
             config()->get('services.mastodon.limits.timeout')
         );
 
-        $response = self::validateResponse($response, $postId, $endpoint);
+        $response = self::validateResponse($response, $postId, $endpoint, $args);
         $imageNotTransferred = $imageUploadFailed || self::isImageMissing($response, count($media));
 
         if ($imageNotTransferred) {
@@ -171,7 +171,7 @@ class API {
         return is_array($result) ? $result : false;
     }
 
-    private static function validateResponse($response, int $postId, string $endpoint) {
+    private static function validateResponse($response, int $postId, string $endpoint, array $sentPayload) {
         $body = Utils::getJsonResponseBody(
             $response,
             'Mastodon',
@@ -188,11 +188,22 @@ class API {
                     : '',
                 'media_attachment_ids' => self::getMediaAttachmentIds($body),
             ];
+            Utils::log(
+                'info',
+                'Post published on Mastodon.',
+                [
+                    'service' => 'mastodon',
+                    'post_id' => $postId,
+                    'record_id' => sanitize_text_field((string) $body['id']),
+                    'record_url' => $validatedResponse['url'],
+                    'sent_payload' => Utils::getLoggablePayload($sentPayload),
+                ]
+            );
         } else {
             $code = is_wp_error($response) ? '500' : wp_remote_retrieve_response_code($response);
             $message = is_wp_error($response)
                 ? $response->get_error_message()
-                : ($body['error'] ?? wp_remote_retrieve_response_message($response));
+                : ($body['message'] ?? $body['error'] ?? wp_remote_retrieve_response_message($response));
             Utils::logRemoteError(
                 'Mastodon',
                 'publish_post',

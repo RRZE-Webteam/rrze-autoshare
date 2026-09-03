@@ -235,6 +235,12 @@ class API {
         $host = trailingslashit($host);
 
         $endpoint = config()->get('services.bluesky.endpoints.create_record');
+        $payload = [
+            'collection' => config()->get('services.bluesky.record.collection'),
+            'did' => esc_html($did),
+            'repo' => esc_html($did),
+            'record' => $record,
+        ];
         $response = Utils::remoteRequest(
             'POST',
             $host . $endpoint,
@@ -243,19 +249,12 @@ class API {
                     'Content-Type'  => 'application/json',
                     'Authorization' => 'Bearer ' . $accessToken,
                 ],
-                'body' => wp_json_encode(
-                    [
-                        'collection' => config()->get('services.bluesky.record.collection'),
-                        'did'        => esc_html($did),
-                        'repo'       => esc_html($did),
-                        'record'     => $record,
-                    ]
-                ),
+                'body' => wp_json_encode($payload),
             ],
             config()->get('services.bluesky.limits.timeout')
         );
 
-        $response = self::validateResponse($response, $postId, $endpoint);
+        $response = self::validateResponse($response, $postId, $endpoint, $payload);
 
         if ($updateStatus) {
             self::updateStatusMeta($postId, $response);
@@ -322,7 +321,7 @@ class API {
         return $urlData;
     }
 
-    private static function validateResponse($response, int $postId, string $endpoint) {
+    private static function validateResponse($response, int $postId, string $endpoint, array $sentPayload) {
         $body = Utils::getJsonResponseBody(
             $response,
             'Bluesky',
@@ -342,23 +341,30 @@ class API {
                     'service' => 'bluesky',
                     'post_id' => $postId,
                     'record_uri' => sanitize_text_field($body['uri']),
+                    'sent_payload' => Utils::getLoggablePayload($sentPayload),
                 ]
             );
         } else {
             $code = is_wp_error($response) ? '500' : wp_remote_retrieve_response_code($response);
             $message = is_wp_error($response)
                 ? $response->get_error_message()
-                : ($body['error'] ?? wp_remote_retrieve_response_message($response));
+                : ($body['message'] ?? $body['error'] ?? wp_remote_retrieve_response_message($response));
+            $errorContext = [
+                'endpoint' => $endpoint,
+                'post_id' => $postId,
+                'error_code' => sanitize_text_field($code),
+                'error_message' => sanitize_text_field($message),
+            ];
+
+            if (!is_wp_error($response) && !empty($body['error'])) {
+                $errorContext['api_error'] = sanitize_text_field($body['error']);
+            }
+
             Utils::logRemoteError(
                 'Bluesky',
                 'publish_post',
                 $response,
-                [
-                    'endpoint' => $endpoint,
-                    'post_id' => $postId,
-                    'error_code' => sanitize_text_field($code),
-                    'error_message' => sanitize_text_field($message),
-                ]
+                $errorContext
             );
             Utils::deferPublication(
                 'bluesky',
@@ -404,10 +410,12 @@ class API {
             return '';
         }
 
+        $actor = str_replace('%3A', ':', rawurlencode($matches[1]));
+
         return esc_url_raw(
             sprintf(
                 config()->get('services.bluesky.urls.post'),
-                rawurlencode($matches[1]),
+                $actor,
                 rawurlencode($matches[2])
             )
         );

@@ -11,7 +11,6 @@ use function RRZE\Autoshare\settings;
 class Main {
     public static function init() {
         add_action('init', [__CLASS__, 'migrateStoredCredentials'], 5);
-        add_action('init', [__CLASS__, 'registerPostMeta']);
         add_action('init', [__CLASS__, 'initPost']);
     }
 
@@ -49,36 +48,6 @@ class Main {
 
     public static function initPost() {
         Post::init();
-    }
-
-    public static function registerPostMeta() {
-        if (!settings()->isServiceActive('bluesky')) {
-            return;
-        }
-
-        foreach (config()->get('default_post_types') as $postType) {
-            register_post_meta(
-                $postType,
-                config()->get('services.bluesky.meta.enabled'),
-                [
-                    'show_in_rest' => true,
-                    'type' => 'boolean',
-                    'single' => true,
-                    'sanitize_callback' => 'rest_sanitize_boolean',
-                    'auth_callback' => [__CLASS__, 'canEditPostMeta'],
-                    'default' => 'false',
-                ]
-            );
-        }
-    }
-
-    public static function canEditPostMeta(
-        bool $allowed,
-        string $metaKey,
-        int $postId,
-        int $userId
-    ): bool {
-        return user_can($userId, 'edit_post', $postId);
     }
 
     public static function isConnected() {

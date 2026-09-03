@@ -17,6 +17,27 @@ class Config {
                 'setting' => 'active_services',
                 'default' => [],
             ],
+            'publication_rules' => [
+                'mode_setting' => 'publication_rule_mode',
+                'rules_setting' => 'publication_rules',
+                'default_mode' => 'default',
+                'advanced_mode' => 'advanced',
+                'all_terms' => 'all',
+                'selected_terms' => 'selected',
+                'rule_defaults' => [
+                    'status' => 'publish',
+                    'category_mode' => 'all',
+                    'category_ids' => [],
+                    'tag_mode' => 'all',
+                    'tag_ids' => [],
+                ],
+            ],
+        ],
+        'debug' => [
+            'informative_logging' => [
+                'setting' => 'informative_logging',
+                'default' => false,
+            ],
         ],
         'transmission_test' => [
             'action' => 'rrze_autoshare_transmission_test',
@@ -44,6 +65,14 @@ class Config {
             ],
         ],
         'default_post_types' => ['post'],
+        'post_meta' => [
+            'enabled' => 'rrze_autoshare_enabled',
+        ],
+        'rest' => [
+            'namespace' => 'rrze-autoshare/v1',
+            'share_route' => '/posts/(?P<id>\\d+)/share',
+            'share_path' => '/posts/%d/share',
+        ],
         'assets' => [
             'admin_style_handle' => 'rrze-autoshare-admin',
             'admin_style_file' => 'build/css/rrze-autoshare-admin.css',
@@ -54,6 +83,7 @@ class Config {
                 'wp-data',
                 'wp-edit-post',
                 'wp-element',
+                'wp-api-fetch',
                 'wp-plugins',
             ],
             'admin_script_object_name' => 'autoshareObject',
@@ -75,6 +105,24 @@ class Config {
             'notice' => 'rrze.log.notice',
             'info' => 'rrze.log.info',
         ],
+        'logging' => [
+            'payload_excluded_keys' => [
+                'access_jwt',
+                'access_token',
+                'authorization',
+                'blob',
+                'body',
+                'client_secret',
+                'content',
+                'html',
+                'image',
+                'password',
+                'refresh_jwt',
+                'status',
+                'text',
+                'thumb',
+            ],
+        ],
         'publication_backoff' => [
             'transient_prefix' => 'rrze_autoshare_publication_backoff_',
             'retryable_status_codes' => [429, 500, 502, 503, 504],
@@ -90,6 +138,7 @@ class Config {
         'services' => [
             'bluesky' => [
                 'label' => 'Bluesky',
+                'publication_statuses' => ['publish'],
                 'settings' => [
                     'domain' => 'bluesky_domain',
                     'featured_image' => 'bluesky_featured_image',
@@ -192,6 +241,7 @@ class Config {
             ],
             'mastodon' => [
                 'label' => 'Mastodon',
+                'publication_statuses' => ['publish'],
                 'settings' => [
                     'domain' => 'mastodon_domain',
                     'featured_image' => 'mastodon_featured_image',

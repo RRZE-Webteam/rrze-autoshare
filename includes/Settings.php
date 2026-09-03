@@ -54,6 +54,7 @@ class Settings {
         $assets = config()->get('assets');
         $test = config()->get('transmission_test');
 
+        wp_enqueue_style('dashicons');
         wp_enqueue_style(
             $assets['admin_style_handle'],
             plugins_url($assets['admin_style_file'], plugin()->getBasename()),
@@ -73,7 +74,7 @@ class Settings {
             [
                 'searchEndpoint' => '/wp/v2/search',
                 'searchMinimumLength' => 2,
-                'searchLimit' => 10,
+                'searchLimit' => 5,
                 'searchType' => 'post',
                 'searchSubtype' => 'post',
                 'searchInputId' => $test['post_search_id'],
@@ -83,6 +84,20 @@ class Settings {
                 'noResults' => __('No posts found.', 'rrze-autoshare'),
                 'searchFailed' => __('Posts could not be loaded.', 'rrze-autoshare'),
                 'selectedPost' => __('Selected post:', 'rrze-autoshare'),
+                'publicationRules' => [
+                    'categoryAll' => __('any categories', 'rrze-autoshare'),
+                    'categoryNone' => __('no selected categories', 'rrze-autoshare'),
+                    /* translators: %s: Category name. */
+                    'categorySingle' => __('the category %s', 'rrze-autoshare'),
+                    /* translators: %s: Comma-separated category names. */
+                    'categoryMultiple' => __('one of the categories %s', 'rrze-autoshare'),
+                    'tagAll' => __('any or no tags', 'rrze-autoshare'),
+                    'tagNone' => __('no selected tags', 'rrze-autoshare'),
+                    /* translators: %s: Tag name. */
+                    'tagSingle' => __('the tag %s', 'rrze-autoshare'),
+                    /* translators: %s: Comma-separated tag names. */
+                    'tagMultiple' => __('one of the tags %s', 'rrze-autoshare'),
+                ],
             ]
         );
     }
@@ -120,6 +135,18 @@ class Settings {
                     $options[$activeServices['setting']][] = $service;
                 }
             }
+        }
+
+        $options = $this->sanitizePublicationRules($options, $submittedOptions);
+
+        $informativeLogging = config()->get('debug.informative_logging');
+        if (
+            $this->canManageDebugging()
+            && array_key_exists($informativeLogging['setting'], $submittedOptions)
+        ) {
+            $options[$informativeLogging['setting']] = !empty(
+                $submittedOptions[$informativeLogging['setting']]
+            );
         }
 
         foreach (config()->get('services', []) as $service => $serviceConfig) {
@@ -195,10 +222,195 @@ class Settings {
             );
     }
 
+    public function isPostAutoshareEnabled(int $postId): bool {
+        $metaKey = config()->get('post_meta.enabled');
+
+        return !metadata_exists('post', $postId, $metaKey)
+            || rest_sanitize_boolean(get_post_meta($postId, $metaKey, true));
+    }
+
     public function isServiceAuthorized(string $service): bool {
         $callback = config()->get('services.' . $service . '.authentication.connection_callback');
 
         return is_callable($callback) && (bool) call_user_func($callback);
+    }
+
+    public function shouldPublishPostToService(
+        string $service,
+        \WP_Post $post,
+        string $newStatus,
+        string $oldStatus
+    ): bool {
+        if (
+            !$this->isServiceActive($service)
+            || !in_array($post->post_type, config()->get('default_post_types'), true)
+            || !$this->isInitialPublicationTransition($newStatus, $oldStatus)
+        ) {
+            return false;
+        }
+
+        $publicationRules = config()->get('general.publication_rules');
+        if (
+            $this->getOption($publicationRules['mode_setting'])
+            !== $publicationRules['advanced_mode']
+        ) {
+            return 'publish' === $newStatus;
+        }
+
+        $rule = $this->getPublicationRule($service);
+        if ($newStatus !== $rule['status']) {
+            return false;
+        }
+
+        return $this->matchesTermRule(
+            $post->ID,
+            'category',
+            $rule['category_mode'],
+            $rule['category_ids']
+        ) && $this->matchesTermRule(
+            $post->ID,
+            'post_tag',
+            $rule['tag_mode'],
+            $rule['tag_ids']
+        );
+    }
+
+    private function sanitizePublicationRules(array $options, array $submittedOptions): array {
+        $publicationRules = config()->get('general.publication_rules');
+        $modeSetting = $publicationRules['mode_setting'];
+        $rulesSetting = $publicationRules['rules_setting'];
+
+        if (array_key_exists($modeSetting, $submittedOptions)) {
+            $submittedMode = is_scalar($submittedOptions[$modeSetting])
+                ? sanitize_key($submittedOptions[$modeSetting])
+                : '';
+            $options[$modeSetting] = $publicationRules['advanced_mode'] === $submittedMode
+                ? $publicationRules['advanced_mode']
+                : $publicationRules['default_mode'];
+        }
+
+        if (!array_key_exists($rulesSetting, $submittedOptions)) {
+            return $options;
+        }
+
+        $submittedRules = is_array($submittedOptions[$rulesSetting])
+            ? $submittedOptions[$rulesSetting]
+            : [];
+        $rules = [];
+        foreach (array_keys($this->getServices()) as $service) {
+            if (!array_key_exists($service, $submittedRules)) {
+                $rules[$service] = $this->getPublicationRule($service);
+                continue;
+            }
+
+            $submittedRule = $submittedRules[$service] ?? [];
+            $submittedRule = is_array($submittedRule) ? $submittedRule : [];
+            $rules[$service] = $this->sanitizePublicationRule($service, $submittedRule);
+        }
+        $options[$rulesSetting] = $rules;
+
+        return $options;
+    }
+
+    private function sanitizePublicationRule(string $service, array $submittedRule): array {
+        $publicationRules = config()->get('general.publication_rules');
+        $allowedStatuses = config()->get('services.' . $service . '.publication_statuses', []);
+        $fallbackStatus = $allowedStatuses[0] ?? $publicationRules['rule_defaults']['status'];
+        $submittedStatus = $submittedRule['status'] ?? null;
+        if (
+            (!is_scalar($submittedStatus) || '' === $submittedStatus)
+            && !empty($submittedRule['statuses'])
+        ) {
+            $submittedStatus = is_array($submittedRule['statuses'])
+                ? reset($submittedRule['statuses'])
+                : $submittedRule['statuses'];
+        }
+        $status = is_scalar($submittedStatus) ? sanitize_key($submittedStatus) : '';
+        $categoryMode = isset($submittedRule['category_mode']) && is_scalar($submittedRule['category_mode'])
+            ? sanitize_key($submittedRule['category_mode'])
+            : '';
+        $tagMode = isset($submittedRule['tag_mode']) && is_scalar($submittedRule['tag_mode'])
+            ? sanitize_key($submittedRule['tag_mode'])
+            : '';
+
+        return [
+            'status' => in_array($status, $allowedStatuses, true) ? $status : $fallbackStatus,
+            'category_mode' => $publicationRules['selected_terms'] === $categoryMode
+                ? $publicationRules['selected_terms']
+                : $publicationRules['all_terms'],
+            'category_ids' => $this->sanitizeTermIds($submittedRule['category_ids'] ?? [], 'category'),
+            'tag_mode' => $publicationRules['selected_terms'] === $tagMode
+                ? $publicationRules['selected_terms']
+                : $publicationRules['all_terms'],
+            'tag_ids' => $this->sanitizeTermIds($submittedRule['tag_ids'] ?? [], 'post_tag'),
+        ];
+    }
+
+    private function sanitizeTermIds($submittedTermIds, string $taxonomy): array {
+        $termIds = [];
+        foreach ((array) $submittedTermIds as $termId) {
+            if (is_scalar($termId)) {
+                $termIds[] = absint($termId);
+            }
+        }
+        $termIds = array_values(array_filter($termIds));
+        if (empty($termIds)) {
+            return [];
+        }
+
+        $terms = get_terms([
+            'taxonomy' => $taxonomy,
+            'include' => $termIds,
+            'hide_empty' => false,
+            'fields' => 'ids',
+        ]);
+
+        return is_wp_error($terms) ? [] : array_map('absint', $terms);
+    }
+
+    private function getPublicationRule(string $service): array {
+        $publicationRules = config()->get('general.publication_rules');
+        $rules = $this->getOption($publicationRules['rules_setting']);
+        $rule = is_array($rules) && isset($rules[$service]) && is_array($rules[$service])
+            ? $rules[$service]
+            : [];
+
+        return wp_parse_args(
+            $this->sanitizePublicationRule($service, $rule),
+            $publicationRules['rule_defaults']
+        );
+    }
+
+    private function getPublicationRuleFieldName(string $service, string $field): string {
+        return config()->get('option_name')
+            . '[' . config()->get('general.publication_rules.rules_setting') . ']'
+            . '[' . $service . ']'
+            . '[' . $field . ']';
+    }
+
+    private function isInitialPublicationTransition(string $newStatus, string $oldStatus): bool {
+        if ('draft' === $newStatus) {
+            return in_array($oldStatus, ['new', 'auto-draft'], true);
+        }
+
+        return $newStatus !== $oldStatus;
+    }
+
+    private function matchesTermRule(int $postId, string $taxonomy, string $mode, array $selectedTermIds): bool {
+        if ($mode === config()->get('general.publication_rules.all_terms')) {
+            return true;
+        }
+
+        if (empty($selectedTermIds)) {
+            return false;
+        }
+
+        $postTermIds = wp_get_post_terms($postId, $taxonomy, ['fields' => 'ids']);
+        if (is_wp_error($postTermIds)) {
+            return false;
+        }
+
+        return !empty(array_intersect($selectedTermIds, array_map('absint', $postTermIds)));
     }
 
     public function deactivateService(string $service): void {
@@ -231,14 +443,15 @@ class Settings {
             <h1><?php esc_html_e('Autoshare Settings', 'rrze-autoshare'); ?></h1>
             <?php settings_errors(config()->get('option_name')); ?>
             <?php $this->renderTabNavigation($tab); ?>
-            <form action="options.php" method="post">
-                <?php settings_fields(config()->get('slug') . '_settings'); ?>
-                <input type="hidden" name="_wp_http_referer" value="<?php echo esc_url($this->getSettingsUrl($tab)); ?>">
-                <?php do_settings_sections($this->getSettingsPage($tab)); ?>
-            <?php submit_button(); ?>
-            </form>
-            <?php if ('general' === $tab) { ?>
+            <?php if ('transmission-test' === $tab) { ?>
                 <?php $this->renderTransmissionTest(); ?>
+            <?php } else { ?>
+                <form action="options.php" method="post">
+                    <?php settings_fields(config()->get('slug') . '_settings'); ?>
+                    <input type="hidden" name="_wp_http_referer" value="<?php echo esc_url($this->getSettingsUrl($tab)); ?>">
+                    <?php do_settings_sections($this->getSettingsPage($tab)); ?>
+                    <?php submit_button(); ?>
+                </form>
             <?php } ?>
             <?php $this->renderServiceAccess($tab); ?>
         </div>
@@ -420,7 +633,7 @@ class Settings {
             $results,
             MINUTE_IN_SECONDS
         );
-        wp_safe_redirect($this->getSettingsUrl('general'));
+        wp_safe_redirect($this->getSettingsUrl('transmission-test'));
         exit;
     }
 
@@ -442,6 +655,259 @@ class Settings {
                 'description' => __('Select the services that Autoshare should use when publishing content.', 'rrze-autoshare'),
             ]
         );
+
+        $this->registerPublicationRulesSettings($page);
+
+        if ($this->canManageDebugging()) {
+            $this->registerDebugSettings($page);
+        }
+    }
+
+    private function registerDebugSettings(string $page): void {
+        $informativeLogging = config()->get('debug.informative_logging');
+
+        add_settings_section(
+            'rrze_autoshare_debugging',
+            __('Debugging', 'rrze-autoshare'),
+            null,
+            $page
+        );
+        add_settings_field(
+            $informativeLogging['setting'],
+            __('Logging', 'rrze-autoshare'),
+            [$this, 'renderCheckboxField'],
+            $page,
+            'rrze_autoshare_debugging',
+            [
+                'name' => $informativeLogging['setting'],
+                'description' => __('Send informative messages to the info log channel.', 'rrze-autoshare'),
+            ]
+        );
+    }
+
+    private function registerPublicationRulesSettings(string $page): void {
+        add_settings_section(
+            'rrze_autoshare_publication_rules',
+            __('Publication Rules', 'rrze-autoshare'),
+            null,
+            $page
+        );
+        add_settings_field(
+            'rrze_autoshare_publication_rules',
+            __('Rules', 'rrze-autoshare'),
+            [$this, 'renderPublicationRulesField'],
+            $page,
+            'rrze_autoshare_publication_rules'
+        );
+    }
+
+    public function renderPublicationRulesField(): void {
+        $publicationRules = config()->get('general.publication_rules');
+        $mode = $this->getOption($publicationRules['mode_setting']);
+        $advanced = $publicationRules['advanced_mode'] === $mode;
+        ?>
+        <fieldset class="rrze-autoshare-publication-rules">
+            <label>
+                <input
+                    class="rrze-autoshare-publication-rule-mode"
+                    name="<?php echo esc_attr(config()->get('option_name') . '[' . $publicationRules['mode_setting'] . ']'); ?>"
+                    type="radio"
+                    value="<?php echo esc_attr($publicationRules['default_mode']); ?>"
+                    <?php checked(!$advanced); ?>
+                >
+                <?php esc_html_e('Default rules', 'rrze-autoshare'); ?>
+            </label>
+            <p class="description"><?php esc_html_e('Send all newly published posts to all active services.', 'rrze-autoshare'); ?></p>
+            <label>
+                <input
+                    class="rrze-autoshare-publication-rule-mode"
+                    name="<?php echo esc_attr(config()->get('option_name') . '[' . $publicationRules['mode_setting'] . ']'); ?>"
+                    type="radio"
+                    value="<?php echo esc_attr($publicationRules['advanced_mode']); ?>"
+                    <?php checked($advanced); ?>
+                >
+                <?php esc_html_e('Advanced rules', 'rrze-autoshare'); ?>
+            </label>
+            <p class="description"><?php esc_html_e('Set rules separately for each service.', 'rrze-autoshare'); ?></p>
+            <div class="rrze-autoshare-publication-rules-advanced" <?php echo $advanced ? '' : 'hidden'; ?>>
+                <?php foreach ($this->getServices() as $service => $label) { ?>
+                    <?php $serviceActive = $this->isServiceActive($service); ?>
+                    <?php $rule = $this->getPublicationRule($service); ?>
+                    <fieldset class="rrze-autoshare-publication-service-rule">
+                        <legend><?php echo esc_html($label); ?></legend>
+                        <?php if (!$serviceActive) { ?>
+                            <div class="notice notice-warning inline">
+                                <p><?php esc_html_e('This service is inactive. Its rules take effect only after the service is activated above.', 'rrze-autoshare'); ?></p>
+                            </div>
+                        <?php } ?>
+                        <?php $this->renderPublicationRuleSummary($label, $rule); ?>
+                        <p>
+                            <strong><?php esc_html_e('Post Status', 'rrze-autoshare'); ?></strong><br>
+                            <?php $allowedStatuses = config()->get('services.' . $service . '.publication_statuses', []); ?>
+                            <?php if (count($allowedStatuses) === 1) { ?>
+                                <input
+                                    name="<?php echo esc_attr($this->getPublicationRuleFieldName($service, 'status')); ?>"
+                                    type="hidden"
+                                    value="<?php echo esc_attr($allowedStatuses[0]); ?>"
+                                    class="rrze-autoshare-publication-status"
+                                    data-status-label="<?php echo esc_attr($this->getPublicationStatusLabel($allowedStatuses[0])); ?>"
+                                >
+                                <?php echo esc_html($this->getPublicationStatusLabel($allowedStatuses[0])); ?>
+                            <?php } else { ?>
+                                <?php foreach ($allowedStatuses as $status) { ?>
+                                    <label>
+                                        <input
+                                            name="<?php echo esc_attr($this->getPublicationRuleFieldName($service, 'status')); ?>"
+                                            type="radio"
+                                            value="<?php echo esc_attr($status); ?>"
+                                            class="rrze-autoshare-publication-status"
+                                            <?php checked($status === $rule['status']); ?>
+                                        >
+                                        <?php echo esc_html($this->getPublicationStatusLabel($status)); ?>
+                                    </label>
+                                <?php } ?>
+                            <?php } ?>
+                        </p>
+                        <?php $this->renderTermRuleField($service, $rule, 'category', __('Categories', 'rrze-autoshare')); ?>
+                        <?php $this->renderTermRuleField($service, $rule, 'tag', __('Tags', 'rrze-autoshare')); ?>
+                    </fieldset>
+                <?php } ?>
+            </div>
+        </fieldset>
+        <?php
+    }
+
+    private function renderPublicationRuleSummary(string $serviceLabel, array $rule): void {
+        ?>
+        <p class="rrze-autoshare-publication-rule-summary" aria-live="polite">
+            <?php
+            printf(
+                /* translators: %s: Service name. */
+                esc_html__('Posts are sent to %s when they are ', 'rrze-autoshare'),
+                esc_html($serviceLabel)
+            );
+            ?>
+            <strong class="rrze-autoshare-publication-summary-status"><?php echo esc_html($this->getPublicationStatusLabel($rule['status'])); ?></strong>
+            <?php esc_html_e(' and are in ', 'rrze-autoshare'); ?>
+            <strong class="rrze-autoshare-publication-summary-categories"><?php echo esc_html($this->getPublicationTermSummary($rule, 'category')); ?></strong>
+            <?php esc_html_e(' and are marked with ', 'rrze-autoshare'); ?>
+            <strong class="rrze-autoshare-publication-summary-tags"><?php echo esc_html($this->getPublicationTermSummary($rule, 'tag')); ?></strong><?php esc_html_e('.', 'rrze-autoshare'); ?>
+        </p>
+        <?php
+    }
+
+    private function getPublicationTermSummary(array $rule, string $type): string {
+        $publicationRules = config()->get('general.publication_rules');
+        $modeKey = $type . '_mode';
+        $idsKey = $type . '_ids';
+
+        if ($publicationRules['all_terms'] === $rule[$modeKey]) {
+            return 'category' === $type
+                ? __('any categories', 'rrze-autoshare')
+                : __('any or no tags', 'rrze-autoshare');
+        }
+
+        $terms = get_terms([
+            'taxonomy' => 'category' === $type ? 'category' : 'post_tag',
+            'include' => $rule[$idsKey],
+            'hide_empty' => false,
+        ]);
+        $termNames = is_wp_error($terms) ? [] : wp_list_pluck($terms, 'name');
+
+        if (empty($termNames)) {
+            return 'category' === $type
+                ? __('no selected categories', 'rrze-autoshare')
+                : __('no selected tags', 'rrze-autoshare');
+        }
+
+        if (count($termNames) === 1) {
+            if ('category' === $type) {
+                return sprintf(
+                    /* translators: %s: Category name. */
+                    __('the category %s', 'rrze-autoshare'),
+                    $termNames[0]
+                );
+            }
+
+            return sprintf(
+                /* translators: %s: Tag name. */
+                __('the tag %s', 'rrze-autoshare'),
+                $termNames[0]
+            );
+        }
+
+        if ('category' === $type) {
+            return sprintf(
+                /* translators: %s: Comma-separated category names. */
+                __('one of the categories %s', 'rrze-autoshare'),
+                implode(', ', $termNames)
+            );
+        }
+
+        return sprintf(
+            /* translators: %s: Comma-separated tag names. */
+            __('one of the tags %s', 'rrze-autoshare'),
+            implode(', ', $termNames)
+        );
+    }
+
+    private function renderTermRuleField(string $service, array $rule, string $type, string $label): void {
+        $publicationRules = config()->get('general.publication_rules');
+        $modeKey = $type . '_mode';
+        $idsKey = $type . '_ids';
+        $taxonomy = 'category' === $type ? 'category' : 'post_tag';
+        $terms = get_terms([
+            'taxonomy' => $taxonomy,
+            'hide_empty' => false,
+        ]);
+        ?>
+        <fieldset class="rrze-autoshare-publication-term-rule" data-rule-type="<?php echo esc_attr($type); ?>">
+            <legend><?php echo esc_html($label); ?></legend>
+            <label>
+                <input
+                    name="<?php echo esc_attr($this->getPublicationRuleFieldName($service, $modeKey)); ?>"
+                    type="radio"
+                    value="<?php echo esc_attr($publicationRules['all_terms']); ?>"
+                    class="rrze-autoshare-publication-term-mode"
+                    <?php checked($publicationRules['all_terms'] === $rule[$modeKey]); ?>
+                >
+                <?php esc_html_e('All', 'rrze-autoshare'); ?>
+            </label>
+            <label>
+                <input
+                    name="<?php echo esc_attr($this->getPublicationRuleFieldName($service, $modeKey)); ?>"
+                    type="radio"
+                    value="<?php echo esc_attr($publicationRules['selected_terms']); ?>"
+                    class="rrze-autoshare-publication-term-mode"
+                    <?php checked($publicationRules['selected_terms'] === $rule[$modeKey]); ?>
+                >
+                <?php esc_html_e('Selected', 'rrze-autoshare'); ?>
+            </label><br>
+            <select class="rrze-autoshare-publication-term-ids" name="<?php echo esc_attr($this->getPublicationRuleFieldName($service, $idsKey) . '[]'); ?>" multiple size="5">
+                <?php if (!is_wp_error($terms)) { ?>
+                    <?php foreach ($terms as $term) { ?>
+                        <option value="<?php echo esc_attr($term->term_id); ?>" <?php selected(in_array($term->term_id, $rule[$idsKey], true)); ?>>
+                            <?php echo esc_html($term->name); ?>
+                        </option>
+                    <?php } ?>
+                <?php } ?>
+            </select>
+        </fieldset>
+        <?php
+    }
+
+    private function getPublicationStatusLabel(string $status): string {
+        if ('publish' === $status) {
+            return __('Publish', 'rrze-autoshare');
+        }
+
+        if ('draft' === $status) {
+            return __('Draft', 'rrze-autoshare');
+        }
+
+        $statusObject = get_post_status_object($status);
+
+        return $statusObject ? $statusObject->label : $status;
     }
 
     private function sendTransmissionTest(string $service, int $postId): array|false {
@@ -639,11 +1105,15 @@ class Settings {
             return;
         }
 
+        echo '<ul class="rrze-autoshare-transmission-test-results" aria-live="polite">';
         foreach ($results as $service => $result) {
+            $success = false;
             if ('invalid_post' === $service) {
-                echo '<div class="notice notice-error inline"><p>' . esc_html__('The post does not exist or you cannot edit it.', 'rrze-autoshare') . '</p></div>';
+                $message = __('The post does not exist or you cannot edit it.', 'rrze-autoshare');
+                $status = 'error';
             } elseif ('no_service' === $service) {
-                echo '<div class="notice notice-error inline"><p>' . esc_html__('Select at least one service for the transmission test.', 'rrze-autoshare') . '</p></div>';
+                $message = __('Select at least one service for the transmission test.', 'rrze-autoshare');
+                $status = 'error';
             } else {
                 $label = $this->getServices()[$service] ?? $service;
                 $success = is_array($result);
@@ -654,30 +1124,47 @@ class Settings {
                         __('The text was sent to %s successfully, but the featured image could not be transmitted.', 'rrze-autoshare'),
                         $label
                     );
-                    $class = 'notice-warning';
+                    $status = 'warning';
                 } elseif ($success) {
                     $message = sprintf(
                         /* translators: %s: Service name. */
                         __('%s received the transmission test successfully.', 'rrze-autoshare'),
                         $label
                     );
-                    $class = 'notice-success';
+                    $status = 'success';
                 } else {
                     $message = sprintf(
                         /* translators: %s: Service name. */
                         __('%s could not receive the transmission test. Check the log for details.', 'rrze-autoshare'),
                         $label
                     );
-                    $class = 'notice-error';
+                    $status = 'error';
                 }
-                $url = $success && !empty($result['url']) ? esc_url($result['url']) : '';
-                echo '<div class="notice ' . esc_attr($class) . ' inline"><p>' . esc_html($message);
-                if ($url !== '') {
-                    echo ' <a href="' . esc_url($url) . '" target="_blank" rel="noopener noreferrer">' . esc_html__('View post', 'rrze-autoshare') . '</a>';
-                }
-                echo '</p></div>';
             }
+
+            $url = $success && !empty($result['url']) ? esc_url($result['url']) : '';
+            $icon = $this->getTransmissionTestStatusIcon($status);
+            echo '<li class="rrze-autoshare-transmission-test-result rrze-autoshare-transmission-test-result-' . esc_attr($status) . '">';
+            echo '<span class="dashicons ' . esc_attr($icon) . '" aria-hidden="true"></span>';
+            echo '<span>' . esc_html($message);
+            if ($url !== '') {
+                echo ' <a href="' . esc_url($url) . '" target="_blank" rel="noopener noreferrer">' . esc_html__('View post', 'rrze-autoshare') . '</a>';
+            }
+            echo '</span></li>';
         }
+        echo '</ul>';
+    }
+
+    private function getTransmissionTestStatusIcon(string $status): string {
+        if ('success' === $status) {
+            return 'dashicons-yes-alt';
+        }
+
+        if ('warning' === $status) {
+            return 'dashicons-warning';
+        }
+
+        return 'dashicons-dismiss';
     }
 
     private function renderBlueskyAccess() {
@@ -847,6 +1334,7 @@ class Settings {
     private function getTabs(): array {
         return [
             'general' => __('General', 'rrze-autoshare'),
+            'transmission-test' => __('Transmission Test', 'rrze-autoshare'),
             'bluesky' => __('Bluesky', 'rrze-autoshare'),
             'mastodon' => __('Mastodon', 'rrze-autoshare'),
         ];
@@ -877,6 +1365,11 @@ class Settings {
         $options = [];
         $activeServices = config()->get('general.active_services');
         $options[$activeServices['setting']] = $activeServices['default'];
+        $publicationRules = config()->get('general.publication_rules');
+        $options[$publicationRules['mode_setting']] = $publicationRules['default_mode'];
+        $options[$publicationRules['rules_setting']] = $this->getDefaultPublicationRules();
+        $informativeLogging = config()->get('debug.informative_logging');
+        $options[$informativeLogging['setting']] = $informativeLogging['default'];
 
         foreach (config()->get('services', []) as $service) {
             foreach ($service['settings'] as $key => $setting) {
@@ -889,6 +1382,16 @@ class Settings {
         return $options;
     }
 
+    private function getDefaultPublicationRules(): array {
+        $rules = [];
+
+        foreach (array_keys($this->getServices()) as $service) {
+            $rules[$service] = config()->get('general.publication_rules.rule_defaults');
+        }
+
+        return $rules;
+    }
+
     private function getUnauthorizedServices(): array {
         $services = [];
 
@@ -899,5 +1402,13 @@ class Settings {
         }
 
         return $services;
+    }
+
+    private function canManageDebugging(): bool {
+        if (is_multisite()) {
+            return is_super_admin();
+        }
+
+        return current_user_can('manage_options');
     }
 }

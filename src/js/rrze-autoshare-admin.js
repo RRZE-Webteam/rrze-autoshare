@@ -9,78 +9,101 @@
 
     var registerPlugin = wordpress.plugins.registerPlugin;
     var PluginDocumentSettingPanel = wordpress.editPost.PluginDocumentSettingPanel;
+    var Button = wordpress.components.Button;
     var CheckboxControl = wordpress.components.CheckboxControl;
+    var FormToggle = wordpress.components.FormToggle;
+    var Notice = wordpress.components.Notice;
     var createElement = wordpress.element.createElement;
     var useDispatch = wordpress.data.useDispatch;
     var useEffect = wordpress.element.useEffect;
     var useSelect = wordpress.data.useSelect;
+    var useState = wordpress.element.useState;
+    var apiFetch = wordpress.apiFetch;
 
     function selectEditedPostMeta(select) {
         return select('core/editor').getEditedPostAttribute('meta') || {};
     }
 
-    function getBlueskyLabel() {
-        if (!autoshareObject.blueskyConnected) {
-            return autoshareObject.labels.blueskyDisabled;
-        }
-
-        if (autoshareObject.blueskyPublished) {
-            return autoshareObject.labels.blueskyPublished;
-        }
-
-        return autoshareObject.labels.blueskyShare;
+    function selectEditedPostStatus(select) {
+        return select('core/editor').getEditedPostAttribute('status');
     }
 
-    function getMastodonLabel() {
-        if (!autoshareObject.mastodonConnected) {
-            return autoshareObject.labels.mastodonDisabled;
+    function getSelectedServices(services) {
+        var selectedServices = [];
+        var i;
+
+        for (i = 0; i < services.length; i++) {
+            if (services[i].selected) {
+                selectedServices.push(services[i].slug);
+            }
         }
 
-        if (autoshareObject.mastodonPublished) {
-            return autoshareObject.labels.mastodonPublished;
+        return selectedServices;
+    }
+
+    function getServiceLabel(serviceSlug) {
+        var i;
+
+        for (i = 0; i < autoshareObject.services.length; i++) {
+            if (autoshareObject.services[i].slug === serviceSlug) {
+                return autoshareObject.services[i].label;
+            }
         }
 
-        return autoshareObject.labels.mastodonShare;
+        return serviceSlug;
+    }
+
+    function getFailedServiceLabels(results, selectedServiceSlugs) {
+        var failedServices = [];
+        var i;
+
+        for (i = 0; i < selectedServiceSlugs.length; i++) {
+            if (!results[selectedServiceSlugs[i]]) {
+                failedServices.push(getServiceLabel(selectedServiceSlugs[i]));
+            }
+        }
+
+        return failedServices;
+    }
+
+    function getShareMessage(results, selectedServiceSlugs) {
+        var failedServices = getFailedServiceLabels(results, selectedServiceSlugs);
+
+        if (failedServices.length) {
+            return autoshareObject.labels.shareFailed.replace('%s', failedServices.join(', '));
+        }
+
+        return autoshareObject.labels.shareSucceeded;
     }
 
     function AutoshareSettingsPanel() {
         var meta = useSelect(selectEditedPostMeta, []);
+        var postStatus = useSelect(selectEditedPostStatus, []);
         var editPost = useDispatch('core/editor').editPost;
-        var blueskyMetaKey = autoshareObject.metaKeys.blueskyEnabled;
-        var mastodonMetaKey = autoshareObject.metaKeys.mastodonEnabled;
-        var isBlueskyDisabled = !autoshareObject.blueskyConnected ||
-            autoshareObject.blueskyPublished;
-        var isMastodonDisabled = !autoshareObject.mastodonConnected ||
-            autoshareObject.mastodonPublished;
-        var useState = wordpress.element.useState;
-        var blueskyState = useState(
-            autoshareObject.blueskyConnected &&
-            autoshareObject.blueskyEnabled &&
-            !autoshareObject.blueskyPublished
-        );
-        var mastodonState = useState(
-            autoshareObject.mastodonConnected &&
-            autoshareObject.mastodonEnabled &&
-            !autoshareObject.mastodonPublished
-        );
-        var isBlueskyChecked = blueskyState[0];
-        var setBlueskyChecked = blueskyState[1];
-        var isMastodonChecked = mastodonState[0];
-        var setMastodonChecked = mastodonState[1];
+        var enabledState = useState(autoshareObject.autoshareEnabled);
+        var selectedServicesState = useState(autoshareObject.services.map(function selectService(service) {
+            return {
+                slug: service.slug,
+                label: service.label,
+                selected: true
+            };
+        }));
+        var sharingState = useState(false);
+        var shareNoticeState = useState(null);
+        var isAutoshareEnabled = enabledState[0];
+        var setAutoshareEnabled = enabledState[1];
+        var selectedServices = selectedServicesState[0];
+        var setSelectedServices = selectedServicesState[1];
+        var isSharing = sharingState[0];
+        var setSharing = sharingState[1];
+        var shareNotice = shareNoticeState[0];
+        var setShareNotice = shareNoticeState[1];
 
         function synchronizePostMeta() {
-            if (autoshareObject.blueskyActive && isBlueskyChecked !== !!meta[blueskyMetaKey]) {
+            if (isAutoshareEnabled !== !!meta[autoshareObject.metaKey]) {
                 editPost({
                     meta: {
-                        [blueskyMetaKey]: !!isBlueskyChecked
-                    }
-                });
-            }
-
-            if (autoshareObject.mastodonActive && isMastodonChecked !== !!meta[mastodonMetaKey]) {
-                editPost({
-                    meta: {
-                        [mastodonMetaKey]: !!isMastodonChecked
+                        [autoshareObject.metaKey]: !!isAutoshareEnabled
                     }
                 });
             }
@@ -89,18 +112,64 @@
         useEffect(synchronizePostMeta, [
             editPost,
             meta,
-            blueskyMetaKey,
-            mastodonMetaKey,
-            isBlueskyChecked,
-            isMastodonChecked
+            isAutoshareEnabled
         ]);
 
-        function updateBlueskyEnabled(checked) {
-            setBlueskyChecked(checked);
+        function updateAutoshareEnabled(event) {
+            setAutoshareEnabled(event.target.checked);
         }
 
-        function updateMastodonEnabled(checked) {
-            setMastodonChecked(checked);
+        function updateSelectedService(serviceSlug, selected) {
+            var updatedServices = [];
+            var i;
+
+            for (i = 0; i < selectedServices.length; i++) {
+                updatedServices.push({
+                    slug: selectedServices[i].slug,
+                    label: selectedServices[i].label,
+                    selected: selectedServices[i].slug === serviceSlug
+                        ? selected
+                        : selectedServices[i].selected
+                });
+            }
+
+            setSelectedServices(updatedServices);
+        }
+
+        function sharePost() {
+            var services = getSelectedServices(selectedServices);
+
+            if (!services.length) {
+                setShareNotice({
+                    status: 'warning',
+                    message: autoshareObject.labels.selectService
+                });
+                return;
+            }
+
+            setSharing(true);
+            setShareNotice(null);
+            apiFetch({
+                path: autoshareObject.shareRoute,
+                method: 'POST',
+                data: {
+                    services: services
+                }
+            }).then(function handleShareResponse(response) {
+                setShareNotice({
+                    status: Object.keys(response.results).every(function serviceSucceeded(service) {
+                        return !!response.results[service];
+                    }) ? 'success' : 'error',
+                    message: getShareMessage(response.results, services)
+                });
+            }).catch(function handleShareFailure() {
+                setShareNotice({
+                    status: 'error',
+                    message: getShareMessage({}, services)
+                });
+            }).finally(function finishSharing() {
+                setSharing(false);
+            });
         }
 
         return createElement(
@@ -110,25 +179,38 @@
                 title: autoshareObject.labels.panelTitle,
                 className: 'rrze-autoshare-panel'
             },
-            autoshareObject.blueskyActive && createElement(
+            createElement(
                 'div',
-                { className: isBlueskyDisabled ? 'checkbox-control-disabled' : '' },
-                createElement(CheckboxControl, {
-                    label: getBlueskyLabel(),
-                    checked: isBlueskyChecked,
-                    disabled: isBlueskyDisabled,
-                    onChange: updateBlueskyEnabled
-                })
+                { className: 'rrze-autoshare-enabled-control' },
+                createElement(FormToggle, {
+                    checked: isAutoshareEnabled,
+                    onChange: updateAutoshareEnabled
+                }),
+                createElement('span', null, autoshareObject.labels.autoshareEnabled)
             ),
-            autoshareObject.mastodonActive && createElement(
+            postStatus === 'publish' && createElement(
                 'div',
-                { className: isMastodonDisabled ? 'checkbox-control-disabled' : '' },
-                createElement(CheckboxControl, {
-                    label: getMastodonLabel(),
-                    checked: isMastodonChecked,
-                    disabled: isMastodonDisabled,
-                    onChange: updateMastodonEnabled
-                })
+                { className: 'rrze-autoshare-manual-share' },
+                selectedServices.map(function renderServiceControl(service) {
+                    return createElement(CheckboxControl, {
+                        key: service.slug,
+                        label: service.label,
+                        checked: service.selected,
+                        onChange: function updateServiceSelection(selected) {
+                            updateSelectedService(service.slug, selected);
+                        }
+                    });
+                }),
+                createElement(Button, {
+                    variant: 'secondary',
+                    isBusy: isSharing,
+                    disabled: isSharing,
+                    onClick: sharePost
+                }, isSharing ? autoshareObject.labels.sharingPost : autoshareObject.labels.sharePost),
+                shareNotice && createElement(Notice, {
+                    status: shareNotice.status,
+                    isDismissible: false
+                }, shareNotice.message)
             )
         );
     }

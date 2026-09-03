@@ -23,27 +23,32 @@ class Utils {
             return null;
         }
 
-        if (wp_remote_retrieve_response_code($response) >= 300) {
-            return null;
-        }
-
         $data = json_decode(wp_remote_retrieve_body($response), true);
 
         if (JSON_ERROR_NONE === json_last_error() && is_array($data)) {
             return $data;
         }
 
-        self::logRemoteWarning(
-            $service,
-            $operation,
-            'The API response did not contain valid JSON.',
-            $context
-        );
+        if (wp_remote_retrieve_response_code($response) < 300) {
+            self::logRemoteWarning(
+                $service,
+                $operation,
+                'The API response did not contain valid JSON.',
+                $context
+            );
+        }
 
         return null;
     }
 
     public static function log(string $level, string $message, array $context = []): void {
+        if (
+            'info' === $level
+            && !settings()->getOption(config()->get('debug.informative_logging.setting'))
+        ) {
+            return;
+        }
+
         $logHook = config()->get('log_hooks.' . $level);
         if (!$logHook) {
             return;
@@ -86,6 +91,28 @@ class Utils {
                 $context
             )
         );
+    }
+
+    public static function getLoggablePayload(array $payload): array {
+        $loggablePayload = [];
+        $excludedKeys = config()->get('logging.payload_excluded_keys', []);
+
+        foreach ($payload as $key => $value) {
+            $normalizedKey = sanitize_key((string) $key);
+            if (in_array($normalizedKey, $excludedKeys, true)) {
+                continue;
+            }
+
+            if (is_array($value)) {
+                $loggablePayload[$key] = self::getLoggablePayload($value);
+            } elseif (is_scalar($value) || null === $value) {
+                $loggablePayload[$key] = is_string($value)
+                    ? sanitize_text_field($value)
+                    : $value;
+            }
+        }
+
+        return $loggablePayload;
     }
 
     public static function isAuthorizationFailure($response, array $statusCodes): bool {
@@ -312,6 +339,10 @@ class Utils {
             return [];
         }
 
+        if (!array_key_exists('description', $external)) {
+            $external['description'] = '';
+        }
+
         return [
             $field => [
                 '$type' => $type,
@@ -389,15 +420,22 @@ class Utils {
     }
 
     public static function getPostExcerpt(\WP_Post $post): string {
-        $excerpt = sanitize_textarea_field($post->post_excerpt);
-        if (empty($excerpt)) {
-            return '';
+        $excerpt = $post->post_excerpt;
+        if ('' === trim(wp_strip_all_tags($excerpt))) {
+            $excerpt = $post->post_content;
         }
 
+        $excerpt = strip_shortcodes($excerpt);
         $excerpt = preg_replace('~$excerptMore$~', '', $excerpt);
-        $excerpt = wp_strip_all_tags($excerpt);
+        $excerpt = wp_strip_all_tags($excerpt, true);
+        $excerpt = preg_replace('/\s+/u', ' ', $excerpt);
+        $excerpt = is_string($excerpt) ? trim($excerpt) : '';
 
-        return html_entity_decode($excerpt, ENT_QUOTES | ENT_HTML5, get_bloginfo('charset'));
+        return html_entity_decode(
+            sanitize_textarea_field($excerpt),
+            ENT_QUOTES | ENT_HTML5,
+            get_bloginfo('charset')
+        );
     }
 
     public static function formatPostContent(string $format, array $placeholders, int $maxLength): string {

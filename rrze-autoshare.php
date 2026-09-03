@@ -3,7 +3,7 @@
 /*
 Plugin Name:        RRZE Autoshare
 Plugin URI:         https://github.com/RRZE-Webteam/rrze-autoshare
-Version:            2.0.0-49
+Version:            2.0.1
 Description:        Automatically shares published WordPress content on Bluesky and Mastodon.
 Author:             RRZE-Webteam <webmaster@fau.de>
 Author URI:         https://www.wp.rrze.fau.de

@@ -8,60 +8,49 @@ use function RRZE\Autoshare\config;
 use function RRZE\Autoshare\settings;
 
 class Post {
+    private static array $restStatusTransitions = [];
+
     public static function init() {
         add_action('transition_post_status', [__CLASS__, 'maybePublishOnService'], 10, 3);
-        add_action('save_post', [__CLASS__, 'savePost'], 10, 2);
         add_action(config()->get('services.bluesky.hooks.publish_post'), [__CLASS__, 'publishPost']);
-    }
 
-    public static function savePost($postId, $post) {
-        if (!settings()->isServiceActive('bluesky')) {
-            return;
-        }
-
-        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
-            return;
-        }
-
-        if (!current_user_can('edit_post', $postId)) {
-            return;
-        }
-
-        if (!in_array($post->post_type, config()->get('default_post_types'), true)) {
-            return;
-        }
-
-        if (isset($_POST['meta'])) {
-            $metaKey = config()->get('services.bluesky.meta.enabled');
-            $metaValue = isset($_POST[$metaKey]);
-            update_post_meta($postId, $metaKey, $metaValue);
+        foreach (config()->get('default_post_types') as $postType) {
+            add_action(
+                sprintf('rest_after_insert_%s', $postType),
+                [__CLASS__, 'publishRestInsertedPost'],
+                10,
+                3
+            );
         }
     }
 
     public static function maybePublishOnService($newStatus, $oldStatus, $post) {
-        if (!settings()->isServiceActive('bluesky')) {
-            return;
-        }
-
-        if ('publish' !== $newStatus || 'publish' === $oldStatus) {
-            return;
-        }
-
-        if (!in_array($post->post_type, config()->get('default_post_types'), true)) {
-            return;
-        }
-
         if (defined('REST_REQUEST') && REST_REQUEST) {
-            add_action(
-                sprintf('rest_after_insert_%s', $post->post_type),
-                [__CLASS__, 'publishRestInsertedPost']
-            );
-        } else {
+            self::$restStatusTransitions[$post->ID] = [$newStatus, $oldStatus];
+            return;
+        }
+
+        if (settings()->shouldPublishPostToService('bluesky', $post, $newStatus, $oldStatus)) {
             self::publishOnService($post->ID);
         }
     }
 
-    public static function publishRestInsertedPost($post) {
+    public static function publishRestInsertedPost($post, $request, $creating): void {
+        $transition = self::$restStatusTransitions[$post->ID] ?? null;
+        unset(self::$restStatusTransitions[$post->ID]);
+
+        if (
+            !is_array($transition)
+            || !settings()->shouldPublishPostToService(
+                'bluesky',
+                $post,
+                $transition[0],
+                $transition[1]
+            )
+        ) {
+            return;
+        }
+
         self::publishOnService($post->ID);
     }
 
@@ -90,7 +79,7 @@ class Post {
     }
 
     public static function isEnabled($postId) {
-        return (bool) get_post_meta($postId, config()->get('services.bluesky.meta.enabled'), true);
+        return settings()->isPostAutoshareEnabled(absint($postId));
     }
 
     public static function isSent($postId) {
