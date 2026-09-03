@@ -1,7 +1,7 @@
 {
   "name": "rrze-autoshare",
   "title": "RRZE Autoshare",
-  "version": "2.0.1",
+  "version": "2.0.3",
   "description": "Automatically shares published WordPress content on Bluesky and Mastodon.",
   "main": "rrze-autoshare.php",
   "textdomain": "rrze-autoshare",
@@ -54,7 +54,7 @@
     "version:prod": "node scripts/build-version.js prod",
     "version:release": "node scripts/build-version.js release",
     "dev": "npm run build && npm run version:dev && npm run readme",
-    "prod": "npm run build && npm run version:prod && npm run readme",
-    "release": "npm run build && npm run version:release && npm run readme"
+    "prod": "npm run build:assets:prod && npm run version:prod && npm run readme",
+    "release": "npm run build:assets:prod && npm run version:release && npm run readme"
   }
 }

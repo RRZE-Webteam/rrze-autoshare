@@ -97,32 +97,162 @@
         searchTimeout = window.setTimeout(runSearch, 250);
     }
 
+    function setPublicationRulesVisibility(advanced) {
+        var sectionMarkers = document.querySelectorAll('.rrze-autoshare-publication-service-section-marker');
+        var i;
+        var heading;
+        var table;
+
+        for (i = 0; i < sectionMarkers.length; i++) {
+            heading = sectionMarkers[i].previousElementSibling;
+            table = sectionMarkers[i].nextElementSibling;
+            sectionMarkers[i].hidden = !advanced;
+
+            if (heading && heading.tagName === 'H2') {
+                heading.hidden = !advanced;
+            }
+
+            if (table && table.tagName === 'TABLE') {
+                table.hidden = !advanced;
+            }
+        }
+    }
+
     function updatePublicationRulesVisibility(event) {
-        var container = event.currentTarget.closest('.rrze-autoshare-publication-rules');
-        var advancedRules;
-
-        if (!container) {
-            return;
-        }
-
-        advancedRules = container.querySelector('.rrze-autoshare-publication-rules-advanced');
-
-        if (advancedRules) {
-            advancedRules.hidden = event.currentTarget.value !== 'advanced';
-        }
+        setPublicationRulesVisibility(event.currentTarget.value === 'advanced');
     }
 
     function initializePublicationRules() {
         var ruleModes = document.querySelectorAll('.rrze-autoshare-publication-rule-mode');
         var serviceRules = document.querySelectorAll('.rrze-autoshare-publication-service-rule');
+        var addRuleButtons = document.querySelectorAll('.rrze-autoshare-add-publication-rule');
+        var removeRuleButtons = document.querySelectorAll('.rrze-autoshare-remove-publication-rule');
         var i;
 
         for (i = 0; i < ruleModes.length; i++) {
             ruleModes[i].addEventListener('change', updatePublicationRulesVisibility);
         }
 
+        if (ruleModes.length) {
+            setPublicationRulesVisibility(
+                document.querySelector('.rrze-autoshare-publication-rule-mode:checked').value === 'advanced'
+            );
+        }
+
         for (i = 0; i < serviceRules.length; i++) {
-            serviceRules[i].addEventListener('change', updatePublicationRuleSummary);
+            initializePublicationServiceRule(serviceRules[i]);
+        }
+
+        for (i = 0; i < addRuleButtons.length; i++) {
+            addRuleButtons[i].addEventListener('click', addPublicationRule);
+        }
+
+        for (i = 0; i < removeRuleButtons.length; i++) {
+            removeRuleButtons[i].addEventListener('click', removePublicationRule);
+        }
+
+        updatePublicationRuleRemoveButtons();
+    }
+
+    function initializePublicationServiceRule(serviceRule) {
+        var termModes = serviceRule.querySelectorAll('.rrze-autoshare-publication-term-mode');
+        var i;
+
+        serviceRule.addEventListener('change', updatePublicationRuleSummary);
+        for (i = 0; i < termModes.length; i++) {
+            syncPublicationTermRule(termModes[i]);
+            termModes[i].addEventListener('change', updatePublicationTermRule);
+        }
+    }
+
+    function addPublicationRule(event) {
+        var serviceRules = event.currentTarget.closest('.rrze-autoshare-publication-service-rules');
+        var list;
+        var template;
+        var index;
+        var markup;
+        var fragment;
+        var newRule;
+
+        if (!serviceRules) {
+            return;
+        }
+
+        list = serviceRules.querySelector('.rrze-autoshare-publication-service-rule-list');
+        template = serviceRules.querySelector('.rrze-autoshare-publication-rule-template');
+        index = serviceRules.dataset.nextRuleIndex;
+        if (!list || !template || index === undefined) {
+            return;
+        }
+
+        markup = template.innerHTML.replace(/__rule_index__/g, index);
+        fragment = document.createRange().createContextualFragment(markup);
+        newRule = fragment.querySelector('.rrze-autoshare-publication-service-rule');
+        if (!newRule) {
+            return;
+        }
+
+        list.appendChild(fragment);
+        serviceRules.dataset.nextRuleIndex = String(Number(index) + 1);
+        initializePublicationServiceRule(newRule);
+        newRule.querySelector('.rrze-autoshare-remove-publication-rule').addEventListener('click', removePublicationRule);
+        updatePublicationRuleRemoveButtons();
+    }
+
+    function removePublicationRule(event) {
+        var serviceRule = event.currentTarget.closest('.rrze-autoshare-publication-service-rule');
+        if (!serviceRule) {
+            return;
+        }
+
+        serviceRule.remove();
+        updatePublicationRuleRemoveButtons();
+    }
+
+    function updatePublicationRuleRemoveButtons() {
+        var serviceRuleLists = document.querySelectorAll('.rrze-autoshare-publication-service-rule-list');
+        var i;
+        var rules;
+        var removeButtons;
+        var j;
+
+        for (i = 0; i < serviceRuleLists.length; i++) {
+            rules = serviceRuleLists[i].querySelectorAll('.rrze-autoshare-publication-service-rule');
+            removeButtons = serviceRuleLists[i].querySelectorAll('.rrze-autoshare-remove-publication-rule');
+            for (j = 0; j < removeButtons.length; j++) {
+                removeButtons[j].hidden = rules.length <= 1;
+            }
+        }
+    }
+
+    function updatePublicationTermRule(event) {
+        syncPublicationTermRule(event.currentTarget);
+        updatePublicationRuleSummary(event);
+    }
+
+    function syncPublicationTermRule(modeInput) {
+        var termRule = modeInput.closest('.rrze-autoshare-publication-term-rule');
+        var selectedMode;
+        var select;
+        var i;
+
+        if (!termRule) {
+            return;
+        }
+
+        selectedMode = termRule.querySelector('.rrze-autoshare-publication-term-mode:checked');
+        select = termRule.querySelector('.rrze-autoshare-publication-term-ids');
+        if (!selectedMode || !select) {
+            return;
+        }
+
+        select.disabled = selectedMode.value === 'all';
+        if (!select.disabled) {
+            return;
+        }
+
+        for (i = 0; i < select.options.length; i++) {
+            select.options[i].selected = false;
         }
     }
 
@@ -189,11 +319,29 @@
         );
     }
 
+    function getPublicationTargets(serviceRule) {
+        var select = serviceRule.querySelector('.rrze-autoshare-publication-targets');
+        var summary = serviceRule.querySelector('.rrze-autoshare-publication-summary-targets');
+
+        if (select) {
+            return getSelectedTermNames(select);
+        }
+
+        return summary && summary.dataset.targets
+            ? summary.dataset.targets.split('|')
+            : [];
+    }
+
     function updatePublicationRuleSummary(event) {
         var serviceRule = event.currentTarget.closest('.rrze-autoshare-publication-service-rule');
         var statusElement;
         var categoriesElement;
         var tagsElement;
+        var targetsElement;
+        var targetPrefixElement;
+        var targetValuesElement;
+        var targets;
+        var strings = autoshareSettingsObject.publicationRules;
 
         if (!serviceRule) {
             return;
@@ -202,10 +350,22 @@
         statusElement = serviceRule.querySelector('.rrze-autoshare-publication-summary-status');
         categoriesElement = serviceRule.querySelector('.rrze-autoshare-publication-summary-categories');
         tagsElement = serviceRule.querySelector('.rrze-autoshare-publication-summary-tags');
+        targetsElement = serviceRule.querySelector('.rrze-autoshare-publication-summary-targets');
+        targetPrefixElement = serviceRule.querySelector('.rrze-autoshare-publication-summary-target-prefix');
+        targetValuesElement = serviceRule.querySelector('.rrze-autoshare-publication-summary-target-values');
 
         statusElement.textContent = getPublicationStatusLabel(serviceRule);
         categoriesElement.textContent = getPublicationTermSummary(serviceRule, 'category');
         tagsElement.textContent = getPublicationTermSummary(serviceRule, 'tag');
+
+        if (targetsElement && targetPrefixElement && targetValuesElement) {
+            targets = getPublicationTargets(serviceRule);
+            targetsElement.hidden = !targets.length;
+            targetPrefixElement.textContent = targets.length === 1
+                ? strings.targetSingle
+                : strings.targetMultiple;
+            targetValuesElement.textContent = targets.join(', ');
+        }
     }
 
     initializePublicationRules();

@@ -13,3 +13,5 @@ node_modules/
 *.pot~
 ### Tmp ###
 _tmp/
+## Sourcemaps nicht ins git
+*.map

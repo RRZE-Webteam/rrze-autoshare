@@ -20,6 +20,7 @@ class Config {
             'publication_rules' => [
                 'mode_setting' => 'publication_rule_mode',
                 'rules_setting' => 'publication_rules',
+                'targets_key' => 'targets',
                 'default_mode' => 'default',
                 'advanced_mode' => 'advanced',
                 'all_terms' => 'all',
@@ -68,11 +69,6 @@ class Config {
         'post_meta' => [
             'enabled' => 'rrze_autoshare_enabled',
         ],
-        'rest' => [
-            'namespace' => 'rrze-autoshare/v1',
-            'share_route' => '/posts/(?P<id>\\d+)/share',
-            'share_path' => '/posts/%d/share',
-        ],
         'assets' => [
             'admin_style_handle' => 'rrze-autoshare-admin',
             'admin_style_file' => 'build/css/rrze-autoshare-admin.css',
@@ -83,7 +79,6 @@ class Config {
                 'wp-data',
                 'wp-edit-post',
                 'wp-element',
-                'wp-api-fetch',
                 'wp-plugins',
             ],
             'admin_script_object_name' => 'autoshareObject',
@@ -200,6 +195,7 @@ class Config {
                     'type' => 'text',
                     'length_is_instance_specific' => false,
                 ],
+                'allowed_formats' => ['{title}', '{excerpt}', '{url}', '{tags}', '{content}'],
                 'limits' => [
                     'media_count' => 1,
                     'timeout' => 15,
@@ -280,6 +276,7 @@ class Config {
                     'type' => 'text',
                     'length_is_instance_specific' => true,
                 ],
+                'allowed_formats' => ['{title}', '{excerpt}', '{url}', '{tags}', '{content}'],
                 'metadata' => [
                     'language' => [
                         'field' => 'language',
@@ -303,6 +300,73 @@ class Config {
                 'authentication' => [
                     'direct_token_input' => true,
                     'connection_callback' => ['RRZE\Autoshare\Services\Mastodon\API', 'isConnected'],
+                    'invalid_status_codes' => [401, 403],
+                ],
+            ],
+            'matrix' => [
+                'label' => 'Matrix',
+                'publication_statuses' => ['publish', 'pending'],
+                'settings' => [
+                    'domain' => 'matrix_domain',
+                    'rooms' => 'matrix_rooms',
+                    'featured_image' => 'matrix_featured_image',
+                    'format' => 'matrix_format',
+                ],
+                'targets' => [
+                    'setting' => 'matrix_rooms',
+                    'validation_callback' => ['RRZE\\Autoshare\\Settings', 'isValidMatrixRoomId'],
+                ],
+                'rules' => [
+                    'multiple' => true,
+                ],
+                'options' => [
+                    'access_token' => 'rrze_autoshare_matrix_access_token',
+                ],
+                'meta' => [
+                    'sent_prefix' => 'rrze_autoshare_matrix_sent_',
+                    'published_prefix' => 'rrze_autoshare_matrix_published_',
+                ],
+                'filters' => [
+                    'title' => 'rrze_autoshare_matrix_title',
+                    'excerpt' => 'rrze_autoshare_matrix_excerpt',
+                    'hashtags' => 'rrze_autoshare_matrix_tags',
+                ],
+                'hooks' => [
+                    'publish_post' => 'rrze_autoshare_matrix_publish_post',
+                ],
+                'endpoints' => [
+                    'whoami' => '/_matrix/client/v3/account/whoami',
+                    'send_message' => '/_matrix/client/v3/rooms/%1$s/send/m.room.message/%2$s',
+                    'upload_media' => '/_matrix/media/v3/upload',
+                ],
+                'defaults' => [
+                    'domain' => 'https://matrix.fau.de',
+                    'rooms' => '',
+                    'featured_image' => true,
+                    'format' => "{title}\n{content_html}\n\n{url}",
+                ],
+                'content' => [
+                    'max_length' => 60000,
+                    'type' => 'rich_text',
+                    'length_is_instance_specific' => true,
+                ],
+                'allowed_formats' => ['{title}', '{excerpt}', '{url}', '{tags}', '{content}', '{content_html}'],
+                'limits' => [
+                    'media_count' => 1,
+                    'timeout' => 15,
+                ],
+                'authorization' => [
+                    'authorize_action' => 'rrze_autoshare_matrix_authorize',
+                    'revoke_action' => 'rrze_autoshare_matrix_revoke',
+                    'token_field' => 'rrze_autoshare_matrix_authorization_token',
+                    'nonce_action' => 'rrze-autoshare-matrix-authorize',
+                    'nonce_field' => 'rrze_autoshare_matrix_authorize_nonce',
+                    'notice_field' => 'matrix_authorization',
+                    'info_url' => 'https://spec.matrix.org/latest/client-server-api/#using-access-tokens',
+                ],
+                'authentication' => [
+                    'direct_token_input' => true,
+                    'connection_callback' => ['RRZE\\Autoshare\\Services\\Matrix\\API', 'isConnected'],
                     'invalid_status_codes' => [401, 403],
                 ],
             ],

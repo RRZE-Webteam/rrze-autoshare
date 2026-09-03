@@ -162,13 +162,7 @@ class API {
             return !is_wp_error($response);
         }
 
-        return self::getTransmissionTestResult($response, $imageNotTransferred);
-    }
-
-    public static function testPost(int $postId): array|false {
-        $result = self::publishPost($postId, false);
-
-        return is_array($result) ? $result : false;
+        return self::getManualSendResult($response, $imageNotTransferred);
     }
 
     private static function validateResponse($response, int $postId, string $endpoint, array $sentPayload) {
@@ -238,7 +232,7 @@ class API {
         return $validatedResponse;
     }
 
-    private static function getTransmissionTestResult($response, bool $imageNotTransferred): array|false {
+    private static function getManualSendResult($response, bool $imageNotTransferred): array|false {
         if (!is_array($response)) {
             return false;
         }

@@ -262,13 +262,7 @@ class API {
             return !is_wp_error($response);
         }
 
-        return self::getTransmissionTestResult($response);
-    }
-
-    public static function testPost(int $postId): array|false {
-        $result = self::publishPost($postId, false);
-
-        return is_array($result) ? $result : false;
+        return self::getManualSendResult($response);
     }
 
     private static function getLinks($text) {
@@ -389,7 +383,7 @@ class API {
         return $validatedResponse;
     }
 
-    private static function getTransmissionTestResult($response): array|false {
+    private static function getManualSendResult($response): array|false {
         if (!is_array($response) || empty($response['id'])) {
             return false;
         }

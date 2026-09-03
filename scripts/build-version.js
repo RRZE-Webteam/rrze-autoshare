@@ -288,6 +288,38 @@ function setPackageLockVersion(pluginRoot, newVersion) {
     writeJson(filePath, lock);
 }
 
+function removeSourceMaps(dirPath) {
+    var entries;
+    var i;
+
+    if (!fs.existsSync(dirPath)) {
+        return;
+    }
+
+    entries = fs.readdirSync(dirPath, { withFileTypes: true });
+    for (i = 0; i < entries.length; i++) {
+        var filePath = path.join(dirPath, entries[i].name);
+
+        if (entries[i].isDirectory()) {
+            removeSourceMaps(filePath);
+        } else if (entries[i].isFile() && path.extname(entries[i].name) === '.map') {
+            fs.unlinkSync(filePath);
+        }
+    }
+}
+
+function removeProductionSourceMaps(pluginRoot, pkg) {
+    var target = pkg.target && typeof pkg.target === 'object' ? pkg.target : {};
+
+    if (typeof target.js === 'string' && target.js !== '') {
+        removeSourceMaps(path.join(pluginRoot, target.js));
+    }
+
+    if (typeof target.css === 'string' && target.css !== '') {
+        removeSourceMaps(path.join(pluginRoot, target.css));
+    }
+}
+
 function getNextVersion(mode, currentVersion) {
     if (mode === 'dev') {
         return bumpDev(currentVersion);
@@ -330,6 +362,10 @@ function main() {
     setPluginHeaderMetadata(pluginRoot, pkg);
     setPluginCompatibility(pluginRoot, pkg);
     setPackageLockVersion(pluginRoot, next);
+
+    if (mode === 'prod' || mode === 'release') {
+        removeProductionSourceMaps(pluginRoot, pkg);
+    }
 
     console.log('Version bumped (' + mode + '): ' + current + ' -> ' + next);
 }

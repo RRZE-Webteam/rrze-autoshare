@@ -406,6 +406,7 @@ class Utils {
         );
         $tags = is_array($tags) ? $tags : [];
         $tags = array_filter(array_map('sanitize_text_field', $tags));
+        $plainContent = self::getPostPlainContent($post);
 
         return self::formatPostContent(
             settings()->getOption(config()->get('services.' . $service . '.settings.format')),
@@ -414,9 +415,41 @@ class Utils {
                 '{excerpt}' => $excerpt,
                 '{url}' => $permalink,
                 '{tags}' => !empty($tags) ? implode(' ', $tags) : '',
+                '{content}' => $plainContent,
+                '{content_html}' => $plainContent,
             ],
-            config()->get('services.' . $service . '.content.max_length')
+            config()->get('services.' . $service . '.content.max_length'),
+            config()->get('services.' . $service . '.content.type')
         );
+    }
+
+    public static function getPostPlainContent(\WP_Post $post): string {
+        $content = do_shortcode(do_blocks($post->post_content));
+        $content = wp_strip_all_tags($content, true);
+        $content = preg_replace('/\s+/u', ' ', $content);
+
+        return is_string($content) ? trim(html_entity_decode($content, ENT_QUOTES | ENT_HTML5, get_bloginfo('charset'))) : '';
+    }
+
+    public static function getPostHtmlContent(\WP_Post $post): string {
+        return wp_kses_post(do_shortcode(do_blocks($post->post_content)));
+    }
+
+    public static function getMatrixFormattedPostContent(\WP_Post $post): string {
+        $format = settings()->getOption(config()->get('services.matrix.settings.format'));
+        $html = strtr(
+            $format,
+            [
+                '{title}' => esc_html(self::getPostTitle($post)),
+                '{excerpt}' => esc_html(self::getPostExcerpt($post)),
+                '{url}' => esc_url(self::getPostPermalink($post)),
+                '{tags}' => esc_html(implode(' ', self::getPostHashtags($post->ID))),
+                '{content}' => esc_html(self::getPostPlainContent($post)),
+                '{content_html}' => self::getPostHtmlContent($post),
+            ]
+        );
+
+        return wp_kses_post(wpautop($html));
     }
 
     public static function getPostExcerpt(\WP_Post $post): string {
@@ -438,9 +471,15 @@ class Utils {
         );
     }
 
-    public static function formatPostContent(string $format, array $placeholders, int $maxLength): string {
+    public static function formatPostContent(
+        string $format,
+        array $placeholders,
+        int $maxLength,
+        string $contentType = 'text'
+    ): string {
         $truncatablePlaceholders = ['{excerpt}', '{title}', '{tags}'];
-        $content = self::renderPostFormat($format, $placeholders);
+        $removeEmptyLines = 'text' === $contentType;
+        $content = self::renderPostFormat($format, $placeholders, $removeEmptyLines);
         $placeholderIndex = 0;
 
         while (
@@ -456,7 +495,7 @@ class Utils {
             }
 
             $placeholders[$placeholder] = self::shortenPostContentSegment($value);
-            $content = self::renderPostFormat($format, $placeholders);
+            $content = self::renderPostFormat($format, $placeholders, $removeEmptyLines);
         }
 
         if (self::getPostContentLength($content) > $maxLength) {
@@ -466,15 +505,23 @@ class Utils {
         return $content;
     }
 
-    private static function renderPostFormat(string $format, array $placeholders): string {
+    private static function renderPostFormat(
+        string $format,
+        array $placeholders,
+        bool $removeEmptyLines
+    ): string {
         $lines = preg_split('/\R/', strtr($format, $placeholders));
         $content = [];
 
         foreach ($lines as $line) {
-            $line = trim($line);
-            if ($line !== '') {
-                $content[] = $line;
+            if ($removeEmptyLines) {
+                $line = trim($line);
+                if ($line === '') {
+                    continue;
+                }
             }
+
+            $content[] = $line;
         }
 
         return html_entity_decode(
