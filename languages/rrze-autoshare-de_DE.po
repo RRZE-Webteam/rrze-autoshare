@@ -3,8 +3,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: RRZE Autoshare\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/rrze-autoshare\n"
-"POT-Creation-Date: 2024-12-06T14:22:24+00:00\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-04 10:37+0200\n"
 "PO-Revision-Date: 2024-12-06 15:27+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -15,117 +15,317 @@ msgstr ""
 "X-Generator: Poedit 3.5\n"
 "X-Domain: rrze-autoshare\n"
 
-#. Plugin Name of the plugin
-#: rrze-autoshare.php
-msgid "RRZE Autoshare"
-msgstr "RRZE Autoshare"
+#: includes/Main.php:42
+msgid "Settings"
+msgstr "Einstellungen"
 
-#. Plugin URI of the plugin
-#: rrze-autoshare.php
-msgid "https://github.com/RRZE-Webteam/rrze-autoshare"
-msgstr "https://github.com/RRZE-Webteam/rrze-autoshare"
+#: includes/Main.php:73
+msgid "Autoshare"
+msgstr "Autoshare"
 
-#. Description of the plugin
-#: rrze-autoshare.php
-msgid ""
-"Automatically share the post title or custom message and a link to the post "
-"to Bluesky, Mastodon and X."
-msgstr ""
-"Dieses Plugin teilt automatisch den Beitragstitel, einen Teil des "
-"Textauszugs, das Beitragsbild (falls verfügbar) und einen Link zum Beitrag "
-"auf Bluesky, Mastodon und X."
+#: includes/Main.php:74
+msgid "Autoshare enabled"
+msgstr "Autoshare aktiviert"
 
-#. Author of the plugin
-#: rrze-autoshare.php
-msgid "RRZE Webteam"
-msgstr "RRZE-Webteam"
-
-#. Author URI of the plugin
-#: rrze-autoshare.php
-msgid "https://blogs.fau.de/webworking/"
-msgstr "https://blogs.fau.de/webworking/"
-
-#: includes/Metabox.php:70 src/blockeditor/script.js:58
-msgid "Share on Bluesky"
-msgstr "Auf Bluesky teilen"
-
-#: includes/Metabox.php:70 src/blockeditor/script.js:60
-msgid "Share on Bluesky is disabled"
-msgstr "Teilen auf Bluesky ist deaktiviert"
-
-#: includes/Metabox.php:71 src/blockeditor/script.js:65
-msgid "It is published on Bluesky"
-msgstr "Es ist auf Bluesky veröffentlicht"
-
-#: includes/Metabox.php:95 src/blockeditor/script.js:71
-msgid "Share on Mastodon"
-msgstr "Auf Mastodon teilen"
-
-#: includes/Metabox.php:95 src/blockeditor/script.js:73
-msgid "Share on Mastodon is disabled"
-msgstr "Teilen auf Mastodon ist deaktiviert"
-
-#: includes/Metabox.php:96 src/blockeditor/script.js:78
-msgid "It is published on Mastodon"
-msgstr "Es ist auf Mastodon veröffentlicht"
-
-#: includes/Metabox.php:120 src/blockeditor/script.js:84
-msgid "Share on X (Twitter)"
-msgstr "Auf X (Twitter) teilen"
-
-#: includes/Metabox.php:120 src/blockeditor/script.js:86
-msgid "Share on X is disabled"
-msgstr "Teilen auf X ist deaktiviert"
-
-#: includes/Metabox.php:121 src/blockeditor/script.js:88
-msgid "It is published on X"
-msgstr "Es ist auf X veröffentlicht"
-
-#: includes/Services/Bluesky/API.php:313 includes/Services/Mastodon/API.php:277
-#: includes/Services/Twitter/API.php:117
+#: includes/Services/Bluesky/API.php:378 includes/Services/Mastodon/API.php:239
 msgid "An error occurred while trying to publish."
 msgstr "Beim Versuch der Veröffentlichung ist ein Fehler aufgetreten."
 
-#. translators: %d is the error code.
-#: includes/Services/Bluesky/API.php:333 includes/Services/Mastodon/API.php:297
-#: includes/Services/Twitter/API.php:137
+#: includes/Services/Bluesky/API.php:429 includes/Services/Mastodon/API.php:305
+#, php-format
 msgid "Error: %d. "
 msgstr "Fehler: %d. "
 
-#: includes/Services/Bluesky/API.php:343
+#: includes/Services/Bluesky/API.php:439
 msgid "This post was not published on Bluesky."
 msgstr "Dieser Beitrag wurde nicht auf Bluesky veröffentlicht."
 
-#: includes/Services/Bluesky/API.php:358 includes/Services/Mastodon/API.php:322
-#: includes/Services/Twitter/API.php:169
-msgid "Revoke Access"
-msgstr "Zugriff widerrufen"
+#: includes/Services/Mastodon/API.php:315
+msgid "This post was not published on Mastodon."
+msgstr "Dieser Beitrag wurde nicht auf Mastodon veröffentlicht."
 
-#: includes/Services/Bluesky/API.php:359 includes/Services/Mastodon/API.php:323
-#: includes/Services/Twitter/API.php:170
-msgid "Authorize Access"
-msgstr "Zugriff autorisieren"
+#: includes/Settings.php:43 includes/Settings.php:626
+msgid "Autoshare Settings"
+msgstr "Einstellungen › Autoshare"
 
-#: includes/Services/Bluesky/API.php:365
-msgid "You’ve authorized Autoshare to read and write to the Bluesky timeline."
+#: includes/Settings.php:44
+msgid "RRZE-Autoshare"
+msgstr "RRZE-Autoshare"
+
+#: includes/Settings.php:87
+msgid "No posts found."
+msgstr "Keine Beiträge gefunden."
+
+#: includes/Settings.php:88
+msgid "Posts could not be loaded."
+msgstr "Beiträge konnten nicht geladen werden."
+
+#: includes/Settings.php:89
+msgid "Selected post:"
+msgstr "Ausgewählter Beitrag:"
+
+#: includes/Settings.php:91 includes/Settings.php:1098
+msgid "any categories"
+msgstr "beliebigen Kategorien"
+
+#: includes/Settings.php:92 includes/Settings.php:1111
+msgid "no selected categories"
+msgstr "keinen ausgewählten Kategorien"
+
+#: includes/Settings.php:94 includes/Settings.php:1119
+#, php-format
+msgid "the category %s"
+msgstr "der Kategorie %s"
+
+#: includes/Settings.php:96 includes/Settings.php:1134
+#, php-format
+msgid "one of the categories %s"
+msgstr "einer der Kategorien %s"
+
+#: includes/Settings.php:97 includes/Settings.php:1099
+msgid "any or no tags"
+msgstr "beliebigen oder keinen Schlagwörtern"
+
+#: includes/Settings.php:98 includes/Settings.php:1112
+msgid "no selected tags"
+msgstr "keinen ausgewählten Schlagwörtern"
+
+#: includes/Settings.php:100 includes/Settings.php:1126
+#, php-format
+msgid "the tag %s"
+msgstr "dem Schlagwort %s"
+
+#: includes/Settings.php:102 includes/Settings.php:1141
+#, php-format
+msgid "one of the tags %s"
+msgstr "einem der Schlagwörter %s"
+
+#: includes/Settings.php:103 includes/Settings.php:1069
+msgid " with target "
+msgstr " mit dem Ziel "
+
+#: includes/Settings.php:104 includes/Settings.php:1069
+msgid " with targets "
+msgstr " mit den Zielen "
+
+#: includes/Settings.php:174
+msgid "The service URL must use HTTPS."
+msgstr "Die Dienst-URL muss HTTPS verwenden."
+
+#: includes/Settings.php:191
+msgid "Enter at least one valid Matrix room ID."
+msgstr "Geben Sie mindestens eine gültige Matrix-Raum-ID ein."
+
+#: includes/Settings.php:208
+msgid "The format cannot be empty."
+msgstr "Das Format darf nicht leer sein."
+
+#: includes/Settings.php:664
+msgid "Disabled because no authorization is available."
+msgstr "Deaktiviert, da keine Autorisierung vorliegt."
+
+#: includes/Settings.php:845
+msgid "Active Services"
+msgstr "Aktive Dienste"
+
+#: includes/Settings.php:848 includes/Settings.php:1481
+msgid "Services"
+msgstr "Dienste"
+
+#: includes/Settings.php:856
+msgid "Select the services that Autoshare should use when publishing content."
 msgstr ""
-"Sie haben Autoshare autorisiert, die Bluesky-Timeline zu lesen und zu "
-"schreiben."
+"Wählen Sie die Dienste aus, die Autoshare beim Veröffentlichen von Inhalten "
+"verwenden soll."
 
-#: includes/Services/Bluesky/API.php:366
-msgid "Authorize Autoshare to read and write to the Bluesky timeline."
+#: includes/Settings.php:870
+msgid "Debugging"
+msgstr "Debugging"
+
+#: includes/Settings.php:876
+msgid "Logging"
+msgstr "Protokollierung"
+
+#: includes/Settings.php:882
+msgid "Send informative messages to the info log channel."
+msgstr "Informative Meldungen an den Info-Kanal senden."
+
+#: includes/Settings.php:890 includes/Settings.php:1805
+msgid "Publication Rules"
+msgstr "Senderegeln"
+
+#: includes/Settings.php:896 includes/Settings.php:913
+msgid "Rules"
+msgstr "Regeln"
+
+#: includes/Settings.php:939
+msgid "Default rules"
+msgstr "Standardregeln"
+
+#: includes/Settings.php:941
+msgid "Send all newly published posts to all active services."
+msgstr "Alle neu veröffentlichten Beiträge an alle aktiven Dienste senden."
+
+#: includes/Settings.php:950
+msgid "Advanced rules"
+msgstr "Erweiterte Regeln"
+
+#: includes/Settings.php:952
+msgid "Set rules separately for each service."
+msgstr "Regeln für jeden Dienst separat festlegen."
+
+#: includes/Settings.php:978
+msgid ""
+"This service is inactive. Its rules take effect only after the service is "
+"activated."
 msgstr ""
-"Autorisieren Sie Autoshare zum Lesen und Schreiben in die Bluesky-Timeline."
+"Dieser Dienst ist inaktiv. Seine Regeln wirken erst, nachdem der Dienst "
+"aktiviert wurde."
 
-#: includes/Services/Bluesky/Settings.php:17
-msgid "Bluesky"
-msgstr "Bluesky"
+#: includes/Settings.php:992
+msgid "Add rule"
+msgstr "Regel hinzufügen"
 
-#: includes/Services/Bluesky/Settings.php:20
+#: includes/Settings.php:1013
+msgid "Post Status"
+msgstr "Beitragsstatus"
+
+#: includes/Settings.php:1038
+msgid "Categories"
+msgstr "Kategorien"
+
+#: includes/Settings.php:1039
+msgid "Tags"
+msgstr "Tags"
+
+#: includes/Settings.php:1044
+msgid "Remove rule"
+msgstr "Regel entfernen"
+
+#: includes/Settings.php:1059
+#, php-format
+msgid "Posts are sent to %s when they are "
+msgstr "Beiträge werden an %s gesendet, wenn sie "
+
+#: includes/Settings.php:1074
+msgid " and are in "
+msgstr " werden und in "
+
+#: includes/Settings.php:1076
+msgid " and are marked with "
+msgstr " sind und mit "
+
+#: includes/Settings.php:1077
+msgid "."
+msgstr "."
+
+#: includes/Settings.php:1166
+msgid "All"
+msgstr "Alle"
+
+#: includes/Settings.php:1176
+msgid "Selected"
+msgstr "Ausgewählt"
+
+#: includes/Settings.php:1201
+msgid "Targets"
+msgstr "Ziele"
+
+#: includes/Settings.php:1222
+msgid "Publish"
+msgstr "Veröffentlicht"
+
+#: includes/Settings.php:1226
+msgid "Draft"
+msgstr "Entwurf"
+
+#: includes/Settings.php:1279
 msgid "Bluesky Settings"
 msgstr "Bluesky Einstellungen"
 
-#: includes/Services/Bluesky/Settings.php:22
+#: includes/Settings.php:1282 includes/Settings.php:1304
+#: includes/Settings.php:1322
+msgid "Service URL"
+msgstr "Dienst-URL"
+
+#: includes/Settings.php:1288
+msgid "The URL of the Bluesky service."
+msgstr "Die URL des Bluesky-Dienstes."
+
+#: includes/Settings.php:1301
+msgid "Mastodon Settings"
+msgstr "Mastodon Einstellungen"
+
+#: includes/Settings.php:1310
+msgid "The URL of the Mastodon service."
+msgstr "Die URL des Mastodon-Dienstes."
+
+#: includes/Settings.php:1321
+#, fuzzy
+msgid "Matrix Settings"
+msgstr "Mastodon Einstellungen"
+
+#: includes/Settings.php:1322
+#, fuzzy
+msgid "The URL of the Matrix homeserver."
+msgstr "Die URL des Mastodon-Dienstes."
+
+#: includes/Settings.php:1325
+msgid "Room IDs"
+msgstr ""
+
+#: includes/Settings.php:1331
+msgid ""
+"Enter one Matrix room ID per line, for example !room:matrix.example.org."
+msgstr ""
+
+#: includes/Settings.php:1344
+msgid "Featured Images"
+msgstr "Beitragsbild"
+
+#: includes/Settings.php:1350
+msgid "Include featured images"
+msgstr "Beitragsbild hinzufügen"
+
+#: includes/Settings.php:1362
+#, php-format
+msgid "Accepted content type: %1$s. Maximum post length: %2$d characters."
+msgstr "Akzeptierter Inhaltstyp: %1$s. Maximale Beitragslänge: %2$d Zeichen."
+
+#: includes/Settings.php:1367
+msgid "The actual limit can differ depending on the Mastodon instance."
+msgstr "Die tatsächliche Begrenzung kann je nach Mastodon-Instanz abweichen."
+
+#: includes/Settings.php:1372
+msgid "Post Format"
+msgstr "Beitragsformat"
+
+#: includes/Settings.php:1381
+msgid "Format"
+msgstr "Format"
+
+#: includes/Settings.php:1394
+msgid "Rich text"
+msgstr "Rich Text"
+
+#: includes/Settings.php:1397
+msgid "Text"
+msgstr "Text"
+
+#: includes/Settings.php:1403
+#, php-format
+msgid "Available placeholders: %s."
+msgstr "Verfuegbare Platzhalter: %s."
+
+#: includes/Settings.php:1408
+msgid "Empty lines are retained."
+msgstr "Leere Zeilen bleiben erhalten."
+
+#: includes/Settings.php:1409
+msgid "Empty lines are removed automatically."
+msgstr "Leere Zeilen werden automatisch entfernt."
+
+#: includes/Settings.php:1425
 msgid ""
 "Bluesky, also known as Bluesky Social, is a social microblogging platform."
 "<br>Please complete the settings fields so that Autoshare can read and write "
@@ -135,345 +335,512 @@ msgstr ""
 "Plattform.<br>Bitte füllen Sie die Einstellungsfelder aus, damit Autoshare "
 "die Bluesky-Timeline lesen und schreiben kann."
 
-#: includes/Services/Bluesky/Settings.php:28
-#: includes/Services/Mastodon/Settings.php:28
-msgid "Service URL"
-msgstr "Dienst-URL"
+#: includes/Settings.php:1429
+msgid ""
+"Mastodon is a free social networking service with microblogging features."
+"<br>Please complete the settings fields so that Autoshare can read and write "
+"to the Mastodon timeline."
+msgstr ""
+"Mastodon ist ein freier sozialer Netzwerkdienst mit Microblogging-Funktionen."
+"<br>Bitte fuellen Sie die Einstellungsfelder aus, damit Autoshare die "
+"Mastodon-Timeline lesen und bearbeiten kann."
 
-#: includes/Services/Bluesky/Settings.php:29
-msgid "The URL of the Bluesky service."
-msgstr "Die URL des Bluesky-Dienstes."
+#: includes/Settings.php:1433
+msgid ""
+"Matrix sends messages to configured rooms. The Matrix user represented by "
+"the access token must be a room member and have permission to send messages."
+msgstr ""
 
-#: includes/Services/Bluesky/Settings.php:36
-#: includes/Services/Mastodon/Settings.php:36
-msgid "The URL entered is not valid."
-msgstr "Die eingegebene URL ist ungültig."
+#: includes/Settings.php:1458 includes/Settings.php:1806
+msgid "Manually Send"
+msgstr "Manuell senden"
 
-#: includes/Services/Bluesky/Settings.php:43
-msgid "Username or email address"
-msgstr "Benutzername oder E-Mail-Adresse"
+#: includes/Settings.php:1463
+msgid "Post"
+msgstr "Beitrag"
 
-#: includes/Services/Bluesky/Settings.php:44
-msgid "The Bluesky account username or email address."
-msgstr "Der Benutzername oder die E-Mail-Adresse des Bluesky-Kontos."
+#: includes/Settings.php:1498
+msgid "Reshare Post According to Rules"
+msgstr "Beitrag gemäß Regeln neu teilen"
 
-#: includes/Services/Bluesky/Settings.php:52
-msgid "Password"
-msgstr "Passwort"
+#: includes/Settings.php:1512
+msgid "The post does not exist or you cannot edit it."
+msgstr "Der Beitrag existiert nicht oder Sie können ihn nicht bearbeiten."
 
-#: includes/Services/Bluesky/Settings.php:53
-msgid "The Bluesky account password."
-msgstr "Das Passwort des Bluesky-Kontos."
+#: includes/Settings.php:1515
+msgid "Select at least one active service."
+msgstr "Wählen Sie mindestens einen aktiven Dienst aus."
 
-#: includes/Services/Bluesky/Settings.php:60
-#: includes/Services/Mastodon/Settings.php:52
-#: includes/Services/Twitter/Settings.php:37
-msgid "Content Types"
-msgstr "Inhaltstypen"
+#: includes/Settings.php:1525
+#, php-format
+msgid "No rule applies to this post for %s."
+msgstr "Für diesen Beitrag trifft keine Regel für %s zu."
 
-#: includes/Services/Bluesky/Settings.php:61
-#: includes/Services/Mastodon/Settings.php:53
-#: includes/Services/Twitter/Settings.php:38
-msgid "Select the type of content that Autoshare could use."
-msgstr "Wählen Sie die Art von Inhalten aus, die Autoshare verwenden könnte."
+#: includes/Settings.php:1532
+#, php-format
+msgid ""
+"The text was sent to %s successfully, but the featured image could not be "
+"transmitted."
+msgstr ""
+"Der Text wurde erfolgreich an %s gesendet, aber das Beitragsbild konnte "
+"nicht übertragen werden."
 
-#: includes/Services/Bluesky/Settings.php:67
-#: includes/Services/Mastodon/Settings.php:59
-#: includes/Services/Twitter/Settings.php:44
-msgid "Enable by default"
-msgstr "Standardmäßig aktivieren"
+#: includes/Settings.php:1539
+#, php-format
+msgid "%s received the post successfully according to the rules."
+msgstr "%s hat den Beitrag gemäß den Regeln erfolgreich erhalten."
 
-#: includes/Services/Bluesky/Settings.php:68
-#: includes/Services/Mastodon/Settings.php:60
-#: includes/Services/Twitter/Settings.php:45
-msgid "Enable Autoshare by default when publishing content"
-msgstr "Standardmäßig Autoshare aktivieren beim Veröffentlichen von Inhalten"
+#: includes/Settings.php:1546
+#, php-format
+msgid "%s could not receive the post. Check the log for details."
+msgstr ""
+"%s konnte den Beitrag nicht empfangen. Prüfen Sie das Protokoll auf Details."
 
-#: includes/Services/Bluesky/Settings.php:73
-#: includes/Services/Mastodon/Settings.php:65
-#: includes/Services/Twitter/Settings.php:50
-msgid "Featured Images"
-msgstr "Beitragsbild"
+#: includes/Settings.php:1559
+msgid "View post"
+msgstr "Beitrag anzeigen"
 
-#: includes/Services/Bluesky/Settings.php:74
-#: includes/Services/Mastodon/Settings.php:66
-#: includes/Services/Twitter/Settings.php:51
-msgid "Include featured images"
-msgstr "Beitragsbild hinzufügen"
-
-#: includes/Services/Bluesky/Settings.php:79
-#: includes/Services/Mastodon/Settings.php:71
-#: includes/Services/Twitter/Settings.php:56
+#: includes/Settings.php:1582 includes/Settings.php:1634
+#: includes/Settings.php:1684
 msgid "Access"
 msgstr "Zugriff"
 
-#: includes/Services/Mastodon/API.php:307
-msgid "This post was not published on Mastodon."
-msgstr "Dieser Beitrag wurde nicht auf Mastodon veröffentlicht."
+#: includes/Settings.php:1585
+msgid "You’ve authorized Autoshare to read and write to the Bluesky timeline."
+msgstr ""
+"Sie haben Autoshare autorisiert, die Bluesky-Timeline zu lesen und zu "
+"schreiben."
 
-#: includes/Services/Mastodon/API.php:329
+#: includes/Settings.php:1589 includes/Settings.php:1641
+#: includes/Settings.php:1690
+msgid "Revoke Access"
+msgstr "Zugriff widerrufen"
+
+#: includes/Settings.php:1592
+msgid "Authorize Autoshare to read and write to the Bluesky timeline."
+msgstr ""
+"Autorisieren Sie Autoshare zum Lesen und Schreiben in die Bluesky-Timeline."
+
+#: includes/Settings.php:1596
+msgid "Bluesky handle or email address"
+msgstr "Bluesky-Handle oder E-Mail-Adresse"
+
+#: includes/Settings.php:1598
+msgid ""
+"Use the complete handle without @, for example name.bsky.social. An email "
+"address is also accepted."
+msgstr ""
+"Verwenden Sie das vollständige Handle ohne @, zum Beispiel name.bsky.social. "
+"Eine E-Mail-Adresse wird ebenfalls akzeptiert."
+
+#: includes/Settings.php:1601
+msgid "Bluesky App Password"
+msgstr "Bluesky-App-Passwort"
+
+#: includes/Settings.php:1609
+#, php-format
+msgid ""
+"Create a separate <a href=\"%1$s\" target=\"_blank\" rel=\"noopener "
+"noreferrer\">Bluesky App Password</a>. Do not enter the Bluesky account "
+"password. <a href=\"%2$s\" target=\"_blank\" rel=\"noopener "
+"noreferrer\">Learn more about App Passwords</a>. The entered data is used "
+"only once for authorization and is not saved."
+msgstr ""
+"Erstellen Sie ein separates <a href=\"%1$s\" target=\"_blank\" "
+"rel=\"noopener noreferrer\">Bluesky-App-Passwort</a>. Geben Sie nicht das "
+"Passwort Ihres Bluesky-Kontos ein. <a href=\"%2$s\" target=\"_blank\" "
+"rel=\"noopener noreferrer\">Mehr über App-Passwörter erfahren</a>. Die "
+"eingegebenen Daten werden nur einmal für die Autorisierung verwendet und "
+"nicht gespeichert."
+
+#: includes/Settings.php:1624 includes/Settings.php:1673
+#: includes/Settings.php:1711
+msgid "Authorize Access"
+msgstr "Zugriff autorisieren"
+
+#: includes/Settings.php:1637
 msgid "You’ve authorized Autoshare to read and write to the Mastodon timeline."
 msgstr ""
 "Sie haben Autoshare autorisiert, die Mastodon-Timeline zu lesen und zu "
 "schreiben."
 
-#: includes/Services/Mastodon/API.php:330
-msgid "Authorize Autoshare to read and write to the Mastodon timeline."
-msgstr ""
-"Autorisieren Sie Autoshare zum Lesen und Schreiben in die Mastodon-Timeline."
+#: includes/Settings.php:1647 includes/Settings.php:1696
+msgid "Access Token"
+msgstr "Zugriffstoken"
 
-#: includes/Services/Mastodon/Settings.php:17
-msgid "Mastodon"
-msgstr "Mastodon"
-
-#: includes/Services/Mastodon/Settings.php:20
-msgid "Mastodon Settings"
-msgstr "Mastodon Einstellungen"
-
-#: includes/Services/Mastodon/Settings.php:22
+#: includes/Settings.php:1651
 msgid ""
-"Mastodon is a free social networking service. It has microblogging features "
-"similar to X.<br>Please complete the settings fields so that Autoshare can "
-"read and write to the Mastodon timeline."
+"Grant the permissions write:statuses, write:media, and read:accounts to "
+"Autoshare."
 msgstr ""
-"Mastodon ist ein kostenloser sozialer Netzwerkdienst. Es verfügt über "
-"ähnliche Microblogging-Funktionen wie X.<br>Bitte füllen Sie die "
-"Einstellungsfelder aus, damit Autoshare die Mastodon-Timeline lesen und "
-"schreiben kann."
+"Erteilen Sie Autoshare die Berechtigungen write:statuses, write:media und "
+"read:accounts."
 
-#: includes/Services/Mastodon/Settings.php:29
-msgid "The URL of the Mastodon service."
-msgstr "Die URL des Mastodon-Dienstes."
-
-#: includes/Services/Mastodon/Settings.php:43
-msgid "Username"
-msgstr "Benutzername"
-
-#: includes/Services/Mastodon/Settings.php:44
-msgid "The Mastodon account username."
-msgstr "Der Benutzername des Mastodon-Kontos."
-
-#: includes/Services/Twitter/Account.php:38
-#: includes/Services/Twitter/Account.php:94
-#: includes/Services/Twitter/Account.php:148
-msgid "You do not have sufficient permissions to access this page."
-msgstr ""
-"Sie verfügen nicht über ausreichende Berechtigungen, um auf diese Seite "
-"zuzugreifen."
-
-#: includes/Services/Twitter/Account.php:43
-#: includes/Services/Twitter/Account.php:153
-msgid "You are not authorized to perform this operation."
-msgstr "Sie sind nicht berechtigt, diesen Vorgang durchzuführen."
-
-#: includes/Services/Twitter/Account.php:74
-#: includes/Services/Twitter/Account.php:111
-msgid "Something went wrong. Please try again."
-msgstr "Etwas ist schief gelaufen. Bitte versuchen Sie es erneut."
-
-#: includes/Services/Twitter/Account.php:101
-msgid "Authorization denied for this request."
-msgstr "Die Autorisierung für diese Anfrage wurde verweigert."
-
-#: includes/Services/Twitter/Account.php:119
-msgid "Something went wrong while fetching the access token. Please try again."
-msgstr ""
-"Beim Abrufen des Zugriffstokens ist ein Fehler aufgetreten. Bitte versuchen "
-"Sie es erneut."
-
-#: includes/Services/Twitter/Account.php:130
-msgid "X (Twitter) account authenticated successfully."
-msgstr "X-Konto (Twitter) erfolgreich authentifiziert."
-
-#: includes/Services/Twitter/Account.php:158
-msgid "X (Twitter) account ID is required to perform this operation."
-msgstr "Für diesen Vorgang ist die Konto-ID von X (Twitter) erforderlich."
-
-#: includes/Services/Twitter/Account.php:168
-msgid "X (Twitter) account disconnected successfully."
-msgstr "X (Twitter)-Konto erfolgreich getrennt."
-
-#: includes/Services/Twitter/API.php:147
-msgid "This post was not published on X."
-msgstr "Dieser Beitrag wurde nicht auf X veröffentlicht."
-
-#. translators: %s: Twitter username.
-#: includes/Services/Twitter/API.php:178
+#: includes/Settings.php:1658
+#, php-format
 msgid ""
-"You’ve authorized Autoshare to read and write to the X timeline. Authorized "
-"account: <code>%s</code>"
+"Create an application and an access token with the permissions "
+"write:statuses, write:media, and read:accounts in <a href=\"%1$s\" "
+"target=\"_blank\" rel=\"noopener noreferrer\">Mastodon application settings</"
+"a>. <a href=\"%2$s\" target=\"_blank\" rel=\"noopener noreferrer\">Learn "
+"more about Mastodon access tokens</a>. The token is stored encrypted."
 msgstr ""
-"Sie haben Autoshare autorisiert, die X-Timeline zu lesen und zu schreiben. "
-"Autorisiertes X-Konto: <code>%s</code>"
+"Erstellen Sie in den <a href=\"%1$s\" target=\"_blank\" rel=\"noopener "
+"noreferrer\">Mastodon-Anwendungseinstellungen</a> eine Anwendung und ein "
+"Zugriffstoken mit den Berechtigungen write:statuses, write:media und "
+"read:accounts. <a href=\"%2$s\" target=\"_blank\" rel=\"noopener "
+"noreferrer\">Mehr über Mastodon-Zugriffstoken erfahren</a>. Das Token wird "
+"verschlüsselt gespeichert."
 
-#: includes/Services/Twitter/API.php:181
-msgid "Authorize Autoshare to read and write to the X timeline."
-msgstr "Autorisieren Sie Autoshare zum Lesen und Schreiben in die X-Timeline."
-
-#: includes/Services/Twitter/OAuth.php:174
-msgid "Something went wrong during getting user details."
-msgstr "Beim Abrufen der Benutzerdaten ist ein Fehler aufgetreten."
-
-#: includes/Services/Twitter/Settings.php:19
-msgid "X (Twitter)"
-msgstr "X (Twitter)"
-
-#: includes/Services/Twitter/Settings.php:29
-msgid "X (Twitter) Settings"
-msgstr "X (Twitter) Einstellungen"
-
-#: includes/Services/Twitter/Settings.php:69
-msgid "Consumer Keys"
-msgstr "Consumer Keys"
-
-#: includes/Services/Twitter/Settings.php:76
-msgid "API Key"
-msgstr "API-Key"
-
-#: includes/Services/Twitter/Settings.php:80
-msgid "Paste your API Key here"
-msgstr "Fügen Sie hier Ihren API-Key ein"
-
-#: includes/Services/Twitter/Settings.php:84
-msgid "API Key Secret"
-msgstr "API-Key-Secret"
-
-#: includes/Services/Twitter/Settings.php:88
-msgid "Paste your API Key Secret here"
-msgstr "Fügen Sie hier Ihren API-Key-Secret ein"
-
-#: includes/Services/Twitter/Settings.php:99
-msgid "1. Create a Twitter app"
-msgstr "1. Erstellen Sie eine Twitter-App"
-
-#. translators: %1$s: opening HTML <a> link tag, %2$s: closing HTML </a> link tag.
-#: includes/Services/Twitter/Settings.php:106
-msgid "Go to the %1$sTwitter developer portal%2$s"
-msgstr "Gehen Sie zum %1$sTwitter-Entwicklerportal%2$s"
-
-#: includes/Services/Twitter/Settings.php:112
+#: includes/Settings.php:1709
 msgid ""
-"Click on Projects & Apps on the left navigation menu and create a new App."
+"Create a Matrix access token for a user that is allowed to send messages in "
+"every configured room. The token is stored encrypted."
 msgstr ""
-"Klicken Sie im linken Navigationsmenü auf Projekte & Apps und erstellen Sie "
-"eine neue App."
 
-#: includes/Services/Twitter/Settings.php:113
-msgid "Find the App and click it to show the Settings page for the App."
+#: includes/Settings.php:1719
+msgid "Matrix access was authorized."
+msgstr "Der Zugriff auf Matrix wurde autorisiert."
+
+#: includes/Settings.php:1720
+msgid "Enter a Matrix access token."
+msgstr "Geben Sie ein Matrix-Zugriffstoken ein."
+
+#: includes/Settings.php:1721
+msgid "Save a Matrix homeserver URL before authorizing access."
 msgstr ""
-"Suchen Sie die App und klicken Sie darauf, um die Seite „Settings“ für die "
-"App anzuzeigen."
+"Speichern Sie eine URL des Matrix-Homeservers, bevor Sie den Zugriff "
+"autorisieren."
 
-#: includes/Services/Twitter/Settings.php:114
-msgid "Edit the User authentication settings of the the App."
-msgstr "Bearbeiten Sie die „User authentication settings“ der App."
+#: includes/Settings.php:1722
+msgid "The Matrix homeserver rejected the access token."
+msgstr "Der Matrix-Homeserver hat das Zugriffstoken abgewiesen."
 
-#: includes/Services/Twitter/Settings.php:115
-msgid "Set App permissions to <strong>Read and write</strong>."
-msgstr ""
-"Setzen Sie die „App permissions“ auf <strong>„Read and write“</strong>."
-
-#: includes/Services/Twitter/Settings.php:116
-msgid "Set Types of App to <strong>Web App, Automated App or Bot</strong>."
-msgstr ""
-"Setzen Sie die „Types of App“ auf <strong>„Web App, Automated App or Bot“</"
-"strong>."
-
-#. translators: %s: Callback URL for Twitter Auth
-#: includes/Services/Twitter/Settings.php:121
+#: includes/Settings.php:1723
 msgid ""
-"On App info set the <code>Callback URL / Redirect URL</code> to <code>%s</"
-"code>."
+"The Matrix homeserver URL does not provide the required Matrix client API. "
+"Check the URL and save the settings before authorizing access."
 msgstr ""
-"Setzen Sie unter App-Info die <code>Callback-URL/Redirect-URL</code> auf "
-"<code>%s</code>."
+"Die URL des Matrix-Homeservers stellt die erforderliche Matrix-Client-API "
+"nicht bereit. Prüfen Sie die URL und speichern Sie die Einstellungen vor der "
+"Autorisierung."
 
-#. translators: %s: Site URL.
-#: includes/Services/Twitter/Settings.php:130
+#: includes/Settings.php:1724
 msgid ""
-"Set the <code>Website URL</code> to <code>%s</code> and click <code>Save</"
-"code>."
+"The Matrix homeserver could not be reached. Check the server URL and network "
+"connection."
 msgstr ""
-"Setzen Sie die <code>Website URL</code> auf <code>%s</code> und klicken Sie "
-"auf <code>Save</code>."
+"Der Matrix-Homeserver konnte nicht erreicht werden. Prüfen Sie die Server-"
+"URL und die Netzwerkverbindung."
 
-#: includes/Services/Twitter/Settings.php:135
-msgid "Switch from the \"Settings\" tab to the \"Keys and tokens\" tab."
-msgstr "Wechseln Sie vom Reiter „Settings“ zum Reiter „Keys and tokens“."
+#: includes/Settings.php:1725
+msgid "The Matrix homeserver is temporarily unavailable. Try again later."
+msgstr ""
+"Der Matrix-Homeserver ist vorübergehend nicht verfügbar. Versuchen Sie es "
+"später erneut."
 
-#: includes/Services/Twitter/Settings.php:136
+#: includes/Settings.php:1726
 msgid ""
-"Click on the <code>Regenerate</code> button in the <code>Consumer Keys</"
-"code> section."
+"The Matrix homeserver returned an unexpected response. No access token was "
+"saved."
 msgstr ""
-"Klicken Sie im Abschnitt <code>Consumer Keys</code> auf die Schaltfläche "
-"<code>Regenerate</code>."
+"Der Matrix-Homeserver hat eine unerwartete Antwort zurückgegeben. Es wurde "
+"kein Zugriffstoken gespeichert."
 
-#: includes/Services/Twitter/Settings.php:137
+#: includes/Settings.php:1727
 msgid ""
-"Copy the <code>API Key</code> and <code>API Key Secret</code> values and "
-"paste them below."
+"The Matrix access token could not be stored securely. Check the server "
+"encryption configuration and the log."
 msgstr ""
-"Kopieren Sie die Werte für <code>API Key</code> und <code>API Key Secret</"
-"code> und fügen Sie sie unten ein."
+"Das Matrix-Zugriffstoken konnte nicht sicher gespeichert werden. Prüfen Sie "
+"die Serververschlüsselung und das Protokoll."
 
-#: includes/Services/Twitter/Settings.php:139
-msgid "2. Connect your Twitter account"
-msgstr "2. Verbinden Sie Ihr Twitter-Konto"
+#: includes/Settings.php:1728
+msgid "Matrix could not authorize access."
+msgstr "Matrix konnte den Zugriff nicht autorisieren."
 
-#: includes/Services/Twitter/Settings.php:141
+#: includes/Settings.php:1729
+msgid "Matrix access was revoked."
+msgstr "Der Zugriff auf Matrix wurde widerrufen."
+
+#: includes/Settings.php:1743
+msgid "Bluesky access was authorized."
+msgstr "Der Zugriff auf Bluesky wurde autorisiert."
+
+#: includes/Settings.php:1745
+msgid "Enter both a Bluesky handle or email address and an App Password."
+msgstr ""
+"Geben Sie sowohl ein Bluesky-Handle oder eine E-Mail-Adresse als auch ein "
+"App-Passwort ein."
+
+#: includes/Settings.php:1747
 msgid ""
-"After saving settings, click the <code>Authorize Access</code> button and "
-"follow the instructions provided there to connect your Twitter account with "
-"this website."
+"The App Password format is invalid. Create a new Bluesky App Password and "
+"enter it exactly as shown, including hyphens."
 msgstr ""
-"Klicken Sie nach dem Speichern der Einstellungen auf die Schaltfläche "
-"<code>Zugriff autorisieren</code> und befolgen Sie die dort bereitgestellten "
-"Anweisungen, um Ihr Twitter-Konto mit dieser Website zu verbinden."
+"Das Format des App-Passworts ist ungültig. Erstellen Sie ein neues Bluesky-"
+"App-Passwort und geben Sie es einschließlich der Bindestriche genau wie "
+"angezeigt ein."
 
-#: includes/Settings.php:45
-msgid "Autoshare Settings"
-msgstr "Einstellungen › Autoshare"
+#: includes/Settings.php:1749
+msgid ""
+"Bluesky rejected the credentials. Use the complete handle without @, for "
+"example name.bsky.social, or the account email address. Do not use the "
+"normal account password; create a new App Password instead."
+msgstr ""
+"Bluesky hat die Zugangsdaten abgelehnt. Verwenden Sie das vollständige "
+"Handle ohne @, zum Beispiel name.bsky.social, oder die E-Mail-Adresse des "
+"Kontos. Verwenden Sie nicht das normale Kontopasswort, sondern erstellen Sie "
+"ein neues App-Passwort."
 
-#: includes/Settings/Settings.php:177
-msgid "Unnamed tab"
-msgstr "Unbenannte Registerkarte"
+#: includes/Settings.php:1751
+msgid ""
+"Bluesky temporarily limited authorization attempts. Wait before trying again."
+msgstr ""
+"Bluesky hat die Autorisierungsversuche vorübergehend begrenzt. Warten Sie, "
+"bevor Sie es erneut versuchen."
 
-#: includes/Settings/Settings.php:267
+#: includes/Settings.php:1753
+msgid "Bluesky is temporarily unavailable. Try again later."
+msgstr ""
+"Bluesky ist vorübergehend nicht verfügbar. Versuchen Sie es später erneut."
+
+#: includes/Settings.php:1755
+msgid "Bluesky could not be reached. Check the server connection."
+msgstr "Bluesky konnte nicht erreicht werden. Prüfen Sie die Serververbindung."
+
+#: includes/Settings.php:1757
+msgid ""
+"Bluesky returned an incomplete authorization response. No access tokens were "
+"saved."
+msgstr ""
+"Bluesky hat eine unvollständige Autorisierungsantwort zurückgegeben. Es "
+"wurden keine Zugriffstoken gespeichert."
+
+#: includes/Settings.php:1759
+msgid ""
+"The Bluesky access tokens could not be stored securely. Check the server "
+"encryption configuration and the log."
+msgstr ""
+"Die Bluesky-Zugriffstoken konnten nicht sicher gespeichert werden. Prüfen "
+"Sie die Serververschlüsselung und das Protokoll."
+
+#: includes/Settings.php:1761
+msgid "Bluesky could not authorize access."
+msgstr "Der Zugriff auf Bluesky konnte nicht autorisiert werden."
+
+#: includes/Settings.php:1763
+msgid "Bluesky access was revoked."
+msgstr "Der Zugriff auf Bluesky wurde widerrufen."
+
+#: includes/Settings.php:1769
 msgid "You do not have enough permissions to do that."
 msgstr "Dazu haben Sie nicht genügend Berechtigungen."
 
-#: includes/Settings/Settings.php:292
-msgid "Settings saved."
-msgstr "Die Einstellungen wurden gespeichert."
+#: includes/Settings.php:1774
+msgid "The link you followed has expired. Please try again."
+msgstr "Der aufgerufene Link ist abgelaufen. Bitte versuchen Sie es erneut."
 
-#: includes/Settings/templates/settings-page.php:18
-msgid "Settings issues detected."
-msgstr "Einstellungsprobleme erkannt."
+#: includes/Settings.php:1783
+msgid "Mastodon access was authorized."
+msgstr "Der Zugriff auf Mastodon wurde autorisiert."
 
-#. translators: 1: Server WordPress version number, 2: Required WordPress version number.
-#: rrze-autoshare.php:108
+#: includes/Settings.php:1785
 msgid ""
-"The server is running WordPress version %1$s. The plugin requires at least "
-"WordPress version %2$s."
+"The Mastodon access token could not be verified. Check the token and service "
+"URL."
 msgstr ""
-"Auf dem Server läuft WordPress Version %1$s. Das Plugin erfordert mindestens "
-"WordPress Version %2$s."
+"Das Mastodon-Zugriffstoken konnte nicht überprüft werden. Prüfen Sie das "
+"Token und die Dienst-URL."
 
-#. translators: 1: Server PHP version number, 2: Required PHP version number.
-#: rrze-autoshare.php:116
-msgid ""
-"The server is running PHP version %1$s. The plugin requires at least PHP "
-"version %2$s."
+#: includes/Settings.php:1787
+msgid "Mastodon access was revoked."
+msgstr "Der Zugriff auf Mastodon wurde widerrufen."
+
+#: includes/Settings.php:1804
+msgid "General"
+msgstr "Allgemeines"
+
+#: includes/Settings.php:1807
+msgid "Bluesky"
+msgstr "Bluesky"
+
+#: includes/Settings.php:1808
+msgid "Mastodon"
+msgstr "Mastodon"
+
+#: includes/Settings.php:1809
+msgid "Matrix"
 msgstr ""
-"Auf dem Server läuft PHP Version %1$s. Das Plugin erfordert mindestens PHP "
-"Version %2$s."
 
-#. translators: 1: The plugin name, 2: The error string.
-#: rrze-autoshare.php:154
-msgid "Plugins: %1$s: %2$s"
-msgstr "Plugins: %1$s: %2$s"
+#~ msgid "Share Post"
+#~ msgstr "Beitrag teilen"
 
-#: src/blockeditor/script.js:107
-msgid "Autoshare"
-msgstr "Autoshare"
+#~ msgid "Sharing post..."
+#~ msgstr "Beitrag wird geteilt..."
+
+#~ msgid "The post was shared successfully."
+#~ msgstr "Der Beitrag wurde erfolgreich geteilt."
+
+#, php-format
+#~ msgid "The post could not be shared with: %s."
+#~ msgstr "Der Beitrag konnte nicht geteilt werden mit: %s."
+
+#~ msgid "Select at least one service."
+#~ msgstr "Wählen Sie mindestens einen Dienst aus."
+
+#~ msgid "The post must be published before it can be shared."
+#~ msgstr "Der Beitrag muss veröffentlicht sein, bevor er geteilt werden kann."
+
+#~ msgid "Transmission Test"
+#~ msgstr "Übertragungstest"
+
+#~ msgid "Run Transmission Test"
+#~ msgstr "Übertragungstest starten"
+
+#~ msgid "Select at least one service for the transmission test."
+#~ msgstr "Wählen Sie mindestens einen Dienst für den Übertragungstest aus."
+
+#, php-format
+#~ msgid "Plugins: %1$s: %2$s"
+#~ msgstr "Plugins: %1$s: %2$s"
+
+#, php-format
+#~ msgid ""
+#~ "The server is running PHP version %1$s. The plugin requires at least PHP "
+#~ "version %2$s."
+#~ msgstr ""
+#~ "Auf dem Server läuft PHP Version %1$s. Das Plugin erfordert mindestens "
+#~ "PHP Version %2$s."
+
+#, php-format
+#~ msgid ""
+#~ "The server is running WordPress version %1$s. The plugin requires at "
+#~ "least WordPress version %2$s."
+#~ msgstr ""
+#~ "Auf dem Server läuft WordPress Version %1$s. Das Plugin erfordert "
+#~ "mindestens WordPress Version %2$s."
+
+#~ msgid "RRZE Autoshare"
+#~ msgstr "RRZE Autoshare"
+
+#~ msgid ""
+#~ "Automatically shares published WordPress content on Bluesky and Mastodon."
+#~ msgstr ""
+#~ "Veröffentlicht publizierte WordPress-Inhalte automatisch auf Bluesky und "
+#~ "Mastodon."
+
+#~ msgid "Share on Bluesky"
+#~ msgstr "Auf Bluesky teilen"
+
+#~ msgid "Share on Bluesky is disabled"
+#~ msgstr "Teilen auf Bluesky ist deaktiviert"
+
+#~ msgid "It is published on Bluesky"
+#~ msgstr "Es ist auf Bluesky veröffentlicht"
+
+#~ msgid "Share on Mastodon"
+#~ msgstr "Auf Mastodon teilen"
+
+#~ msgid "Share on Mastodon is disabled"
+#~ msgstr "Teilen auf Mastodon ist deaktiviert"
+
+#~ msgid "It is published on Mastodon"
+#~ msgstr "Es ist auf Mastodon veröffentlicht"
+
+#~ msgid "the categories %s"
+#~ msgstr "den Kategorien %s"
+
+#~ msgid "Authorize Autoshare to read and write to the Mastodon timeline."
+#~ msgstr ""
+#~ "Autorisieren Sie Autoshare zum Lesen und Schreiben in die Mastodon-"
+#~ "Timeline."
+
+#~ msgid "Username"
+#~ msgstr "Benutzername"
+
+#~ msgid "The Mastodon account username."
+#~ msgstr "Der Benutzername des Mastodon-Kontos."
+
+#~ msgid "Content Types"
+#~ msgstr "Inhaltstypen"
+
+#~ msgid "Select the type of content that Autoshare could use."
+#~ msgstr ""
+#~ "Wählen Sie die Art von Inhalten aus, die Autoshare verwenden könnte."
+
+#~ msgid "Username or email address"
+#~ msgstr "Benutzername oder E-Mail-Adresse"
+
+#~ msgid ""
+#~ "Bluesky access could not be authorized. Check the account identifier and "
+#~ "App Password."
+#~ msgstr ""
+#~ "Der Zugriff auf Bluesky konnte nicht autorisiert werden. Prüfen Sie die "
+#~ "Konto-Kennung und das App-Passwort."
+
+#~ msgid "The URL entered is not valid."
+#~ msgstr "Die eingegebene URL ist ungültig."
+
+#~ msgid "The Bluesky service URL cannot be changed."
+#~ msgstr "Die Bluesky-Service-URL kann nicht geändert werden."
+
+#, php-format
+#~ msgid ""
+#~ "Accepted content type: %1$s. Maximum post length: %2$d characters. The "
+#~ "actual limit can differ depending on the Mastodon instance."
+#~ msgstr ""
+#~ "Akzeptierter Inhaltstyp: %1$s. Maximale Beitragslänge: %2$d Zeichen. Das "
+#~ "tatsächliche Limit kann je nach Mastodon-Instanz abweichen."
+
+#~ msgid "Settings issues detected."
+#~ msgstr "Einstellungsprobleme erkannt."
+
+#~ msgid "Unnamed tab"
+#~ msgstr "Unbenannte Registerkarte"
+
+#~ msgid "Settings saved."
+#~ msgstr "Die Einstellungen wurden gespeichert."
+
+#~ msgid "The format must contain {title}, {excerpt}, {url}, and {tags}."
+#~ msgstr "Das Format muss {title}, {excerpt}, {url} und {tags} enthalten."
+
+#~ msgid "Enable by default"
+#~ msgstr "Standardmäßig aktivieren"
+
+#~ msgid "Enable Autoshare by default when publishing content"
+#~ msgstr ""
+#~ "Standardmäßig Autoshare aktivieren beim Veröffentlichen von Inhalten"
+
+#~ msgid ""
+#~ "Use the placeholders {title}, {excerpt}, {url}, and {tags}. All "
+#~ "placeholders are required. Empty lines are removed automatically."
+#~ msgstr ""
+#~ "Verwenden Sie die Platzhalter {title}, {excerpt}, {url} und {tags}. Alle "
+#~ "Platzhalter sind erforderlich. Leere Zeilen werden automatisch entfernt."
+
+#~ msgid "The Bluesky account username or email address."
+#~ msgstr "Der Benutzername oder die E-Mail-Adresse des Bluesky-Kontos."
+
+#, php-format
+#~ msgid ""
+#~ "Create a separate <a href=\"%1$s\" target=\"_blank\" rel=\"noopener "
+#~ "noreferrer\">Bluesky App Password</a>. Do not enter the Bluesky account "
+#~ "password. <a href=\"%2$s\" target=\"_blank\" rel=\"noopener "
+#~ "noreferrer\">Learn more about App Passwords</a>."
+#~ msgstr ""
+#~ "Erstellen Sie ein separates <a href=\"%1$s\" target=\"_blank\" "
+#~ "rel=\"noopener noreferrer\">Bluesky-App-Passwort</a>. Geben Sie nicht Ihr "
+#~ "Bluesky-Kontopasswort ein. <a href=\"%2$s\" target=\"_blank\" "
+#~ "rel=\"noopener noreferrer\">Mehr über App-Passwörter erfahren</a>."
+
+#~ msgid "Enter a Bluesky App Password in the format xxxx-xxxx-xxxx-xxxx."
+#~ msgstr ""
+#~ "Bitte geben Sie ein Bluesky-App-Passwort im Format xxxx-xxxx-xxxx-xxxx "
+#~ "ein."
+
+#~ msgid "Password"
+#~ msgstr "Passwort"
+
+#~ msgid "The Bluesky account password."
+#~ msgstr "Das Passwort des Bluesky-Kontos."

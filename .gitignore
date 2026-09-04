@@ -8,12 +8,10 @@
 .DS_Store
 ### Node ###
 node_modules/
-package-lock.json
-### Composer ###
-composer.lock
 ### WordPress ###
-*.pot
 *.po~
 *.pot~
 ### Tmp ###
 _tmp/
+## Sourcemaps nicht ins git
+*.map

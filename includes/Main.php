@@ -6,29 +6,25 @@ defined('ABSPATH') || exit;
 
 use RRZE\Autoshare\Services\Bluesky\Main as Bluesky;
 use RRZE\Autoshare\Services\Mastodon\Main as Mastodon;
-use RRZE\Autoshare\Services\Twitter\Main as Twitter;
+use RRZE\Autoshare\Services\Matrix\Main as Matrix;
 
-class Main
-{
+class Main {
     /**
      * Loaded
      */
-    public function loaded()
-    {
+    public function loaded() {
         add_filter('plugin_action_links_' . plugin()->getBaseName(), [$this, 'settingsLink']);
 
-        /* Enqueue Admin Assets */
-        add_action('admin_enqueue_scripts', [$this, 'adminEnqueueScripts']);
+        settings();
 
-        /* Enqueue Block Editor Assets */
         add_action('enqueue_block_editor_assets', [$this, 'enqueueBlockEditorAssets'], 10, 0);
+        add_action('init', [$this, 'registerPostMeta']);
 
-        settings()->loaded();
-        Metabox::init();
+        add_action('init', [Encryption::class, 'migrateStoredOptions'], 1);
 
         Bluesky::init();
         Mastodon::init();
-        Twitter::init();
+        Matrix::init();
 
         Cron::init();
     }
@@ -39,104 +35,77 @@ class Main
      * @param array $links
      * @return void
      */
-    public function settingsLink($links)
-    {
+    public function settingsLink($links) {
         $settingsLink = sprintf(
             '<a href="%s">%s</a>',
-            admin_url('options-general.php?page=rrze_autoshare'),
-            __('Settings', 'rrze_autoshare')
+            admin_url(config()->get('admin_parent_slug') . '?page=' . config()->get('admin_page_slug')),
+            __('Settings', 'rrze-autoshare')
         );
         array_unshift($links, $settingsLink);
         return $links;
     }
 
-    public function adminEnqueueScripts($hook)
-    {
-        if ($hook != 'post.php' && $hook != 'post-new.php') {
-            return;
-        }
-
+    public function enqueueBlockEditorAssets() {
         global $post;
-        if (
-            !in_array(get_post_type($post), settings()->getOption('bluesky_post_types'))
-            && !in_array(get_post_type($post), settings()->getOption('mastodon_post_types'))
-            && !in_array(get_post_type($post), settings()->getOption('twitter_post_types'))
-        ) {
+        $postType = get_post_type($post);
+        if (!in_array($postType, config()->get('default_post_types'), true)) {
             return;
         }
 
         wp_enqueue_style(
-            'rrze-autoshare-admin',
-            plugins_url('build/admin.style.css', plugin()->getBasename()),
+            config()->get('assets.admin_style_handle'),
+            plugins_url(config()->get('assets.admin_style_file'), plugin()->getBasename()),
             [],
             plugin()->getVersion()
         );
-    }
-
-    public function enqueueBlockEditorAssets()
-    {
-        global $post;
-        if (
-            !in_array(get_post_type($post), settings()->getOption('bluesky_post_types'))
-            && !in_array(get_post_type($post), settings()->getOption('mastodon_post_types'))
-            && !in_array(get_post_type($post), settings()->getOption('twitter_post_types'))
-        ) {
-            return;
-        }
-
-        wp_enqueue_style(
-            'rrze-autoshare-blockeditor',
-            plugins_url('build/blockeditor.style.css', plugin()->getBasename()),
-            [],
-            plugin()->getVersion()
-        );
-
-        $assetFile = include(plugin()->getPath('build') . 'blockeditor.asset.php');
 
         wp_enqueue_script(
-            'rrze-autoshare-blockeditor',
-            plugins_url('build/blockeditor.js', plugin()->getBasename()),
-            $assetFile['dependencies'],
+            config()->get('assets.admin_script_handle'),
+            plugins_url(config()->get('assets.admin_script_file'), plugin()->getBasename()),
+            config()->get('assets.admin_script_dependencies'),
             plugin()->getVersion()
         );
 
-        $blueskyEnableByDefault = (bool) settings()->getOption('bluesky_enable_default');
-        $blueskyIsEnabled = metadata_exists('post', $post->ID, 'rrze_autoshare_bluesky_enabled') ? Bluesky::isEnabled($post->ID) : $blueskyEnableByDefault;
-        $blueskyIsPublished = Bluesky::isPublished($post->ID);
-        $blueskyIsConnected = Bluesky::isConnected();
-
-        $mastodonEnableByDefault = (bool) settings()->getOption('mastodon_enable_default');
-        $mastodonIsEnabled = metadata_exists('post', $post->ID, 'rrze_autoshare_mastodon_enabled') ? Mastodon::isEnabled($post->ID) : $mastodonEnableByDefault;
-        $mastodonIsPublished = Mastodon::isPublished($post->ID);
-        $mastodonIsConnected = Mastodon::isConnected();
-
-        $twitterEnableByDefault = (bool) settings()->getOption('bluesky_enable_default');
-        $twitterIsEnabled = metadata_exists('post', $post->ID, 'rrze_autoshare_twitter_enabled') ? Twitter::isEnabled($post->ID) : $twitterEnableByDefault;
-        $twitterIsPublished = Twitter::isPublished($post->ID);
-        $twitterIsConnected = Twitter::isConnected();
-
         $localization = [
-            'blueskyConnected' => $blueskyIsConnected,
-            'blueskyEnabled' => $blueskyIsEnabled,
-            'blueskyPublished' => $blueskyIsPublished,
-            'mastodonConnected' => $mastodonIsConnected,
-            'mastodonEnabled' => $mastodonIsEnabled,
-            'mastodonPublished' => $mastodonIsPublished,
-            'twitterConnected' => $twitterIsConnected,
-            'twitterEnabled' => $twitterIsEnabled,
-            'twitterPublished' => $twitterIsPublished,
+            'autoshareEnabled' => settings()->isPostAutoshareEnabled($post->ID),
+            'metaKey' => config()->get('post_meta.enabled'),
+            'labels' => [
+                'panelTitle' => __('Autoshare', 'rrze-autoshare'),
+                'autoshareEnabled' => __('Autoshare enabled', 'rrze-autoshare'),
+            ],
         ];
 
         wp_localize_script(
-            'rrze-autoshare-blockeditor',
-            'autoshareObject',
+            config()->get('assets.admin_script_handle'),
+            config()->get('assets.admin_script_object_name'),
             $localization
         );
-
-        wp_set_script_translations(
-            'rrze-autoshare-blockeditor',
-            'rrze-autoshare',
-            plugin()->getPath('languages')
-        );
     }
+
+    public function registerPostMeta(): void {
+        foreach (config()->get('default_post_types') as $postType) {
+            register_post_meta(
+                $postType,
+                config()->get('post_meta.enabled'),
+                [
+                    'show_in_rest' => true,
+                    'type' => 'boolean',
+                    'single' => true,
+                    'sanitize_callback' => 'rest_sanitize_boolean',
+                    'auth_callback' => [$this, 'canEditPostMeta'],
+                    'default' => true,
+                ]
+            );
+        }
+    }
+
+    public function canEditPostMeta(
+        bool $allowed,
+        string $metaKey,
+        int $postId,
+        int $userId
+    ): bool {
+        return user_can($userId, 'edit_post', $postId);
+    }
+
 }

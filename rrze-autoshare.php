@@ -3,11 +3,11 @@
 /*
 Plugin Name:        RRZE Autoshare
 Plugin URI:         https://github.com/RRZE-Webteam/rrze-autoshare
-Version:            1.6.2
-Description:        Automatically share the post title or custom message and a link to the post to Bluesky, Mastodon and X.
-Author:             RRZE Webteam
-Author URI:         https://blogs.fau.de/webworking/
-License:            GNU General Public License Version 3
+Version:            2.0.6
+Description:        Automatically shares published WordPress content on Bluesky and Mastodon.
+Author:             RRZE-Webteam <webmaster@fau.de>
+Author URI:         https://www.wp.rrze.fau.de
+License:            GNU General Public License v3
 License URI:        https://www.gnu.org/licenses/gpl-3.0.html
 Text Domain:        rrze-autoshare
 Domain Path:        /languages
@@ -19,11 +19,36 @@ namespace RRZE\Autoshare;
 
 defined('ABSPATH') || exit;
 
-// Autoloader
-require_once 'vendor/autoload.php';
+/**
+ * SPL Autoloader (PSR-4).
+ *
+ * @param string $class The fully-qualified class name.
+ * @return void
+ */
+function autoload(string $class): void {
+    $namespaces = [
+        __NAMESPACE__ . '\\' => __DIR__ . '/includes/',
+    ];
+
+    foreach ($namespaces as $prefix => $baseDir) {
+        $len = strlen($prefix);
+        if (strncmp($prefix, $class, $len) !== 0) {
+            continue;
+        }
+
+        $relativeClass = substr($class, $len);
+        $file = $baseDir . str_replace('\\', '/', $relativeClass) . '.php';
+
+        if (file_exists($file)) {
+            require $file;
+        }
+    }
+}
+
+spl_autoload_register(__NAMESPACE__ . '\autoload');
 
 // Load the plugin's text domain for localization.
-add_action('init', fn() => load_plugin_textdomain('rrze-autoshare', false, dirname(plugin_basename(__FILE__)) . '/languages'));
+add_action('init', __NAMESPACE__ . '\loadTextdomain');
 
 
 // Register activation hook for the plugin
@@ -43,25 +68,45 @@ add_action('plugins_loaded', __NAMESPACE__ . '\loaded');
 /**
  * Activation callback function.
  */
-function activation()
-{
-    //
+function activation(bool $networkWide = false): void {
+    if (!is_multisite() || !$networkWide) {
+        Cron::activateScheduledEvents();
+        return;
+    }
+
+    $siteIds = get_sites(['fields' => 'ids']);
+    foreach ($siteIds as $siteId) {
+        switch_to_blog($siteId);
+        Cron::activateScheduledEvents();
+        restore_current_blog();
+    }
 }
 
 /**
  * Deactivation callback function.
  */
-function deactivation()
-{
-    //
+function deactivation(bool $networkWide = false) {
+    if (!is_multisite() || !$networkWide) {
+        Cron::clearSchedule();
+        return;
+    }
+
+    $siteIds = get_sites([
+        'fields' => 'ids',
+    ]);
+
+    foreach ($siteIds as $siteId) {
+        switch_to_blog($siteId);
+        Cron::clearSchedule();
+        restore_current_blog();
+    }
 }
 
 /**
  * Instantiate Plugin class.
  * @return object Plugin
  */
-function plugin()
-{
+function plugin() {
     static $instance;
     if (null === $instance) {
         $instance = new Plugin(__FILE__);
@@ -70,11 +115,22 @@ function plugin()
 }
 
 /**
+ * Instantiate Config class.
+ * @return object Config
+ */
+function config() {
+    static $instance;
+    if (null === $instance) {
+        $instance = new Config();
+    }
+    return $instance;
+}
+
+/**
  * Instantiate Settings class.
  * @return object Settings
  */
-function settings()
-{
+function settings() {
     static $instance;
     if (null === $instance) {
         $instance = new Settings();
@@ -90,37 +146,26 @@ function settings()
  *
  * @return string An error message string if requirements are not met, or an empty string if requirements are satisfied.
  */
-function systemRequirements(): string
-{
-    // Get the global WordPress version.
-    global $wp_version;
-
-    // Get the PHP version.
-    $phpVersion = phpversion();
-
-    // Initialize an error message string.
-    $error = '';
-
-    // Check if the WordPress version is compatible with the plugin's requirement.
+function systemRequirements(): string {
     if (!is_wp_version_compatible(plugin()->getRequiresWP())) {
-        $error = sprintf(
+        return sprintf(
             /* translators: 1: Server WordPress version number, 2: Required WordPress version number. */
             __('The server is running WordPress version %1$s. The plugin requires at least WordPress version %2$s.', 'rrze-autoshare'),
-            $wp_version,
+            wp_get_wp_version(),
             plugin()->getRequiresWP()
         );
-    } elseif (!is_php_version_compatible(plugin()->getRequiresPHP())) {
-        // Check if the PHP version is compatible with the plugin's requirement.
-        $error = sprintf(
+    }
+
+    if (!is_php_version_compatible(plugin()->getRequiresPHP())) {
+        return sprintf(
             /* translators: 1: Server PHP version number, 2: Required PHP version number. */
             __('The server is running PHP version %1$s. The plugin requires at least PHP version %2$s.', 'rrze-autoshare'),
-            $phpVersion,
+            PHP_VERSION,
             plugin()->getRequiresPHP()
         );
     }
 
-    // Return the error message string, which will be empty if requirements are satisfied.
-    return $error;
+    return '';
 }
 
 /**
@@ -129,42 +174,56 @@ function systemRequirements(): string
  * This function is responsible for initializing the plugin, loading text domains for localization,
  * checking system requirements, and displaying error notices if necessary.
  */
-function loaded()
-{
+function loaded() {
     // Trigger the 'loaded' method of the main plugin instance.
     plugin()->loaded();
 
-    // Check system requirements.
-    if (systemRequirements()) {
-        // If there is an error, add an action to display an admin notice with the error message.
-        add_action('admin_init', function () {
-            $error = systemRequirements();
-            // Check if the current user has the capability to activate plugins.
-            if (current_user_can('activate_plugins')) {
-                // Get plugin data to retrieve the plugin's name.
-                $pluginName = plugin()->getName();
+    $wpCompatible = is_wp_version_compatible(plugin()->getRequiresWP());
+    $phpCompatible = is_php_version_compatible(plugin()->getRequiresPHP());
 
-                // Determine the admin notice tag based on network-wide activation.
-                $tag = is_plugin_active_for_network(plugin()->getBaseName()) ? 'network_admin_notices' : 'admin_notices';
-
-                // Add an action to display the admin notice.
-                add_action($tag, function () use ($pluginName, $error) {
-                    printf(
-                        '<div class="notice notice-error"><p>' .
-                            /* translators: 1: The plugin name, 2: The error string. */
-                            esc_html__('Plugins: %1$s: %2$s', 'rrze-autoshare') .
-                            '</p></div>',
-                        $pluginName,
-                        $error
-                    );
-                });
-            }
-        });
-
-        // Return to prevent further initialization if there is an error.
+    if (!$wpCompatible || !$phpCompatible) {
+        add_action('admin_init', __NAMESPACE__ . '\\addRequirementsNotice');
         return;
     }
 
     // If there are no errors, create an instance of the 'Main' class and trigger its 'loaded' method.
     (new Main)->loaded();
+}
+
+function addRequirementsNotice(): void {
+    if (!current_user_can('activate_plugins')) {
+        return;
+    }
+
+    $hook = is_plugin_active_for_network(plugin()->getBaseName())
+        ? 'network_admin_notices'
+        : 'admin_notices';
+    add_action($hook, __NAMESPACE__ . '\\renderRequirementsNotice');
+}
+
+function renderRequirementsNotice(): void {
+    $error = systemRequirements();
+    if ($error === '') {
+        return;
+    }
+
+    printf(
+        '<div class="notice notice-error"><p>' .
+            /* translators: 1: The plugin name, 2: The error string. */
+            esc_html__('Plugins: %1$s: %2$s', 'rrze-autoshare') .
+            '</p></div>',
+        esc_html(plugin()->getName()),
+        esc_html($error)
+    );
+}
+
+/**
+ * Load plugin text domain.
+ */
+function loadTextdomain(): void {
+    load_plugin_textdomain(
+        config()->get('text_domain'),
+        false,
+        dirname(plugin_basename(__FILE__)) . '/languages'
+    );
 }

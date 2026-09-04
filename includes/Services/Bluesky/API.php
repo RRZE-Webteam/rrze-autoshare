@@ -4,60 +4,41 @@ namespace RRZE\Autoshare\Services\Bluesky;
 
 defined('ABSPATH') || exit;
 
-use RRZE\Autoshare\Settings\Encryption;
-use function RRZE\Autoshare\plugin;
+use RRZE\Autoshare\Config;
+use RRZE\Autoshare\Cron;
+use RRZE\Autoshare\Encryption;
+use RRZE\Autoshare\Utils;
+use function RRZE\Autoshare\config;
 use function RRZE\Autoshare\settings;
 
-class API
-{
-    const ACCESS_JWT = 'rrze_autoshare_bluesky_access_jwt';
+class API {
+    public static function authorize(string $identifier, string $password): true|\WP_Error {
+        $host = trailingslashit(config()->get('services.bluesky.defaults.domain'));
+        $authorized = self::authorizeAccess($host, $identifier, $password);
 
-    const REFRESH_JWT = 'rrze_autoshare_bluesky_refresh_jwt';
-
-    const DID = 'rrze_autoshare_bluesky_did';
-
-    public static function connect()
-    {
-        $host = settings()->getOption('bluesky_domain');
-        $host = trailingslashit($host);
-        $identifier = settings()->getOption('bluesky_identifier');
-        $password = settings()->getOption('bluesky_password');
-
-        if (!$host || !$identifier || !$password) {
-            return false;
-        }
-
-        if (
-            isset($_GET['action']) &&
-            'authorize' === $_GET['action'] &&
-            isset($_GET['_wpnonce']) &&
-            wp_verify_nonce(sanitize_key($_GET['_wpnonce']), 'rrze-autoshare-bluesky-authorize')
-        ) {
-            if (!self::authorizeAccess($host, $identifier, $password)) {
-                self::revokeAccess();
-            }
-        } elseif (
-            isset($_GET['action']) &&
-            'revoke' === $_GET['action'] &&
-            isset($_GET['_wpnonce']) &&
-            wp_verify_nonce(sanitize_key($_GET['_wpnonce']), 'rrze-autoshare-bluesky-revoke')
-        ) {
+        if (true !== $authorized) {
             self::revokeAccess();
         }
+
+        return $authorized;
     }
 
-    private static function authorizeAccess($host, $identifier, $password)
-    {
-        $host = trailingslashit($host);
-        $password = Encryption::decrypt($password);
-        $wpVersion = get_bloginfo('version');
-        $pluginVersion = plugin()->getVersion();
-        $userAgent = 'WordPress/' . $wpVersion . '; ' . get_bloginfo('url');
+    public static function revoke() {
+        self::revokeAccess();
+    }
 
-        $response = wp_safe_remote_post(
-            esc_url_raw($host . 'xrpc/com.atproto.server.createSession'),
+    private static function authorizeAccess(string $host, string $identifier, string $password): true|\WP_Error {
+        $host = trailingslashit($host);
+
+        if (!Config::validateBlueskyAppPassword($password)) {
+            return new \WP_Error('invalid_app_password_format');
+        }
+
+        $endpoint = config()->get('services.bluesky.endpoints.create_session');
+        $response = Utils::remoteRequest(
+            'POST',
+            $host . $endpoint,
             [
-                'user-agent' => "$userAgent; RRZE-Autoshare/$pluginVersion",
                 'headers'    => [
                     'Content-Type' => 'application/json',
                 ],
@@ -67,17 +48,34 @@ class API
                         'password'   => $password,
                     ]
                 ),
-            ]
+            ],
+            config()->get('services.bluesky.limits.timeout')
         );
 
-        if (
-            is_wp_error($response) ||
-            wp_remote_retrieve_response_code($response) >= 300
-        ) {
-            return false;
+        if (is_wp_error($response)) {
+            return new \WP_Error('connection_failed');
+        }
+
+        if (wp_remote_retrieve_response_code($response) >= 300) {
+            $responseCode = wp_remote_retrieve_response_code($response);
+
+            if (429 === $responseCode) {
+                return new \WP_Error('authorization_rate_limited');
+            }
+
+            if ($responseCode >= 500) {
+                return new \WP_Error('service_unavailable');
+            }
+
+            if (in_array($responseCode, [400, 401, 403], true)) {
+                return new \WP_Error('credentials_rejected');
+            }
+
+            return new \WP_Error('authorization_failed');
         }
 
         $data = json_decode(wp_remote_retrieve_body($response), true);
+        $data = JSON_ERROR_NONE === json_last_error() && is_array($data) ? $data : [];
 
         if (
             empty($data['accessJwt']) ||
@@ -85,112 +83,134 @@ class API
             empty($data['did'])
         ) {
             self::revokeAccess();
-            return false;
+            return new \WP_Error('unexpected_authorization_response');
         }
 
-        update_option(self::ACCESS_JWT, $data['accessJwt']);
-        update_option(self::REFRESH_JWT, $data['refreshJwt']);
-        update_option(self::DID, $data['did']);
+        if (
+            !self::storeToken('access_jwt', $data['accessJwt']) ||
+            !self::storeToken('refresh_jwt', $data['refreshJwt']) ||
+            !self::storeToken('did', $data['did'])
+        ) {
+            self::revokeAccess();
+            return new \WP_Error('token_storage_failed');
+        }
+
         return true;
     }
 
-    private static function revokeAccess()
-    {
-        delete_option(self::ACCESS_JWT);
-        delete_option(self::REFRESH_JWT);
-        delete_option(self::DID);
-        return;
+    private static function revokeAccess() {
+        delete_option(config()->get('services.bluesky.options.access_jwt'));
+        delete_option(config()->get('services.bluesky.options.refresh_jwt'));
+        delete_option(config()->get('services.bluesky.options.did'));
+        Cron::clearSchedule();
     }
 
-    private static function refreshAccessToken()
-    {
-        $host = settings()->getOption('bluesky_domain');
+    private static function refreshAccessToken() {
+        $host = settings()->getOption(config()->get('services.bluesky.settings.domain'));
         $host = trailingslashit($host);
 
-        $wpVersion = get_bloginfo('version');
-        $pluginVersion = plugin()->getVersion();
-        $userAgent = 'WordPress/' . $wpVersion . '; ' . get_bloginfo('url');
-
-        if (!$accessToken = get_option(self::REFRESH_JWT)) {
+        if (!$accessToken = self::getRefreshToken()) {
             return false;
         }
 
-        $response = wp_safe_remote_post(
-            esc_url_raw($host . 'xrpc/com.atproto.server.refreshSession'),
+        $endpoint = config()->get('services.bluesky.endpoints.refresh_session');
+        $response = Utils::remoteRequest(
+            'POST',
+            $host . $endpoint,
             [
-                'user-agent' => "$userAgent; RRZE-Autoshare/$pluginVersion",
                 'headers'    => [
                     'Content-Type' => 'application/json',
                     'Authorization' => 'Bearer ' . $accessToken,
                 ]
-            ]
+            ],
+            config()->get('services.bluesky.limits.timeout')
         );
 
         if (
             is_wp_error($response) ||
             wp_remote_retrieve_response_code($response) >= 300
         ) {
+            Utils::logRemoteError('Bluesky', 'refresh_access_token', $response, ['endpoint' => $endpoint]);
+            self::deactivateOnAuthorizationFailure($response);
             return false;
         }
 
-        $data = json_decode(wp_remote_retrieve_body($response), true);
+        $data = Utils::getJsonResponseBody(
+            $response,
+            'Bluesky',
+            'refresh_access_token',
+            ['endpoint' => $endpoint]
+        );
 
         if (
             empty($data['accessJwt'])
             || empty($data['refreshJwt'])
         ) {
+            Utils::logRemoteWarning(
+                'Bluesky',
+                'refresh_access_token',
+                'Bluesky token refresh response did not contain the expected token data.'
+            );
             return false;
         }
-        update_option(self::ACCESS_JWT, sanitize_text_field($data['accessJwt']));
-        update_option(self::REFRESH_JWT, sanitize_text_field($data['refreshJwt']));
+        if (
+            !self::storeToken('access_jwt', sanitize_text_field($data['accessJwt'])) ||
+            !self::storeToken('refresh_jwt', sanitize_text_field($data['refreshJwt']))
+        ) {
+            return false;
+        }
 
         return true;
     }
 
-    public static function refreshToken()
-    {
+    public static function refreshToken() {
         self::refreshAccessToken();
     }
 
-    public static function publishPost($postId)
-    {
-        self::refreshAccessToken();
+    public static function publishPost($postId, bool $updateStatus = true): bool|array {
+        if (Utils::isPublicationDeferred('bluesky')) {
+            return false;
+        }
+
+        if (!self::refreshAccessToken()) {
+            return false;
+        }
 
         $post = get_post($postId);
 
-        $locale = get_locale();
-        $langCode = substr($locale, 0, 2);
         $title = sanitize_text_field($post->post_title);
-        $text = Post::getContent($post);
+        $text = Utils::getPostContent($post, 'bluesky');
         if (empty($text)) {
-            return;
+            return false;
         }
 
-        $record = [
-            '$type'     => 'app.bsky.feed.post',
+        $record = array_merge([
+            '$type'     => config()->get('services.bluesky.record.type'),
             'text'      => $text,
-            'langs'     => [$langCode],
-            'createdAt' => gmdate('c', strtotime($post->post_date_gmt))
-        ];
+        ], Utils::getServiceMetadata($post, 'bluesky'));
 
         $links = self::getLinks($text);
         if (!empty($links)) {
             $record = array_merge($record, $links);
         }
 
-        $media = Media::getImages($post);
+        $media = Utils::getImages($post, 'bluesky');
         if (!empty($media)) {
-            $count = 1;
+            $count = config()->get('services.bluesky.limits.media_count');
             $media = array_slice($media, 0, $count, true);
 
             foreach ($media as $id => $alt) {
                 $image = Media::uploadImage($id, $alt);
             }
         }
+
+        if (Utils::isPublicationDeferred('bluesky')) {
+            return false;
+        }
         if (!empty($image['blob'])) {
             $embed = [
                 'embed' => [
-                    '$type' => 'app.bsky.embed.images',
+                    '$type' => config()->get('services.bluesky.record.embed_images_type'),
                     'images' => [
                         [
                             'alt' => $title,
@@ -200,44 +220,52 @@ class API
                 ]
             ];
             $record = array_merge($record, $embed);
+        } else {
+            $record = array_merge($record, Utils::getServiceExternalEmbed($post, 'bluesky'));
         }
 
-        $accessToken = get_option(self::ACCESS_JWT);
-        $host = settings()->getOption('bluesky_domain');
-        $did = get_option(self::DID);
+        if (!self::isConnected()) {
+            return false;
+        }
+
+        $accessToken = self::getAccessToken();
+        $host = settings()->getOption(config()->get('services.bluesky.settings.domain'));
+        $did = self::getDid();
 
         $host = trailingslashit($host);
 
-        $wpVersion = get_bloginfo('version');
-        $pluginVersion = plugin()->getVersion();
-        $userAgent = 'WordPress/' . $wpVersion . '; ' . get_bloginfo('url');
-
-        $response = wp_safe_remote_post(
-            esc_url_raw($host . 'xrpc/com.atproto.repo.createRecord'),
+        $endpoint = config()->get('services.bluesky.endpoints.create_record');
+        $payload = [
+            'collection' => config()->get('services.bluesky.record.collection'),
+            'did' => esc_html($did),
+            'repo' => esc_html($did),
+            'record' => $record,
+        ];
+        $response = Utils::remoteRequest(
+            'POST',
+            $host . $endpoint,
             [
-                'user-agent' => "$userAgent; RRZE-Autoshare/$pluginVersion",
                 'headers' => [
                     'Content-Type'  => 'application/json',
                     'Authorization' => 'Bearer ' . $accessToken,
                 ],
-                'body' => wp_json_encode(
-                    [
-                        'collection' => 'app.bsky.feed.post',
-                        'did'        => esc_html($did),
-                        'repo'       => esc_html($did),
-                        'record'     => $record,
-                    ]
-                ),
-            ]
+                'body' => wp_json_encode($payload),
+            ],
+            config()->get('services.bluesky.limits.timeout')
         );
 
-        $response = self::validateResponse($response);
+        $response = self::validateResponse($response, $postId, $endpoint, $payload);
 
-        self::updateStatusMeta($postId, $response);
+        if ($updateStatus) {
+            self::updateStatusMeta($postId, $response);
+
+            return !is_wp_error($response);
+        }
+
+        return self::getManualSendResult($response);
     }
 
-    private static function getLinks($text)
-    {
+    private static function getLinks($text) {
         $urls = self::getUrlsFromText($text);
         $links = [];
         if (!empty($urls)) {
@@ -249,7 +277,7 @@ class API
                     ],
                     "features" => [
                         [
-                            '$type' => "app.bsky.richtext.facet#link",
+                            '$type' => config()->get('services.bluesky.record.facet_link_type'),
                             'uri' => $url['url'],
                         ],
                     ],
@@ -266,8 +294,7 @@ class API
         return $links;
     }
 
-    private static function getUrlsFromText($text)
-    {
+    private static function getUrlsFromText($text) {
         $regex = '/(https?:\/\/[^\s]+)/';
         preg_match_all($regex, $text, $matches, PREG_OFFSET_CAPTURE);
 
@@ -288,20 +315,58 @@ class API
         return $urlData;
     }
 
-    private static function validateResponse($response)
-    {
-        if (!is_wp_error($response)) {
-            $body = json_decode($response['body']);
-        }
+    private static function validateResponse($response, int $postId, string $endpoint, array $sentPayload) {
+        $body = Utils::getJsonResponseBody(
+            $response,
+            'Bluesky',
+            'publish_post',
+            ['endpoint' => $endpoint, 'post_id' => $postId]
+        );
 
-        if (!empty($body->uri)) {
+        if (!empty($body['uri'])) {
             $validatedResponse = [
-                'id' => $body->uri,
-                'created_at' => $body->created_at ?? gmdate('c'),
+                'id' => $body['uri'],
+                'created_at' => $body['created_at'] ?? gmdate('c'),
             ];
+            Utils::log(
+                'info',
+                'Post published on Bluesky.',
+                [
+                    'service' => 'bluesky',
+                    'post_id' => $postId,
+                    'record_uri' => sanitize_text_field($body['uri']),
+                    'sent_payload' => Utils::getLoggablePayload($sentPayload),
+                ]
+            );
         } else {
             $code = is_wp_error($response) ? '500' : wp_remote_retrieve_response_code($response);
-            $message = is_wp_error($response) ? $response->get_error_message() : $body->error;
+            $message = is_wp_error($response)
+                ? $response->get_error_message()
+                : ($body['message'] ?? $body['error'] ?? wp_remote_retrieve_response_message($response));
+            $errorContext = [
+                'endpoint' => $endpoint,
+                'post_id' => $postId,
+                'error_code' => sanitize_text_field($code),
+                'error_message' => sanitize_text_field($message),
+            ];
+
+            if (!is_wp_error($response) && !empty($body['error'])) {
+                $errorContext['api_error'] = sanitize_text_field($body['error']);
+            }
+
+            Utils::logRemoteError(
+                'Bluesky',
+                'publish_post',
+                $response,
+                $errorContext
+            );
+            Utils::deferPublication(
+                'bluesky',
+                $response,
+                'publish_post',
+                ['endpoint' => $endpoint, 'post_id' => $postId]
+            );
+            self::deactivateOnAuthorizationFailure($response);
             $errors = [
                 (object) [
                     'code' => sanitize_text_field($code),
@@ -309,7 +374,7 @@ class API
                 ],
             ];
             $validatedResponse = new \WP_Error(
-                'rrze_autoshare_bluesky_error',
+                config()->get('services.bluesky.meta.error'),
                 __('An error occurred while trying to publish.', 'rrze-autoshare'),
                 $errors
             );
@@ -318,8 +383,39 @@ class API
         return $validatedResponse;
     }
 
-    private static function updateStatusMeta($postId, $data)
-    {
+    private static function getManualSendResult($response): array|false {
+        if (!is_array($response) || empty($response['id'])) {
+            return false;
+        }
+
+        return [
+            'url' => self::getPostUrl((string) $response['id']),
+        ];
+    }
+
+    private static function getPostUrl(string $recordUri): string {
+        if (
+            !preg_match(
+                '#^at://([^/]+)/app\\.bsky\\.feed\\.post/([^/]+)$#',
+                $recordUri,
+                $matches
+            )
+        ) {
+            return '';
+        }
+
+        $actor = str_replace('%3A', ':', rawurlencode($matches[1]));
+
+        return esc_url_raw(
+            sprintf(
+                config()->get('services.bluesky.urls.post'),
+                $actor,
+                rawurlencode($matches[2])
+            )
+        );
+    }
+
+    private static function updateStatusMeta($postId, $data) {
         if (!is_wp_error($data)) {
             $status = 'published';
             $response = [
@@ -328,7 +424,7 @@ class API
                 'created_at' => sanitize_text_field($data['created_at']),
             ];
         } elseif (is_wp_error($data)) {
-            $errorMessage = $data->error_data['rrze_autoshare_bluesky_error'][0];
+            $errorMessage = $data->error_data[config()->get('services.bluesky.meta.error')][0];
             // translators: %d is the error code.
             $errorCodeText = $errorMessage->code ? sprintf(__('Error: %d. ', 'rrze-autoshare'), $errorMessage->code) : '';
             $status = 'error';
@@ -344,66 +440,48 @@ class API
             ];
         }
 
-        update_post_meta($postId, sprintf('rrze_autoshare_bluesky_%s', $status), $response);
+        update_post_meta($postId, config()->get('services.bluesky.meta.' . $status), $response);
     }
 
-    public static function isConnected()
-    {
-        return (bool) get_option(self::ACCESS_JWT);
+    public static function isConnected() {
+        return (bool) self::getAccessToken();
     }
 
-    public static function authorizeAccessText()
-    {
-        return self::isConnected() ?
-            __('Revoke Access', 'rrze-autoshare') :
-            __('Authorize Access', 'rrze-autoshare');
-    }
-
-    public static function authorizeAccessDescription()
-    {
-        return self::isConnected() ?
-            __('You’ve authorized Autoshare to read and write to the Bluesky timeline.', 'rrze-autoshare') :
-            __('Authorize Autoshare to read and write to the Bluesky timeline.', 'rrze-autoshare');
-    }
-
-    public static function authorizeAccessUrl()
-    {
-        if (self::isConnected()) {
-            return self::revokeUrl();
-        } else {
-            return self::authorizeUrl();
+    public static function deactivateOnAuthorizationFailure($response): bool {
+        if (!Utils::isAuthorizationFailure(
+            $response,
+            config()->get('services.bluesky.authentication.invalid_status_codes', [])
+        )) {
+            return false;
         }
+
+        self::revokeAccess();
+        settings()->deactivateService('bluesky');
+
+        return true;
     }
 
-    private static function authorizeUrl()
-    {
-        return wp_nonce_url(
-            add_query_arg(
-                [
-                    'page' => 'rrze_autoshare',
-                    'tab'  => 'bluesky',
-                    'action' => 'authorize'
-                ],
-                admin_url('options-general.php')
-            ),
-            'rrze-autoshare-bluesky-authorize',
-            '_wpnonce'
+    public static function getAccessToken() {
+        return self::getToken('access_jwt');
+    }
+
+    private static function getRefreshToken() {
+        return self::getToken('refresh_jwt');
+    }
+
+    private static function getDid() {
+        return self::getToken('did');
+    }
+
+    private static function getToken(string $name) {
+        return Encryption::getOption(config()->get('services.bluesky.options.' . $name));
+    }
+
+    private static function storeToken(string $name, string $value): bool {
+        return Encryption::updateOption(
+            config()->get('services.bluesky.options.' . $name),
+            $value
         );
     }
 
-    private static function revokeUrl()
-    {
-        return wp_nonce_url(
-            add_query_arg(
-                [
-                    'page' => 'rrze_autoshare',
-                    'tab'  => 'bluesky',
-                    'action' => 'revoke'
-                ],
-                admin_url('options-general.php')
-            ),
-            'rrze-autoshare-bluesky-revoke',
-            '_wpnonce'
-        );
-    }
 }
