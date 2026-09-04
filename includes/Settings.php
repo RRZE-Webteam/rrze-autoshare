@@ -161,9 +161,22 @@ class Settings {
             $defaults = $serviceConfig['defaults'];
 
             if (isset($settings['domain']) && array_key_exists($settings['domain'], $submittedOptions)) {
-                $domain = esc_url_raw($submittedOptions[$settings['domain']] ?? '');
+                $submittedDomain = $submittedOptions[$settings['domain']] ?? '';
+                $domain = is_scalar($submittedDomain)
+                    ? esc_url_raw(wp_unslash($submittedDomain))
+                    : '';
                 if ('bluesky' === $service) {
                     $domain = $defaults['domain'];
+                } elseif ($domain !== '' && !Utils::isHttpsUrl($domain)) {
+                    add_settings_error(
+                        config()->get('option_name'),
+                        $settings['domain'],
+                        __('The service URL must use HTTPS.', 'rrze-autoshare')
+                    );
+                    $currentDomain = $this->getOption($settings['domain']);
+                    $domain = is_string($currentDomain) && Utils::isHttpsUrl($currentDomain)
+                        ? $currentDomain
+                        : $defaults['domain'];
                 }
                 $options[$settings['domain']] = $domain ?: $defaults['domain'];
             }

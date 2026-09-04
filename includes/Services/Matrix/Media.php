@@ -37,10 +37,18 @@ class Media {
 
         $filename = sanitize_file_name(basename($filePath));
         $endpoint = config()->get('services.matrix.endpoints.upload_media');
+        $host = settings()->getOption(config()->get('services.matrix.settings.domain'));
+        if (!is_string($host) || !Utils::isHttpsUrl($host)) {
+            Utils::log(
+                'warning',
+                'Matrix media upload was not sent because the homeserver URL does not use HTTPS.',
+                ['service' => 'matrix', 'attachment_id' => $attachmentId]
+            );
+            return false;
+        }
         $response = Utils::remoteRequest(
             'POST',
-            trailingslashit(settings()->getOption(config()->get('services.matrix.settings.domain')))
-                . ltrim($endpoint, '/')
+            trailingslashit($host) . ltrim($endpoint, '/')
                 . '?filename=' . rawurlencode($filename),
             [
                 'headers' => [

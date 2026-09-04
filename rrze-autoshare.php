@@ -3,7 +3,7 @@
 /*
 Plugin Name:        RRZE Autoshare
 Plugin URI:         https://github.com/RRZE-Webteam/rrze-autoshare
-Version:            2.0.5
+Version:            2.0.6
 Description:        Automatically shares published WordPress content on Bluesky and Mastodon.
 Author:             RRZE-Webteam <webmaster@fau.de>
 Author URI:         https://www.wp.rrze.fau.de
@@ -68,8 +68,18 @@ add_action('plugins_loaded', __NAMESPACE__ . '\loaded');
 /**
  * Activation callback function.
  */
-function activation(bool $networkWide = false) {
-    return;
+function activation(bool $networkWide = false): void {
+    if (!is_multisite() || !$networkWide) {
+        Cron::activateScheduledEvents();
+        return;
+    }
+
+    $siteIds = get_sites(['fields' => 'ids']);
+    foreach ($siteIds as $siteId) {
+        switch_to_blog($siteId);
+        Cron::activateScheduledEvents();
+        restore_current_blog();
+    }
 }
 
 /**

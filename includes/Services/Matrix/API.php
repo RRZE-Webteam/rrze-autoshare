@@ -46,6 +46,16 @@ class API {
             return false;
         }
 
+        $host = settings()->getOption(config()->get('services.matrix.settings.domain'));
+        if (!is_string($host) || !Utils::isHttpsUrl($host)) {
+            Utils::log(
+                'warning',
+                'Matrix publication was not sent because the homeserver URL does not use HTTPS.',
+                ['service' => 'matrix', 'post_id' => $postId, 'room_id' => $roomId]
+            );
+            return false;
+        }
+
         $post = get_post($postId);
         if (!$post instanceof \WP_Post) {
             return false;
@@ -107,6 +117,11 @@ class API {
     }
 
     private static function sendMessage(string $roomId, array $payload, string $operation, int $postId): array|false {
+        $host = settings()->getOption(config()->get('services.matrix.settings.domain'));
+        if (!is_string($host) || !Utils::isHttpsUrl($host)) {
+            return false;
+        }
+
         $transactionId = wp_generate_uuid4();
         $endpoint = sprintf(
             config()->get('services.matrix.endpoints.send_message'),
@@ -115,7 +130,7 @@ class API {
         );
         $response = Utils::remoteRequest(
             'PUT',
-            trailingslashit(settings()->getOption(config()->get('services.matrix.settings.domain'))) . ltrim($endpoint, '/'),
+            trailingslashit($host) . ltrim($endpoint, '/'),
             [
                 'headers' => [
                     'Authorization' => 'Bearer ' . self::getOption('access_token'),
@@ -161,7 +176,7 @@ class API {
         if (false === $token) {
             return new \WP_Error('token_storage_failed');
         }
-        if ($host === '') {
+        if (!is_string($host) || !Utils::isHttpsUrl($host)) {
             return new \WP_Error('missing_homeserver_url');
         }
 

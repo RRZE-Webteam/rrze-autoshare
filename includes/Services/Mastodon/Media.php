@@ -54,6 +54,14 @@ class Media {
 
         $host = settings()->getOption('mastodon_domain');
         $accessToken = API::getAccessToken();
+        if (!is_string($host) || !Utils::isHttpsUrl($host)) {
+            Utils::log(
+                'warning',
+                'Mastodon media upload was not sent because the service URL does not use HTTPS.',
+                ['service' => 'mastodon', 'attachment_id' => $postId]
+            );
+            return;
+        }
 
         $endpoint = config()->get('services.mastodon.endpoints.media');
         $response = Utils::remoteRequest(

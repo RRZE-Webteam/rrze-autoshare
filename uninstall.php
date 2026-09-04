@@ -11,6 +11,7 @@ function rrze_autoshare_uninstall_site(): void {
         'rrze_autoshare_mastodon_client_id',
         'rrze_autoshare_mastodon_client_secret',
         'rrze_autoshare_mastodon_access_token',
+        'rrze_autoshare_matrix_access_token',
         'rrze_autoshare_bluesky_credentials_migrated',
         'rrze_autoshare_bluesky_tokens_migrated',
         'rrze_autoshare_encrypted_service_options_migrated',
@@ -19,6 +20,7 @@ function rrze_autoshare_uninstall_site(): void {
         'rrze_autoshare_bluesky_refresh_token',
         'rrze_autoshare_bluesky_publish_post',
         'rrze_autoshare_mastodon_publish_post',
+        'rrze_autoshare_matrix_publish_post',
     ];
 
     foreach ($scheduledHooks as $hook) {
@@ -31,6 +33,7 @@ function rrze_autoshare_uninstall_site(): void {
 
     delete_transient('rrze_autoshare_publication_backoff_bluesky');
     delete_transient('rrze_autoshare_publication_backoff_mastodon');
+    delete_transient('rrze_autoshare_publication_backoff_matrix');
 
     $userIds = get_users(['fields' => 'ids']);
     foreach ($userIds as $userId) {

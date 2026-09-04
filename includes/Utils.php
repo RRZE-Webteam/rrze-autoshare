@@ -137,7 +137,7 @@ class Utils {
             return false;
         }
 
-        $retryAt = self::getPublicationRetryAt($response, $responseCode);
+        $retryAt = self::calculatePublicationRetryAt($response, $responseCode);
         $delay = max(1, $retryAt - time());
         set_transient(
             self::getPublicationBackoffKey($service),
@@ -169,7 +169,27 @@ class Utils {
         return false !== get_transient(self::getPublicationBackoffKey($service));
     }
 
-    private static function getPublicationRetryAt($response, int $responseCode): int {
+    public static function getPublicationRetryAt(string $service): int|false {
+        $backoff = get_transient(self::getPublicationBackoffKey($service));
+        $retryAt = is_array($backoff) ? absint($backoff['retry_at'] ?? 0) : 0;
+
+        return $retryAt > time() ? $retryAt : false;
+    }
+
+    public static function getPublicationRetryMetaKey(string $service): string {
+        return config()->get('publication_backoff.retry_meta_prefix') . sanitize_key($service);
+    }
+
+    public static function isHttpsUrl(string $url): bool {
+        $parts = wp_parse_url($url);
+
+        return is_array($parts)
+            && !empty($parts['host'])
+            && isset($parts['scheme'])
+            && 'https' === strtolower($parts['scheme']);
+    }
+
+    private static function calculatePublicationRetryAt($response, int $responseCode): int {
         $defaultDelay = 429 === $responseCode
             ? config()->get('publication_backoff.rate_limit_delay')
             : config()->get('publication_backoff.server_error_delay');

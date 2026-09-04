@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: RRZE Autoshare\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-03 15:47+0200\n"
+"POT-Creation-Date: 2026-09-04 10:37+0200\n"
 "PO-Revision-Date: 2024-12-06 15:27+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -27,11 +27,11 @@ msgstr "Autoshare"
 msgid "Autoshare enabled"
 msgstr "Autoshare aktiviert"
 
-#: includes/Services/Bluesky/API.php:378 includes/Services/Mastodon/API.php:227
+#: includes/Services/Bluesky/API.php:378 includes/Services/Mastodon/API.php:239
 msgid "An error occurred while trying to publish."
 msgstr "Beim Versuch der Veröffentlichung ist ein Fehler aufgetreten."
 
-#: includes/Services/Bluesky/API.php:429 includes/Services/Mastodon/API.php:293
+#: includes/Services/Bluesky/API.php:429 includes/Services/Mastodon/API.php:305
 #, php-format
 msgid "Error: %d. "
 msgstr "Fehler: %d. "
@@ -40,11 +40,11 @@ msgstr "Fehler: %d. "
 msgid "This post was not published on Bluesky."
 msgstr "Dieser Beitrag wurde nicht auf Bluesky veröffentlicht."
 
-#: includes/Services/Mastodon/API.php:303
+#: includes/Services/Mastodon/API.php:315
 msgid "This post was not published on Mastodon."
 msgstr "Dieser Beitrag wurde nicht auf Mastodon veröffentlicht."
 
-#: includes/Settings.php:43 includes/Settings.php:613
+#: includes/Settings.php:43 includes/Settings.php:626
 msgid "Autoshare Settings"
 msgstr "Einstellungen › Autoshare"
 
@@ -64,113 +64,117 @@ msgstr "Beiträge konnten nicht geladen werden."
 msgid "Selected post:"
 msgstr "Ausgewählter Beitrag:"
 
-#: includes/Settings.php:91 includes/Settings.php:1085
+#: includes/Settings.php:91 includes/Settings.php:1098
 msgid "any categories"
 msgstr "beliebigen Kategorien"
 
-#: includes/Settings.php:92 includes/Settings.php:1098
+#: includes/Settings.php:92 includes/Settings.php:1111
 msgid "no selected categories"
 msgstr "keinen ausgewählten Kategorien"
 
-#: includes/Settings.php:94 includes/Settings.php:1106
+#: includes/Settings.php:94 includes/Settings.php:1119
 #, php-format
 msgid "the category %s"
 msgstr "der Kategorie %s"
 
-#: includes/Settings.php:96 includes/Settings.php:1121
+#: includes/Settings.php:96 includes/Settings.php:1134
 #, php-format
 msgid "one of the categories %s"
 msgstr "einer der Kategorien %s"
 
-#: includes/Settings.php:97 includes/Settings.php:1086
+#: includes/Settings.php:97 includes/Settings.php:1099
 msgid "any or no tags"
 msgstr "beliebigen oder keinen Schlagwörtern"
 
-#: includes/Settings.php:98 includes/Settings.php:1099
+#: includes/Settings.php:98 includes/Settings.php:1112
 msgid "no selected tags"
 msgstr "keinen ausgewählten Schlagwörtern"
 
-#: includes/Settings.php:100 includes/Settings.php:1113
+#: includes/Settings.php:100 includes/Settings.php:1126
 #, php-format
 msgid "the tag %s"
 msgstr "dem Schlagwort %s"
 
-#: includes/Settings.php:102 includes/Settings.php:1128
+#: includes/Settings.php:102 includes/Settings.php:1141
 #, php-format
 msgid "one of the tags %s"
 msgstr "einem der Schlagwörter %s"
 
-#: includes/Settings.php:103 includes/Settings.php:1056
+#: includes/Settings.php:103 includes/Settings.php:1069
 msgid " with target "
 msgstr " mit dem Ziel "
 
-#: includes/Settings.php:104 includes/Settings.php:1056
+#: includes/Settings.php:104 includes/Settings.php:1069
 msgid " with targets "
 msgstr " mit den Zielen "
 
-#: includes/Settings.php:178
+#: includes/Settings.php:174
+msgid "The service URL must use HTTPS."
+msgstr "Die Dienst-URL muss HTTPS verwenden."
+
+#: includes/Settings.php:191
 msgid "Enter at least one valid Matrix room ID."
 msgstr "Geben Sie mindestens eine gültige Matrix-Raum-ID ein."
 
-#: includes/Settings.php:195
+#: includes/Settings.php:208
 msgid "The format cannot be empty."
 msgstr "Das Format darf nicht leer sein."
 
-#: includes/Settings.php:651
+#: includes/Settings.php:664
 msgid "Disabled because no authorization is available."
 msgstr "Deaktiviert, da keine Autorisierung vorliegt."
 
-#: includes/Settings.php:832
+#: includes/Settings.php:845
 msgid "Active Services"
 msgstr "Aktive Dienste"
 
-#: includes/Settings.php:835 includes/Settings.php:1468
+#: includes/Settings.php:848 includes/Settings.php:1481
 msgid "Services"
 msgstr "Dienste"
 
-#: includes/Settings.php:843
+#: includes/Settings.php:856
 msgid "Select the services that Autoshare should use when publishing content."
 msgstr ""
 "Wählen Sie die Dienste aus, die Autoshare beim Veröffentlichen von Inhalten "
 "verwenden soll."
 
-#: includes/Settings.php:857
+#: includes/Settings.php:870
 msgid "Debugging"
 msgstr "Debugging"
 
-#: includes/Settings.php:863
+#: includes/Settings.php:876
 msgid "Logging"
 msgstr "Protokollierung"
 
-#: includes/Settings.php:869
+#: includes/Settings.php:882
 msgid "Send informative messages to the info log channel."
 msgstr "Informative Meldungen an den Info-Kanal senden."
 
-#: includes/Settings.php:877 includes/Settings.php:1792
+#: includes/Settings.php:890 includes/Settings.php:1805
 msgid "Publication Rules"
 msgstr "Senderegeln"
 
-#: includes/Settings.php:883 includes/Settings.php:900
+#: includes/Settings.php:896 includes/Settings.php:913
 msgid "Rules"
 msgstr "Regeln"
 
-#: includes/Settings.php:926
+#: includes/Settings.php:939
 msgid "Default rules"
 msgstr "Standardregeln"
 
-#: includes/Settings.php:928
+#: includes/Settings.php:941
 msgid "Send all newly published posts to all active services."
 msgstr "Alle neu veröffentlichten Beiträge an alle aktiven Dienste senden."
 
-#: includes/Settings.php:937
+#: includes/Settings.php:950
 msgid "Advanced rules"
 msgstr "Erweiterte Regeln"
 
-#: includes/Settings.php:939
+#: includes/Settings.php:952
 msgid "Set rules separately for each service."
 msgstr "Regeln für jeden Dienst separat festlegen."
 
-#: includes/Settings.php:965
+#: includes/Settings.php:978
 msgid ""
 "This service is inactive. Its rules take effect only after the service is "
 "activated."
@@ -178,150 +182,150 @@ msgstr ""
 "Dieser Dienst ist inaktiv. Seine Regeln wirken erst, nachdem der Dienst "
 "aktiviert wurde."
 
-#: includes/Settings.php:979
+#: includes/Settings.php:992
 msgid "Add rule"
 msgstr "Regel hinzufügen"
 
-#: includes/Settings.php:1000
+#: includes/Settings.php:1013
 msgid "Post Status"
 msgstr "Beitragsstatus"
 
-#: includes/Settings.php:1025
+#: includes/Settings.php:1038
 msgid "Categories"
 msgstr "Kategorien"
 
-#: includes/Settings.php:1026
+#: includes/Settings.php:1039
 msgid "Tags"
 msgstr "Tags"
 
-#: includes/Settings.php:1031
+#: includes/Settings.php:1044
 msgid "Remove rule"
 msgstr "Regel entfernen"
 
-#: includes/Settings.php:1046
+#: includes/Settings.php:1059
 #, php-format
 msgid "Posts are sent to %s when they are "
 msgstr "Beiträge werden an %s gesendet, wenn sie "
 
-#: includes/Settings.php:1061
+#: includes/Settings.php:1074
 msgid " and are in "
 msgstr " werden und in "
 
-#: includes/Settings.php:1063
+#: includes/Settings.php:1076
 msgid " and are marked with "
 msgstr " sind und mit "
 
-#: includes/Settings.php:1064
+#: includes/Settings.php:1077
 msgid "."
 msgstr "."
 
-#: includes/Settings.php:1153
+#: includes/Settings.php:1166
 msgid "All"
 msgstr "Alle"
 
-#: includes/Settings.php:1163
+#: includes/Settings.php:1176
 msgid "Selected"
 msgstr "Ausgewählt"
 
-#: includes/Settings.php:1188
+#: includes/Settings.php:1201
 msgid "Targets"
 msgstr "Ziele"
 
-#: includes/Settings.php:1209
+#: includes/Settings.php:1222
 msgid "Publish"
 msgstr "Veröffentlicht"
 
-#: includes/Settings.php:1213
+#: includes/Settings.php:1226
 msgid "Draft"
 msgstr "Entwurf"
 
-#: includes/Settings.php:1266
+#: includes/Settings.php:1279
 msgid "Bluesky Settings"
 msgstr "Bluesky Einstellungen"
 
-#: includes/Settings.php:1269 includes/Settings.php:1291
-#: includes/Settings.php:1309
+#: includes/Settings.php:1282 includes/Settings.php:1304
+#: includes/Settings.php:1322
 msgid "Service URL"
 msgstr "Dienst-URL"
 
-#: includes/Settings.php:1275
+#: includes/Settings.php:1288
 msgid "The URL of the Bluesky service."
 msgstr "Die URL des Bluesky-Dienstes."
 
-#: includes/Settings.php:1288
+#: includes/Settings.php:1301
 msgid "Mastodon Settings"
 msgstr "Mastodon Einstellungen"
 
-#: includes/Settings.php:1297
+#: includes/Settings.php:1310
 msgid "The URL of the Mastodon service."
 msgstr "Die URL des Mastodon-Dienstes."
 
-#: includes/Settings.php:1308
+#: includes/Settings.php:1321
 #, fuzzy
 msgid "Matrix Settings"
 msgstr "Mastodon Einstellungen"
 
-#: includes/Settings.php:1309
+#: includes/Settings.php:1322
 #, fuzzy
 msgid "The URL of the Matrix homeserver."
 msgstr "Die URL des Mastodon-Dienstes."
 
-#: includes/Settings.php:1312
+#: includes/Settings.php:1325
 msgid "Room IDs"
 msgstr ""
 
-#: includes/Settings.php:1318
+#: includes/Settings.php:1331
 msgid ""
 "Enter one Matrix room ID per line, for example !room:matrix.example.org."
 msgstr ""
 
-#: includes/Settings.php:1331
+#: includes/Settings.php:1344
 msgid "Featured Images"
 msgstr "Beitragsbild"
 
-#: includes/Settings.php:1337
+#: includes/Settings.php:1350
 msgid "Include featured images"
 msgstr "Beitragsbild hinzufügen"
 
-#: includes/Settings.php:1349
+#: includes/Settings.php:1362
 #, php-format
 msgid "Accepted content type: %1$s. Maximum post length: %2$d characters."
 msgstr "Akzeptierter Inhaltstyp: %1$s. Maximale Beitragslänge: %2$d Zeichen."
 
-#: includes/Settings.php:1354
+#: includes/Settings.php:1367
 msgid "The actual limit can differ depending on the Mastodon instance."
 msgstr "Die tatsächliche Begrenzung kann je nach Mastodon-Instanz abweichen."
 
-#: includes/Settings.php:1359
+#: includes/Settings.php:1372
 msgid "Post Format"
 msgstr "Beitragsformat"
 
-#: includes/Settings.php:1368
+#: includes/Settings.php:1381
 msgid "Format"
 msgstr "Format"
 
-#: includes/Settings.php:1381
+#: includes/Settings.php:1394
 msgid "Rich text"
 msgstr "Rich Text"
 
-#: includes/Settings.php:1384
+#: includes/Settings.php:1397
 msgid "Text"
 msgstr "Text"
 
-#: includes/Settings.php:1390
+#: includes/Settings.php:1403
 #, php-format
 msgid "Available placeholders: %s."
 msgstr "Verfuegbare Platzhalter: %s."
 
-#: includes/Settings.php:1395
+#: includes/Settings.php:1408
 msgid "Empty lines are retained."
 msgstr "Leere Zeilen bleiben erhalten."
 
-#: includes/Settings.php:1396
+#: includes/Settings.php:1409
 msgid "Empty lines are removed automatically."
 msgstr "Leere Zeilen werden automatisch entfernt."
 
-#: includes/Settings.php:1412
+#: includes/Settings.php:1425
 msgid ""
 "Bluesky, also known as Bluesky Social, is a social microblogging platform."
 "<br>Please complete the settings fields so that Autoshare can read and write "
@@ -331,7 +335,7 @@ msgstr ""
 "Plattform.<br>Bitte füllen Sie die Einstellungsfelder aus, damit Autoshare "
 "die Bluesky-Timeline lesen und schreiben kann."
 
-#: includes/Settings.php:1416
+#: includes/Settings.php:1429
 msgid ""
 "Mastodon is a free social networking service with microblogging features."
 "<br>Please complete the settings fields so that Autoshare can read and write "
@@ -341,38 +345,38 @@ msgstr ""
 "<br>Bitte fuellen Sie die Einstellungsfelder aus, damit Autoshare die "
 "Mastodon-Timeline lesen und bearbeiten kann."
 
-#: includes/Settings.php:1420
+#: includes/Settings.php:1433
 msgid ""
 "Matrix sends messages to configured rooms. The Matrix user represented by "
 "the access token must be a room member and have permission to send messages."
 msgstr ""
 
-#: includes/Settings.php:1445 includes/Settings.php:1793
+#: includes/Settings.php:1458 includes/Settings.php:1806
 msgid "Manually Send"
 msgstr "Manuell senden"
 
-#: includes/Settings.php:1450
+#: includes/Settings.php:1463
 msgid "Post"
 msgstr "Beitrag"
 
-#: includes/Settings.php:1485
+#: includes/Settings.php:1498
 msgid "Reshare Post According to Rules"
 msgstr "Beitrag gemäß Regeln neu teilen"
 
-#: includes/Settings.php:1499
+#: includes/Settings.php:1512
 msgid "The post does not exist or you cannot edit it."
 msgstr "Der Beitrag existiert nicht oder Sie können ihn nicht bearbeiten."
 
-#: includes/Settings.php:1502
+#: includes/Settings.php:1515
 msgid "Select at least one active service."
 msgstr "Wählen Sie mindestens einen aktiven Dienst aus."
 
-#: includes/Settings.php:1512
+#: includes/Settings.php:1525
 #, php-format
 msgid "No rule applies to this post for %s."
 msgstr "Für diesen Beitrag trifft keine Regel für %s zu."
 
-#: includes/Settings.php:1519
+#: includes/Settings.php:1532
 #, php-format
 msgid ""
 "The text was sent to %s successfully, but the featured image could not be "
@@ -381,46 +385,47 @@ msgstr ""
 "Der Text wurde erfolgreich an %s gesendet, aber das Beitragsbild konnte "
 "nicht übertragen werden."
 
-#: includes/Settings.php:1526
+#: includes/Settings.php:1539
 #, php-format
 msgid "%s received the post successfully according to the rules."
 msgstr "%s hat den Beitrag gemäß den Regeln erfolgreich erhalten."
 
-#: includes/Settings.php:1533
+#: includes/Settings.php:1546
 #, php-format
 msgid "%s could not receive the post. Check the log for details."
-msgstr "%s konnte den Beitrag nicht empfangen. Prüfen Sie das Protokoll auf Details."
+msgstr ""
+"%s konnte den Beitrag nicht empfangen. Prüfen Sie das Protokoll auf Details."
 
-#: includes/Settings.php:1546
+#: includes/Settings.php:1559
 msgid "View post"
 msgstr "Beitrag anzeigen"
 
-#: includes/Settings.php:1569 includes/Settings.php:1621
-#: includes/Settings.php:1671
+#: includes/Settings.php:1582 includes/Settings.php:1634
+#: includes/Settings.php:1684
 msgid "Access"
 msgstr "Zugriff"
 
-#: includes/Settings.php:1572
+#: includes/Settings.php:1585
 msgid "You’ve authorized Autoshare to read and write to the Bluesky timeline."
 msgstr ""
 "Sie haben Autoshare autorisiert, die Bluesky-Timeline zu lesen und zu "
 "schreiben."
 
-#: includes/Settings.php:1576 includes/Settings.php:1628
-#: includes/Settings.php:1677
+#: includes/Settings.php:1589 includes/Settings.php:1641
+#: includes/Settings.php:1690
 msgid "Revoke Access"
 msgstr "Zugriff widerrufen"
 
-#: includes/Settings.php:1579
+#: includes/Settings.php:1592
 msgid "Authorize Autoshare to read and write to the Bluesky timeline."
 msgstr ""
 "Autorisieren Sie Autoshare zum Lesen und Schreiben in die Bluesky-Timeline."
 
-#: includes/Settings.php:1583
+#: includes/Settings.php:1596
 msgid "Bluesky handle or email address"
 msgstr "Bluesky-Handle oder E-Mail-Adresse"
 
-#: includes/Settings.php:1585
+#: includes/Settings.php:1598
 msgid ""
 "Use the complete handle without @, for example name.bsky.social. An email "
 "address is also accepted."
@@ -428,11 +433,11 @@ msgstr ""
 "Verwenden Sie das vollständige Handle ohne @, zum Beispiel name.bsky.social. "
 "Eine E-Mail-Adresse wird ebenfalls akzeptiert."
 
-#: includes/Settings.php:1588
+#: includes/Settings.php:1601
 msgid "Bluesky App Password"
 msgstr "Bluesky-App-Passwort"
 
-#: includes/Settings.php:1596
+#: includes/Settings.php:1609
 #, php-format
 msgid ""
 "Create a separate <a href=\"%1$s\" target=\"_blank\" rel=\"noopener "
@@ -448,22 +453,22 @@ msgstr ""
 "eingegebenen Daten werden nur einmal für die Autorisierung verwendet und "
 "nicht gespeichert."
 
-#: includes/Settings.php:1611 includes/Settings.php:1660
-#: includes/Settings.php:1698
+#: includes/Settings.php:1624 includes/Settings.php:1673
+#: includes/Settings.php:1711
 msgid "Authorize Access"
 msgstr "Zugriff autorisieren"
 
-#: includes/Settings.php:1624
+#: includes/Settings.php:1637
 msgid "You’ve authorized Autoshare to read and write to the Mastodon timeline."
 msgstr ""
 "Sie haben Autoshare autorisiert, die Mastodon-Timeline zu lesen und zu "
 "schreiben."
 
-#: includes/Settings.php:1634 includes/Settings.php:1683
+#: includes/Settings.php:1647 includes/Settings.php:1696
 msgid "Access Token"
 msgstr "Zugriffstoken"
 
-#: includes/Settings.php:1638
+#: includes/Settings.php:1651
 msgid ""
 "Grant the permissions write:statuses, write:media, and read:accounts to "
 "Autoshare."
@@ -471,7 +476,7 @@ msgstr ""
 "Erteilen Sie Autoshare die Berechtigungen write:statuses, write:media und "
 "read:accounts."
 
-#: includes/Settings.php:1645
+#: includes/Settings.php:1658
 #, php-format
 msgid ""
 "Create an application and an access token with the permissions "
@@ -487,31 +492,31 @@ msgstr ""
 "noreferrer\">Mehr über Mastodon-Zugriffstoken erfahren</a>. Das Token wird "
 "verschlüsselt gespeichert."
 
-#: includes/Settings.php:1696
+#: includes/Settings.php:1709
 msgid ""
 "Create a Matrix access token for a user that is allowed to send messages in "
 "every configured room. The token is stored encrypted."
 msgstr ""
 
-#: includes/Settings.php:1706
+#: includes/Settings.php:1719
 msgid "Matrix access was authorized."
 msgstr "Der Zugriff auf Matrix wurde autorisiert."
 
-#: includes/Settings.php:1707
+#: includes/Settings.php:1720
 msgid "Enter a Matrix access token."
 msgstr "Geben Sie ein Matrix-Zugriffstoken ein."
 
-#: includes/Settings.php:1708
+#: includes/Settings.php:1721
 msgid "Save a Matrix homeserver URL before authorizing access."
 msgstr ""
 "Speichern Sie eine URL des Matrix-Homeservers, bevor Sie den Zugriff "
 "autorisieren."
 
-#: includes/Settings.php:1709
+#: includes/Settings.php:1722
 msgid "The Matrix homeserver rejected the access token."
 msgstr "Der Matrix-Homeserver hat das Zugriffstoken abgewiesen."
 
-#: includes/Settings.php:1710
+#: includes/Settings.php:1723
 msgid ""
 "The Matrix homeserver URL does not provide the required Matrix client API. "
 "Check the URL and save the settings before authorizing access."
@@ -520,7 +525,7 @@ msgstr ""
 "nicht bereit. Prüfen Sie die URL und speichern Sie die Einstellungen vor der "
 "Autorisierung."
 
-#: includes/Settings.php:1711
+#: includes/Settings.php:1724
 msgid ""
 "The Matrix homeserver could not be reached. Check the server URL and network "
 "connection."
@@ -528,13 +533,13 @@ msgstr ""
 "Der Matrix-Homeserver konnte nicht erreicht werden. Prüfen Sie die Server-"
 "URL und die Netzwerkverbindung."
 
-#: includes/Settings.php:1712
+#: includes/Settings.php:1725
 msgid "The Matrix homeserver is temporarily unavailable. Try again later."
 msgstr ""
 "Der Matrix-Homeserver ist vorübergehend nicht verfügbar. Versuchen Sie es "
 "später erneut."
 
-#: includes/Settings.php:1713
+#: includes/Settings.php:1726
 msgid ""
 "The Matrix homeserver returned an unexpected response. No access token was "
 "saved."
@@ -542,7 +547,7 @@ msgstr ""
 "Der Matrix-Homeserver hat eine unerwartete Antwort zurückgegeben. Es wurde "
 "kein Zugriffstoken gespeichert."
 
-#: includes/Settings.php:1714
+#: includes/Settings.php:1727
 msgid ""
 "The Matrix access token could not be stored securely. Check the server "
 "encryption configuration and the log."
@@ -550,25 +555,25 @@ msgstr ""
 "Das Matrix-Zugriffstoken konnte nicht sicher gespeichert werden. Prüfen Sie "
 "die Serververschlüsselung und das Protokoll."
 
-#: includes/Settings.php:1715
+#: includes/Settings.php:1728
 msgid "Matrix could not authorize access."
 msgstr "Matrix konnte den Zugriff nicht autorisieren."
 
-#: includes/Settings.php:1716
+#: includes/Settings.php:1729
 msgid "Matrix access was revoked."
 msgstr "Der Zugriff auf Matrix wurde widerrufen."
 
-#: includes/Settings.php:1730
+#: includes/Settings.php:1743
 msgid "Bluesky access was authorized."
 msgstr "Der Zugriff auf Bluesky wurde autorisiert."
 
-#: includes/Settings.php:1732
+#: includes/Settings.php:1745
 msgid "Enter both a Bluesky handle or email address and an App Password."
 msgstr ""
 "Geben Sie sowohl ein Bluesky-Handle oder eine E-Mail-Adresse als auch ein "
 "App-Passwort ein."
 
-#: includes/Settings.php:1734
+#: includes/Settings.php:1747
 msgid ""
 "The App Password format is invalid. Create a new Bluesky App Password and "
 "enter it exactly as shown, including hyphens."
@@ -577,7 +582,7 @@ msgstr ""
 "App-Passwort und geben Sie es einschließlich der Bindestriche genau wie "
 "angezeigt ein."
 
-#: includes/Settings.php:1736
+#: includes/Settings.php:1749
 msgid ""
 "Bluesky rejected the credentials. Use the complete handle without @, for "
 "example name.bsky.social, or the account email address. Do not use the "
@@ -588,23 +593,23 @@ msgstr ""
 "Kontos. Verwenden Sie nicht das normale Kontopasswort, sondern erstellen Sie "
 "ein neues App-Passwort."
 
-#: includes/Settings.php:1738
+#: includes/Settings.php:1751
 msgid ""
 "Bluesky temporarily limited authorization attempts. Wait before trying again."
 msgstr ""
 "Bluesky hat die Autorisierungsversuche vorübergehend begrenzt. Warten Sie, "
 "bevor Sie es erneut versuchen."
 
-#: includes/Settings.php:1740
+#: includes/Settings.php:1753
 msgid "Bluesky is temporarily unavailable. Try again later."
 msgstr ""
 "Bluesky ist vorübergehend nicht verfügbar. Versuchen Sie es später erneut."
 
-#: includes/Settings.php:1742
+#: includes/Settings.php:1755
 msgid "Bluesky could not be reached. Check the server connection."
 msgstr "Bluesky konnte nicht erreicht werden. Prüfen Sie die Serververbindung."
 
-#: includes/Settings.php:1744
+#: includes/Settings.php:1757
 msgid ""
 "Bluesky returned an incomplete authorization response. No access tokens were "
 "saved."
@@ -612,7 +617,7 @@ msgstr ""
 "Bluesky hat eine unvollständige Autorisierungsantwort zurückgegeben. Es "
 "wurden keine Zugriffstoken gespeichert."
 
-#: includes/Settings.php:1746
+#: includes/Settings.php:1759
 msgid ""
 "The Bluesky access tokens could not be stored securely. Check the server "
 "encryption configuration and the log."
@@ -620,27 +625,27 @@ msgstr ""
 "Die Bluesky-Zugriffstoken konnten nicht sicher gespeichert werden. Prüfen "
 "Sie die Serververschlüsselung und das Protokoll."
 
-#: includes/Settings.php:1748
+#: includes/Settings.php:1761
 msgid "Bluesky could not authorize access."
 msgstr "Der Zugriff auf Bluesky konnte nicht autorisiert werden."
 
-#: includes/Settings.php:1750
+#: includes/Settings.php:1763
 msgid "Bluesky access was revoked."
 msgstr "Der Zugriff auf Bluesky wurde widerrufen."
 
-#: includes/Settings.php:1756
+#: includes/Settings.php:1769
 msgid "You do not have enough permissions to do that."
 msgstr "Dazu haben Sie nicht genügend Berechtigungen."
 
-#: includes/Settings.php:1761
+#: includes/Settings.php:1774
 msgid "The link you followed has expired. Please try again."
 msgstr "Der aufgerufene Link ist abgelaufen. Bitte versuchen Sie es erneut."
 
-#: includes/Settings.php:1770
+#: includes/Settings.php:1783
 msgid "Mastodon access was authorized."
 msgstr "Der Zugriff auf Mastodon wurde autorisiert."
 
-#: includes/Settings.php:1772
+#: includes/Settings.php:1785
 msgid ""
 "The Mastodon access token could not be verified. Check the token and service "
 "URL."
@@ -648,23 +653,23 @@ msgstr ""
 "Das Mastodon-Zugriffstoken konnte nicht überprüft werden. Prüfen Sie das "
 "Token und die Dienst-URL."
 
-#: includes/Settings.php:1774
+#: includes/Settings.php:1787
 msgid "Mastodon access was revoked."
 msgstr "Der Zugriff auf Mastodon wurde widerrufen."
 
-#: includes/Settings.php:1791
+#: includes/Settings.php:1804
 msgid "General"
 msgstr "Allgemeines"
 
-#: includes/Settings.php:1794
+#: includes/Settings.php:1807
 msgid "Bluesky"
 msgstr "Bluesky"
 
-#: includes/Settings.php:1795
+#: includes/Settings.php:1808
 msgid "Mastodon"
 msgstr "Mastodon"
 
-#: includes/Settings.php:1796
+#: includes/Settings.php:1809
 msgid "Matrix"
 msgstr ""
 

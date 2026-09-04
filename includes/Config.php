@@ -124,6 +124,8 @@ class Config {
             'rate_limit_delay' => 900,
             'server_error_delay' => 300,
             'maximum_delay' => DAY_IN_SECONDS,
+            'maximum_attempts' => 3,
+            'retry_meta_prefix' => 'rrze_autoshare_publication_retry_',
         ],
         'encryption' => [
             'cipher_method' => 'aes-256-gcm',

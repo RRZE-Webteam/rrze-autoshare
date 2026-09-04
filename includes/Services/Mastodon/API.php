@@ -31,7 +31,8 @@ class API {
     }
 
     private static function verifyAccessToken(bool $logFailure = true): bool {
-        if (!$host = settings()->getOption(config()->get('services.mastodon.settings.domain'))) {
+        $host = settings()->getOption(config()->get('services.mastodon.settings.domain'));
+        if (!is_string($host) || !Utils::isHttpsUrl($host)) {
             return false;
         }
 
@@ -89,6 +90,9 @@ class API {
         }
 
         $post = get_post($postId);
+        if (!$post instanceof \WP_Post) {
+            return false;
+        }
 
         $text = Utils::getPostContent($post, 'mastodon');
         if (empty($text)) {
@@ -125,6 +129,14 @@ class API {
         }
 
         $host = settings()->getOption(config()->get('services.mastodon.settings.domain'));
+        if (!is_string($host) || !Utils::isHttpsUrl($host)) {
+            Utils::log(
+                'warning',
+                'Mastodon publication was not sent because the service URL does not use HTTPS.',
+                ['service' => 'mastodon', 'post_id' => $postId]
+            );
+            return false;
+        }
         $accessToken = self::getOption('access_token');
 
         $endpoint = config()->get('services.mastodon.endpoints.statuses');
