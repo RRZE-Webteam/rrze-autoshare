@@ -100,8 +100,10 @@ class Settings {
                     'tagSingle' => __('the tag %s', 'rrze-autoshare'),
                     /* translators: %s: Comma-separated tag names. */
                     'tagMultiple' => __('one of the tags %s', 'rrze-autoshare'),
-                    'targetSingle' => __(' with target ', 'rrze-autoshare'),
-                    'targetMultiple' => __(' with targets ', 'rrze-autoshare'),
+                    'targetSingle' => __(' in the room ', 'rrze-autoshare'),
+                    'targetMultiple' => __(' in the rooms ', 'rrze-autoshare'),
+                    'withoutTargetWhen' => __(' when they are ', 'rrze-autoshare'),
+                    'withTargetWhen' => __(' sent when they are ', 'rrze-autoshare'),
                 ],
             ]
         );
@@ -1056,7 +1058,7 @@ class Settings {
             <?php
             printf(
                 /* translators: %s: Service name. */
-                esc_html__('Posts are sent to %s when they are ', 'rrze-autoshare'),
+                esc_html__('Posts are sent to %s', 'rrze-autoshare'),
                 esc_html($serviceLabel)
             );
             ?>
@@ -1066,9 +1068,12 @@ class Settings {
                 <?php echo empty($targets) ? 'hidden' : ''; ?>
             >
                 <span class="rrze-autoshare-publication-summary-target-prefix">
-                    <?php echo esc_html(count($targets) === 1 ? __(' with target ', 'rrze-autoshare') : __(' with targets ', 'rrze-autoshare')); ?>
+                    <?php echo esc_html(count($targets) === 1 ? __(' in the room ', 'rrze-autoshare') : __(' in the rooms ', 'rrze-autoshare')); ?>
                 </span>
                 <strong class="rrze-autoshare-publication-summary-target-values"><?php echo esc_html(implode(', ', $targets)); ?></strong>
+            </span>
+            <span class="rrze-autoshare-publication-summary-when">
+                <?php echo esc_html(empty($targets) ? __(' when they are ', 'rrze-autoshare') : __(' sent when they are ', 'rrze-autoshare')); ?>
             </span>
             <strong class="rrze-autoshare-publication-summary-status"><?php echo esc_html($this->getPublicationStatusLabel($rule['status'])); ?></strong>
             <?php esc_html_e(' and are in ', 'rrze-autoshare'); ?>
@@ -1856,7 +1861,10 @@ class Settings {
         $rules = [];
 
         foreach (array_keys($this->getServices()) as $service) {
-            $rules[$service] = config()->get('general.publication_rules.rule_defaults');
+            $rule = config()->get('general.publication_rules.rule_defaults');
+            $rules[$service] = $this->supportsMultiplePublicationRules($service)
+                ? [$rule]
+                : $rule;
         }
 
         return $rules;

@@ -340,6 +340,7 @@
         var targetsElement;
         var targetPrefixElement;
         var targetValuesElement;
+        var whenElement;
         var targets;
         var strings = autoshareSettingsObject.publicationRules;
 
@@ -353,18 +354,22 @@
         targetsElement = serviceRule.querySelector('.rrze-autoshare-publication-summary-targets');
         targetPrefixElement = serviceRule.querySelector('.rrze-autoshare-publication-summary-target-prefix');
         targetValuesElement = serviceRule.querySelector('.rrze-autoshare-publication-summary-target-values');
+        whenElement = serviceRule.querySelector('.rrze-autoshare-publication-summary-when');
 
         statusElement.textContent = getPublicationStatusLabel(serviceRule);
         categoriesElement.textContent = getPublicationTermSummary(serviceRule, 'category');
         tagsElement.textContent = getPublicationTermSummary(serviceRule, 'tag');
 
-        if (targetsElement && targetPrefixElement && targetValuesElement) {
+        if (targetsElement && targetPrefixElement && targetValuesElement && whenElement) {
             targets = getPublicationTargets(serviceRule);
             targetsElement.hidden = !targets.length;
             targetPrefixElement.textContent = targets.length === 1
                 ? strings.targetSingle
                 : strings.targetMultiple;
             targetValuesElement.textContent = targets.join(', ');
+            whenElement.textContent = targets.length
+                ? strings.withTargetWhen
+                : strings.withoutTargetWhen;
         }
     }
 
