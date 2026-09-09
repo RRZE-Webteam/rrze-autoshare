@@ -13,6 +13,7 @@ class Settings {
         add_action('admin_menu', [$this, 'addAdminMenu']);
         add_action('admin_init', [$this, 'registerSettings']);
         add_action('admin_enqueue_scripts', [$this, 'enqueueSettingsAssets']);
+        add_action('init', [$this, 'migrateMatrixFormat'], 2);
         add_action(
             'admin_post_' . config()->get('services.bluesky.authorization.authorize_action'),
             [$this, 'authorizeBlueskyAccess']
@@ -123,6 +124,23 @@ class Settings {
         $this->registerBlueskySettings();
         $this->registerMastodonSettings();
         $this->registerMatrixSettings();
+    }
+
+    public function migrateMatrixFormat(): void {
+        $optionName = config()->get('option_name');
+        $options = get_option($optionName, []);
+        if (!is_array($options)) {
+            return;
+        }
+
+        $setting = config()->get('services.matrix.settings.format');
+        $previousDefault = "{title}\n{content_html}\n\n{url}";
+        if (($options[$setting] ?? null) !== $previousDefault) {
+            return;
+        }
+
+        $options[$setting] = config()->get('services.matrix.defaults.format');
+        update_option($optionName, $options, false);
     }
 
     public function sanitizeOptions($submittedOptions) {
@@ -1352,7 +1370,9 @@ class Settings {
             $section,
             [
                 'name' => $setting,
-                'description' => __('Include featured images', 'rrze-autoshare'),
+                'description' => 'matrix' === $service
+                    ? __('Include featured images when the {artikelbild} placeholder is used in the format.', 'rrze-autoshare')
+                    : __('Include featured images', 'rrze-autoshare'),
             ]
         );
     }

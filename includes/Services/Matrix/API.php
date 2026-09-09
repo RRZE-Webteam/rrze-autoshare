@@ -61,33 +61,29 @@ class API {
             return false;
         }
 
-        $body = Utils::getPostContent($post, 'matrix');
-        if ($body === '') {
-            return false;
-        }
-
-        $payload = ['msgtype' => 'm.text', 'body' => $body];
-        $formattedBody = Utils::getMatrixFormattedPostContent($post);
-        if ($formattedBody !== '') {
-            $payload['format'] = 'org.matrix.custom.html';
-            $payload['formatted_body'] = $formattedBody;
-        }
         $imageNotTransferred = false;
+        $featuredImageFallback = '';
+        $featuredImageHtml = '';
+        $format = settings()->getOption(config()->get('services.matrix.settings.format'));
+        $usesFeaturedImage = is_string($format) && str_contains($format, '{artikelbild}');
         $images = Utils::getImages($post, 'matrix');
-        if (!empty($images)) {
+        if ($usesFeaturedImage && !empty($images)) {
             $images = array_slice($images, 0, config()->get('services.matrix.limits.media_count'), true);
             $attachmentId = (int) array_key_first($images);
             $image = Media::uploadImage($attachmentId);
             if (is_array($image)) {
-                $payload = array_merge(
-                    $payload,
-                    [
-                        'msgtype' => 'm.image',
-                        'filename' => $image['filename'],
-                        'url' => $image['url'],
-                        'info' => $image['info'],
-                    ]
+                $alt = (string) ($images[$attachmentId] ?? '');
+                $featuredImageFallback = $alt === ''
+                    ? __('Featured image', 'rrze-autoshare')
+                    : $alt;
+                $featuredImageHtml = Utils::getMatrixFeaturedImageHtml(
+                    $image,
+                    $featuredImageFallback
                 );
+                if ($featuredImageHtml === '') {
+                    $featuredImageFallback = '';
+                    $imageNotTransferred = true;
+                }
             } else {
                 $imageNotTransferred = true;
                 Utils::log(
@@ -100,6 +96,17 @@ class API {
                     ]
                 );
             }
+        }
+        $body = Utils::getPostContent($post, 'matrix', $featuredImageFallback);
+        if ($body === '') {
+            return false;
+        }
+
+        $payload = ['msgtype' => 'm.text', 'body' => $body];
+        $formattedBody = Utils::getMatrixFormattedPostContent($post, $featuredImageHtml);
+        if ($formattedBody !== '') {
+            $payload['format'] = 'org.matrix.custom.html';
+            $payload['formatted_body'] = $formattedBody;
         }
         $data = self::sendMessage($roomId, $payload, 'publish_post', $postId);
         if (!empty($data['event_id'])) {

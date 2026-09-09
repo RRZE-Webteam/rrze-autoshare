@@ -345,14 +345,14 @@ class Config {
                     'domain' => 'https://matrix.fau.de',
                     'rooms' => '',
                     'featured_image' => true,
-                    'format' => "{title}\n{content_html}\n\n{url}",
+                    'format' => "{title}\n{artikelbild}\n{content_html}\n\n{url}",
                 ],
                 'content' => [
                     'max_length' => 60000,
                     'type' => 'rich_text',
                     'length_is_instance_specific' => true,
                 ],
-                'allowed_formats' => ['{title}', '{excerpt}', '{url}', '{tags}', '{content}', '{content_html}'],
+                'allowed_formats' => ['{title}', '{excerpt}', '{url}', '{tags}', '{content}', '{content_html}', '{artikelbild}'],
                 'limits' => [
                     'media_count' => 1,
                     'timeout' => 15,

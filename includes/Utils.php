@@ -408,7 +408,7 @@ class Utils {
         return sanitize_text_field($post->post_title);
     }
 
-    public static function getPostContent(\WP_Post $post, string $service): string {
+    public static function getPostContent(\WP_Post $post, string $service, string $featuredImageFallback = ''): string {
         $permalink = esc_url_raw(get_the_permalink($post->ID));
         $title = apply_filters(
             config()->get('services.' . $service . '.filters.title'),
@@ -437,6 +437,7 @@ class Utils {
                 '{tags}' => !empty($tags) ? implode(' ', $tags) : '',
                 '{content}' => $plainContent,
                 '{content_html}' => $plainContent,
+                '{artikelbild}' => $featuredImageFallback,
             ],
             config()->get('services.' . $service . '.content.max_length'),
             config()->get('services.' . $service . '.content.type')
@@ -455,7 +456,7 @@ class Utils {
         return wp_kses_post(do_shortcode(do_blocks($post->post_content)));
     }
 
-    public static function getMatrixFormattedPostContent(\WP_Post $post): string {
+    public static function getMatrixFormattedPostContent(\WP_Post $post, string $featuredImageHtml = ''): string {
         $format = settings()->getOption(config()->get('services.matrix.settings.format'));
         $html = strtr(
             $format,
@@ -466,10 +467,39 @@ class Utils {
                 '{tags}' => esc_html(implode(' ', self::getPostHashtags($post->ID))),
                 '{content}' => esc_html(self::getPostPlainContent($post)),
                 '{content_html}' => self::getPostHtmlContent($post),
+                '{artikelbild}' => $featuredImageHtml,
             ]
         );
 
-        return wp_kses_post(wpautop($html));
+        return wp_kses(
+            wpautop($html),
+            wp_kses_allowed_html('post'),
+            array_merge(wp_allowed_protocols(), ['mxc'])
+        );
+    }
+
+    public static function getMatrixFeaturedImageHtml(array $image, string $alt): string {
+        $url = isset($image['url']) && is_string($image['url']) ? $image['url'] : '';
+        if (!preg_match('#^mxc://[^/]+/.+$#', $url)) {
+            return '';
+        }
+
+        $info = isset($image['info']) && is_array($image['info']) ? $image['info'] : [];
+        $width = absint($info['w'] ?? 0);
+        $height = absint($info['h'] ?? 0);
+        $attributes = sprintf(
+            'src="%1$s" alt="%2$s" title="%2$s"',
+            esc_attr($url),
+            esc_attr($alt)
+        );
+        if ($width > 0) {
+            $attributes .= sprintf(' width="%d"', $width);
+        }
+        if ($height > 0) {
+            $attributes .= sprintf(' height="%d"', $height);
+        }
+
+        return '<img ' . $attributes . '>';
     }
 
     public static function getPostExcerpt(\WP_Post $post): string {
